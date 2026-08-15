@@ -28,6 +28,10 @@ Last upstream review:
 | Event dispatch modes | `docs/user/develop/framework/events.zh.md` |
 | Capability role design | `docs/user/develop/practice/index.zh.md` |
 | LLM adapter protocol | `docs/user/develop/practice/llm-adapter.zh.md` |
+| MCP transports and tool bridge | `packages/mcp/mcp-client/README.zh.md` |
+| Skill discovery and loading | `packages/skill/skill/README.zh.md`, `packages/skill/tool-skill/README.zh.md` |
+| Plan collaboration state | `packages/plan/plan-mode/README.zh.md` |
+| Web search and fetch tools | `packages/web/tool-web/README.zh.md` |
 
 ## Refresh checklist
 

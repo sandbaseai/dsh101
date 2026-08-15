@@ -79,6 +79,13 @@
           <a href="#llm-adapter">LLM 适配器</a>
           <a href="#profiles">Profile 与组合包</a>
         </section>
+        <section>
+          <h2>Agent 工作流</h2>
+          <a href="#mcp">连接 MCP</a>
+          <a href="#skills">Skills</a>
+          <a href="#plan-mode">Plan Mode</a>
+          <a href="#web-tools">Web 工具</a>
+        </section>
       </nav>
     </aside>
 
@@ -262,6 +269,53 @@ print(result.final_response)</code></pre>
           <div><span>1</span><strong>Bundle patch 列表</strong></div>
         </div>
         <p>后应用的层按行胜出。一个 patch 会替换目标行的整个 <code>config</code>，而不是递归合并其中的字段。</p>
+
+        <div class="chapter-break"><span>04</span><div><small>Agent 工作流</small><strong>连接外部能力</strong></div></div>
+
+        <h2 id="mcp">连接 MCP Server<a href="#mcp" class="anchor">#</a></h2>
+        <p>MCP Client 插件把外部服务器的工具注册到 <code>ctx.tools</code>。每个服务器使用一个插件实例，支持本地 <code>stdio</code> 与远程 <code>streamable-http</code> 两种传输。</p>
+        <div class="code-block">
+          <div class="code-head"><span>cordis.yml</span><button class="copy" data-copy="- id: mcp-github\n  name: '@deepseek-ai/dsh-mcp-client'\n  config:\n    serverName: github\n    transport: stdio\n    command: npx\n    args: ['-y', '@modelcontextprotocol/server-github']\n    env:\n      GITHUB_TOKEN: !!js process.env.GITHUB_TOKEN">复制</button></div>
+          <pre><code>- id: mcp-github
+  name: <span class="string">'@deepseek-ai/dsh-mcp-client'</span>
+  config:
+    serverName: github
+    transport: stdio
+    command: npx
+    args: [<span class="string">'-y'</span>, <span class="string">'@modelcontextprotocol/server-github'</span>]
+    env:
+      GITHUB_TOKEN: !!js process.env.GITHUB_TOKEN</code></pre>
+        </div>
+        <div class="naming-demo"><span>server</span><strong>github</strong><i>+</i><span>tool</span><strong>create_issue</strong><i>→</i><code>mcp__github__create_issue</code></div>
+        <p>公开名称是 <code>(serverName, rawName)</code> 的确定性函数，因此重连和重新同步不会改名。服务器崩溃后默认指数退避重连；正常工具世代在恢复期间保持注册，但调用会暂时失败。</p>
+        <div class="detail-card"><strong>当前范围</strong><p>目前只桥接 MCP Tools。Resources 与 Prompts 尚无 Harness 消费接口；非文本结果在模型上下文中会变成占位符，但完整 JSON 块仍保留在执行局部的规范值中。</p></div>
+
+        <h2 id="skills">Skills 的发现与加载<a href="#skills" class="anchor">#</a></h2>
+        <p>Skill 是可复用的 Agent 指令。提供方负责发现候选项，注册表合并全局层与当前 scope，<code>tool-skill</code> 再向模型公开目录和按需加载工具。</p>
+        <div class="skill-pipeline">
+          <div><small>01</small><strong>Provider</strong><span>发现摘要</span></div><i>→</i>
+          <div><small>02</small><strong>Registry</strong><span>按 scope 合并</span></div><i>→</i>
+          <div><small>03</small><strong>Catalog</strong><span>只展示名称与描述</span></div><i>→</i>
+          <div><small>04</small><strong>Loader</strong><span>按需读取正文</span></div>
+        </div>
+        <p>目录与正文采用渐进式加载，避免把所有 Skill 内容塞进每次请求。每个 Skill 都声明 <code>modelInvocable</code> 与 <code>userInvocable</code>，模型入口和用户入口必须分别检查自己的调用策略。</p>
+
+        <h2 id="plan-mode">Plan Mode<a href="#plan-mode" class="anchor">#</a></h2>
+        <p>Plan Mode 是按 Agent 记录在会话日志中的协作状态。<code>/plan</code> 进入，<code>/plan off</code> 直接退出；模型调用 <code>exit_plan_mode</code> 时必须经过用户明确评审。</p>
+        <div class="plan-flow">
+          <div><span>/plan</span><p>写入或排队 <code>plan/mode: true</code></p></div>
+          <i>→</i><div class="planning"><span>Explore & design</span><p>注入部署方配置的 Plan 指引</p></div>
+          <i>→</i><div><span>exit_plan_mode</span><p>用户批准后提交退出状态</p></div>
+        </div>
+        <div class="warning"><strong>软引导，不是安全边界</strong><p>Plan Mode 只改变模型指引与评审流程，不会强制沙箱或批准策略。需要限制写入和命令时，应单独配置权限控制。</p></div>
+
+        <h2 id="web-tools">Web 搜索与抓取<a href="#web-tools" class="anchor">#</a></h2>
+        <p>Web capability seam 将模型工具与具体提供方分离。<code>web_search</code> 用于发现来源，<code>web_fetch</code> 获取指定 URL，并把 HTML 转换为 Markdown。</p>
+        <div class="web-tool-grid">
+          <div><div class="tool-icon">⌕</div><strong>web_search</strong><p>接收 query，返回可选答案、来源标题、URL、摘要与发布时间。</p><small>默认最多 8 个来源</small></div>
+          <div><div class="tool-icon">↗</div><strong>web_fetch</strong><p>接收 URL，返回状态、最终地址和解码后的正文。</p><small>默认超时 30 秒</small></div>
+        </div>
+        <p>工具是否注册由产品配置决定，而不是由后端当前是否可用决定。这保持了模型看到的 Schema 稳定；提供方缺失或冲突会在执行时返回结构化 <code>WebError</code>。</p>
 
         <div class="source-note">
           <div><span class="pulse"></span><strong>内容来源</strong></div>

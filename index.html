@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="从零开始掌握 DeepSeek Harness 的中文实践教程。" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>DSH 101 — DeepSeek Harness 入门指南</title>
+    <script>document.documentElement.classList.toggle('dark',localStorage.getItem('dsh-theme')==='dark'||(!localStorage.getItem('dsh-theme')&&matchMedia('(prefers-color-scheme:dark)').matches))</script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <button class="icon-btn menu-btn" id="menuButton" aria-label="打开菜单">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <a class="brand" href="#top" aria-label="DSH 101 首页">
+          <span class="brand-mark"><span></span><span></span><span></span></span>
+          <span class="brand-name">DSH 101</span>
+          <span class="preview-tag">社区指南</span>
+        </a>
+        <nav class="topnav" aria-label="主导航">
+          <a class="active" href="#quickstart">入门</a>
+          <a href="#workspace">概念</a>
+          <a href="#practice">实践</a>
+        </nav>
+        <div class="actions">
+          <button class="search-trigger" id="searchButton" aria-label="搜索文档">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+            <span>搜索文档</span><kbd>⌘ K</kbd>
+          </button>
+          <span class="divider"></span>
+          <button class="icon-btn" id="themeButton" aria-label="切换主题">
+            <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+            <svg class="moon" viewBox="0 0 24 24"><path d="M21 15.2A9 9 0 1 1 8.8 3a7 7 0 0 0 12.2 12.2Z"/></svg>
+          </button>
+          <a class="icon-btn github" href="https://github.com/sandbaseai/dsh101" target="_blank" rel="noreferrer" aria-label="GitHub">
+            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.86c-2.78.6-3.37-1.18-3.37-1.18-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.35 1.09 2.92.83.09-.65.35-1.09.64-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.58 9.58 0 0 1 12 6.84c.85 0 1.69.11 2.48.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.93.36.31.68.92.68 1.86v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="mobile-bar"><button id="mobileMenu">☰ <span>菜单</span></button><span>使用 Web UI</span></div>
+    <div class="overlay" id="overlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <section>
+          <h2>入门</h2>
+          <a class="selected" href="#quickstart">使用 Web UI</a>
+          <a href="#install">安装与启动</a>
+          <a href="#model">配置模型</a>
+        </section>
+        <section>
+          <h2>核心概念</h2>
+          <a href="#workspace">工作区</a>
+          <a href="#session">会话与任务</a>
+          <a href="#permissions">权限与审批</a>
+        </section>
+        <section>
+          <h2>SDK</h2>
+          <span class="soon">Python <em>即将推出</em></span>
+          <span class="soon">TypeScript <em>即将推出</em></span>
+        </section>
+        <section>
+          <h2>进阶</h2>
+          <span class="soon">开发 Tool <em>即将推出</em></span>
+          <span class="soon">插件与生命周期 <em>即将推出</em></span>
+          <span class="soon">部署 <em>即将推出</em></span>
+        </section>
+      </nav>
+    </aside>
+
+    <main class="page" id="top">
+      <article class="content">
+        <div class="eyebrow">入门 · 5 分钟</div>
+        <h1 id="quickstart">使用 Web UI</h1>
+        <p class="lead">用 DeepSeek Harness 启动你的第一个智能编程任务。本指南将带你完成模型配置、工作区选择和首次运行。</p>
+
+        <div class="callout">
+          <div class="callout-icon">i</div>
+          <div><strong>开始之前</strong><p>你需要 Node.js 20+、一个 DeepSeek API Key，以及一个准备让 Agent 读取的本地项目。</p></div>
+        </div>
+
+        <h2 id="install">安装与启动<a href="#install" class="anchor">#</a></h2>
+        <p>在终端中运行以下命令。DSH 会在当前目录启动服务，并打印 Web UI 的访问地址。</p>
+        <div class="code-block">
+          <div class="code-head"><span>Terminal</span><button class="copy" data-copy="npm install -g @deepseek-ai/dsh\ndsh">复制</button></div>
+          <pre><code><span class="muted">$</span> npm install -g @deepseek-ai/dsh
+<span class="muted">$</span> dsh</code></pre>
+        </div>
+
+        <h2 id="model">配置模型<a href="#model" class="anchor">#</a></h2>
+        <p>打开右上角的 <strong>设置 → 模型</strong>，选择 DeepSeek，输入 API Key 并保存。配置会立即生效，无需重启服务。</p>
+        <ol class="steps">
+          <li><span>1</span><div><strong>进入模型设置</strong><p>点击设置图标，在侧栏选择「模型」。</p></div></li>
+          <li><span>2</span><div><strong>添加凭证</strong><p>选择服务提供方，并粘贴你的 API Key。</p></div></li>
+          <li><span>3</span><div><strong>验证连接</strong><p>保存后状态显示为绿色，即可创建会话。</p></div></li>
+        </ol>
+
+        <h2 id="workspace">选择工作区<a href="#workspace" class="anchor">#</a></h2>
+        <p>点击「选择工作区」，添加你启动 <code>dsh</code> 时所在的项目目录。工作区决定 Agent 能够读取和修改的文件范围。</p>
+        <div class="warning"><strong>注意</strong><p>选择工作区前，会话输入框保持禁用。请勿将包含敏感凭证的目录设为工作区。</p></div>
+
+        <h2 id="session">运行第一个任务<a href="#session" class="anchor">#</a></h2>
+        <p>新建一个会话，然后尝试发送一个目标明确、可以验证的任务：</p>
+        <blockquote>总结这个仓库，列出它的主要模块，并解释各模块之间的关系。</blockquote>
+        <p>Agent 可以读取文件、执行命令并维护计划。当某项操作超出当前权限策略时，Web UI 会先请求你的批准。</p>
+
+        <h2 id="permissions">权限与审批<a href="#permissions" class="anchor">#</a></h2>
+        <p>Harness 默认采用最小权限策略。文件写入、网络访问和高风险命令会根据你的配置触发审批，所有工具调用都会保留清晰记录。</p>
+
+        <div class="next-card" id="practice"><div><small>下一篇</small><strong>配置更多模型提供方</strong></div><span>→</span></div>
+        <footer><p>以 Apache-2.0 协议开放 · 由社区维护</p><a href="https://github.com/sandbaseai/dsh101" target="_blank" rel="noreferrer">在 GitHub 上编辑此页</a></footer>
+      </article>
+
+      <aside class="toc">
+        <div class="toc-line"></div>
+        <p>本页目录</p>
+        <a class="current" href="#install">安装与启动</a>
+        <a href="#model">配置模型</a>
+        <a href="#workspace">选择工作区</a>
+        <a href="#session">运行第一个任务</a>
+        <a href="#permissions">权限与审批</a>
+      </aside>
+    </main>
+
+    <dialog class="search-dialog" id="searchDialog">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+        <input id="searchInput" placeholder="搜索文档" autocomplete="off" />
+        <kbd>ESC</kbd>
+      </div>
+      <div class="search-results" id="searchResults"><p>输入关键词以搜索本页内容</p></div>
+      <div class="search-footer"><span>↵ 选择</span><span>↑↓ 导航</span><span>ESC 关闭</span></div>
+    </dialog>
+    <script type="module" src="/src.js"></script>
+  </body>
+</html>

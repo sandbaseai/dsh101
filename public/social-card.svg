@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f7f7f8"/>
+  <circle cx="1040" cy="-40" r="390" fill="#eef1fb"/>
+  <circle cx="1120" cy="620" r="270" fill="#3451b2" opacity=".08"/>
+  <g transform="translate(96 92)">
+    <rect width="76" height="76" rx="18" fill="#242424"/>
+    <g fill="#fff" transform="translate(16 14) skewX(-8)">
+      <rect y="18" width="11" height="30" rx="2" opacity=".52"/>
+      <rect x="17" width="11" height="48" rx="2"/>
+      <rect x="34" y="10" width="11" height="38" rx="2" opacity=".76"/>
+    </g>
+  </g>
+  <text x="96" y="258" fill="#242424" font-family="Inter,Arial,sans-serif" font-size="88" font-weight="700" letter-spacing="-4">DSH 101</text>
+  <text x="100" y="332" fill="#3c3c43" font-family="Inter,Arial,sans-serif" font-size="34">DeepSeek Harness · Community Guide</text>
+  <text x="100" y="438" fill="#3451b2" font-family="Inter,Arial,sans-serif" font-size="24">Models · SDK · Plugins · MCP · Skills · Agent Workflows</text>
+  <path d="M100 486h1000" stroke="#dedee2"/>
+  <text x="100" y="540" fill="#77777f" font-family="Inter,Arial,sans-serif" font-size="20">中文 / English</text>
+</svg>

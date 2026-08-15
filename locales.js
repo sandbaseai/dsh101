@@ -231,6 +231,12 @@ export function installLocale() {
     translateText(document.body, locale)
     document.documentElement.lang = locale === 'en' ? 'en' : 'zh-CN'
     document.title = locale === 'en' ? 'DSH 101 — DeepSeek Harness Guide' : 'DSH 101 — DeepSeek Harness 入门指南'
+    const description = locale === 'en'
+      ? 'Learn DeepSeek Harness from first principles: models, SDKs, plugins, MCP, skills, and agent workflows.'
+      : '从零开始掌握 DeepSeek Harness：模型、SDK、插件、MCP、Skills 与 Agent 工作流。'
+    document.querySelector('meta[name="description"]').content = description
+    document.querySelector('meta[property="og:title"]').content = document.title
+    document.querySelector('meta[property="og:description"]').content = description
     label.textContent = locale === 'en' ? 'English' : '中文'
     input.placeholder = locale === 'en' ? 'Search docs' : '搜索文档'
     document.querySelector('#backToTop').setAttribute('aria-label', locale === 'en' ? 'Back to top' : '返回顶部')

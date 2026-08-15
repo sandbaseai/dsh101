@@ -28,7 +28,10 @@ sidebar.querySelectorAll('a').forEach(link => link.addEventListener('click', () 
 document.querySelector('#themeButton').addEventListener('click', () => {
   root.classList.toggle('dark')
   localStorage.setItem('dsh-theme', root.classList.contains('dark') ? 'dark' : 'light')
+  document.querySelector('meta[name="theme-color"]').content = root.classList.contains('dark') ? '#1b1b1f' : '#ffffff'
 })
+
+document.querySelector('meta[name="theme-color"]').content = root.classList.contains('dark') ? '#1b1b1f' : '#ffffff'
 
 function openSearch() {
   dialog.showModal()

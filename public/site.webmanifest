@@ -1,0 +1,17 @@
+{
+  "name": "DSH 101 — DeepSeek Harness Guide",
+  "short_name": "DSH 101",
+  "description": "A bilingual community guide to DeepSeek Harness.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#242424",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

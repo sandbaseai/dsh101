@@ -4,6 +4,12 @@
 
 支持简体中文与 English，可在页面顶栏切换并自动保存语言偏好。教程内容的上游来源和同步流程记录在 [`CONTENT_SOURCES.md`](./CONTENT_SOURCES.md)。
 
+如果本地相邻目录中有 `deepseek-harness` checkout，可以检查内容来源是否落后于上游：
+
+```bash
+npm run sources:status
+```
+
 ## 本地开发
 
 ```bash

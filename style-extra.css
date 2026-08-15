@@ -25,6 +25,11 @@
 .stream-flow .finish { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); }
 .compact-list { padding-left: 20px; color: var(--text-2); }
 .compact-list li { margin: 7px 0; padding-left: 4px; }
+.reading-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--blue); transform: scaleX(0); transform-origin: left; transition: transform 80ms linear; }
+.back-to-top { position: fixed; right: 24px; bottom: 24px; z-index: 18; width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 50%; background: color-mix(in srgb, var(--bg) 90%, transparent); color: var(--text-2); box-shadow: 0 8px 28px #0002; backdrop-filter: blur(10px); cursor: pointer; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .2s, transform .2s, border-color .2s; }
+.back-to-top.visible { opacity: 1; transform: none; pointer-events: auto; }
+.back-to-top:hover { color: var(--blue); border-color: var(--blue); }
+.back-to-top svg { width: 17px; }
 @media (max-width: 760px) {
   .language-btn span { display: none; }
   .error-table > div { grid-template-columns: 1fr; gap: 6px; }

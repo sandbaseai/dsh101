@@ -10,6 +10,7 @@
   </head>
   <body>
     <header class="topbar">
+      <div class="reading-progress" id="readingProgress"></div>
       <div class="topbar-inner">
         <button class="icon-btn menu-btn" id="menuButton" aria-label="打开菜单">
           <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -292,6 +293,9 @@ print(result.final_response)</code></pre>
       <div class="search-results" id="searchResults"><p>输入关键词以搜索本页内容</p></div>
       <div class="search-footer"><span>↵ 选择</span><span>↑↓ 导航</span><span>ESC 关闭</span></div>
     </dialog>
+    <button class="back-to-top" id="backToTop" aria-label="返回顶部">
+      <svg viewBox="0 0 24 24"><path d="m6 14 6-6 6 6"/></svg>
+    </button>
     <script type="module" src="/src.js"></script>
   </body>
 </html>

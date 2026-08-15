@@ -86,6 +86,7 @@ const en = {
   '声明输入': 'Declare input',
   'Parameters 会推导并校验 execute 的参数。': 'Parameters infer and validate the execute arguments.',
   '返回规范值': 'Return canonical data',
+  '返回顶部': 'Back to top',
   'execute 返回由 output schema 约束的数据。': 'Execute returns data constrained by the output schema.',
   '渲染模型内容': 'Render model content',
   'render 将规范值转换为模型真正看到的结果。': 'Render turns canonical data into the result the model actually sees.',
@@ -190,6 +191,7 @@ export function installLocale() {
     document.title = locale === 'en' ? 'DSH 101 — DeepSeek Harness Guide' : 'DSH 101 — DeepSeek Harness 入门指南'
     label.textContent = locale === 'en' ? 'English' : '中文'
     input.placeholder = locale === 'en' ? 'Search docs' : '搜索文档'
+    document.querySelector('#backToTop').setAttribute('aria-label', locale === 'en' ? 'Back to top' : '返回顶部')
     localStorage.setItem('dsh-locale', locale)
   }
 

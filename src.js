@@ -10,6 +10,8 @@ const overlay = document.querySelector('#overlay')
 const dialog = document.querySelector('#searchDialog')
 const input = document.querySelector('#searchInput')
 const results = document.querySelector('#searchResults')
+const progress = document.querySelector('#readingProgress')
+const backToTop = document.querySelector('#backToTop')
 
 function toggleMenu(force) {
   const open = force ?? !sidebar.classList.contains('open')
@@ -48,7 +50,7 @@ input.addEventListener('input', () => {
     results.innerHTML = `<p>${english ? 'Type to search this page' : '输入关键词以搜索本页内容'}</p>`
     return
   }
-  const matches = [...document.querySelectorAll('.content h2')]
+  const matches = [...document.querySelectorAll('.content h2[id], .content h3[id]')]
     .filter(item => item.textContent.toLowerCase().includes(query))
   results.innerHTML = matches.length
     ? matches.map(item => `<a href="#${item.id}"><small>${english ? 'Use the Web UI' : '使用 Web UI'}</small><strong>${item.childNodes[0].textContent}</strong></a>`).join('')
@@ -65,9 +67,30 @@ document.querySelectorAll('.copy').forEach(button => button.addEventListener('cl
 
 const headings = [...document.querySelectorAll('.content h2')]
 const tocLinks = [...document.querySelectorAll('.toc a')]
+const sidebarLinks = [...document.querySelectorAll('.sidebar a[href^="#"]')]
 const observer = new IntersectionObserver(entries => {
   const visible = entries.filter(entry => entry.isIntersecting).at(-1)
   if (!visible) return
   tocLinks.forEach(link => link.classList.toggle('current', link.hash === `#${visible.target.id}`))
+  sidebarLinks.forEach(link => {
+    const current = link.hash === `#${visible.target.id}`
+    link.classList.toggle('selected', current)
+    if (current) link.setAttribute('aria-current', 'location')
+    else link.removeAttribute('aria-current')
+  })
 }, { rootMargin: '-90px 0px -72% 0px' })
 headings.forEach(heading => observer.observe(heading))
+
+function updateReadingProgress() {
+  const article = document.querySelector('.content')
+  const start = article.offsetTop
+  const distance = article.scrollHeight - innerHeight
+  const ratio = distance <= 0 ? 1 : Math.min(1, Math.max(0, (scrollY - start) / distance))
+  progress.style.transform = `scaleX(${ratio})`
+  backToTop.classList.toggle('visible', scrollY > 700)
+}
+
+addEventListener('scroll', updateReadingProgress, { passive: true })
+addEventListener('resize', updateReadingProgress)
+backToTop.addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }))
+updateReadingProgress()

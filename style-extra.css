@@ -1,0 +1,13 @@
+.language-btn { height: 34px; display: flex; align-items: center; gap: 6px; border: 0; border-radius: 7px; background: transparent; color: var(--text-2); padding: 0 7px; font-size: 12px; cursor: pointer; }
+.language-btn:hover { background: var(--soft); }
+.language-btn svg { width: 16px; }
+.detail-card { margin: 20px 0; padding: 16px 18px; border-left: 3px solid var(--blue); background: var(--soft); border-radius: 0 8px 8px 0; }
+.detail-card p { margin: 4px 0 0; font-size: 13px; }
+.error-table { margin: 20px 0; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; }
+.error-table > div { display: grid; grid-template-columns: 175px 1fr; gap: 14px; padding: 12px 14px; border-top: 1px solid var(--border); font-size: 13px; }
+.error-table > div:first-child { border-top: 0; }
+.error-table span { color: var(--text-2); }
+@media (max-width: 760px) {
+  .language-btn span { display: none; }
+  .error-table > div { grid-template-columns: 1fr; gap: 6px; }
+}

@@ -29,6 +29,10 @@
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
             <span>搜索文档</span><kbd>⌘ K</kbd>
           </button>
+          <button class="language-btn" id="languageButton" aria-label="Switch language">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+            <span id="languageLabel">中文</span>
+          </button>
           <span class="divider"></span>
           <button class="icon-btn" id="themeButton" aria-label="切换主题">
             <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
@@ -60,14 +64,15 @@
         </section>
         <section>
           <h2>SDK</h2>
-          <span class="soon">Python <em>即将推出</em></span>
-          <span class="soon">TypeScript <em>即将推出</em></span>
+          <a href="#python">Python 快速上手</a>
+          <a href="#sessions">会话与运行时</a>
         </section>
         <section>
           <h2>进阶</h2>
-          <span class="soon">开发 Tool <em>即将推出</em></span>
-          <span class="soon">插件与生命周期 <em>即将推出</em></span>
-          <span class="soon">部署 <em>即将推出</em></span>
+          <a href="#plugins">第一个插件</a>
+          <a href="#tools">开发 Tool</a>
+          <a href="#lifecycle">插件生命周期</a>
+          <a href="#profiles">Profile 与组合包</a>
         </section>
       </nav>
     </aside>
@@ -86,18 +91,29 @@
         <h2 id="install">安装与启动<a href="#install" class="anchor">#</a></h2>
         <p>在终端中运行以下命令。DSH 会在当前目录启动服务，并打印 Web UI 的访问地址。</p>
         <div class="code-block">
-          <div class="code-head"><span>Terminal</span><button class="copy" data-copy="npm install -g @deepseek-ai/dsh\ndsh">复制</button></div>
-          <pre><code><span class="muted">$</span> npm install -g @deepseek-ai/dsh
-<span class="muted">$</span> dsh</code></pre>
+          <div class="code-head"><span>Terminal</span><button class="copy" data-copy="npx @deepseek-ai/dsh web">复制</button></div>
+          <pre><code><span class="muted">$</span> npx @deepseek-ai/dsh web
+<span class="success">Web UI → http://127.0.0.1:3080</span></code></pre>
         </div>
 
         <h2 id="model">配置模型<a href="#model" class="anchor">#</a></h2>
-        <p>打开右上角的 <strong>设置 → 模型</strong>，选择 DeepSeek，输入 API Key 并保存。配置会立即生效，无需重启服务。</p>
+        <p>打开右上角的 <strong>设置 → 模型</strong>，选择 DeepSeek，输入 API Key 并保存。模型变更会在下一次请求时生效，无需重启服务。</p>
         <ol class="steps">
           <li><span>1</span><div><strong>进入模型设置</strong><p>点击设置图标，在侧栏选择「模型」。</p></div></li>
           <li><span>2</span><div><strong>添加凭证</strong><p>选择服务提供方，并粘贴你的 API Key。</p></div></li>
           <li><span>3</span><div><strong>验证连接</strong><p>保存后状态显示为绿色，即可创建会话。</p></div></li>
         </ol>
+        <div class="detail-card">
+          <strong>凭据不会返回浏览器</strong>
+          <p>API Key 是只写字段。保存后前端只会收到脱敏描述符；明文保存在 <code>$DSH_HOME/.credentials.yaml</code>，settings 中只保存凭据引用。</p>
+        </div>
+        <h3>自定义提供方</h3>
+        <p>公司网关或自建 OpenAI 兼容端点可通过「添加自定义提供方」配置。Provider ID 会被请求、会话、默认模型和凭据引用使用，因此保存后应视为永久标识；展示名称、URL、协议和模型仍可修改。</p>
+        <div class="error-table">
+          <div><code>MISSING_CREDENTIAL</code><span>在模型页保存密钥，或提供配置引用的环境变量。</span></div>
+          <div><code>UNKNOWN_MODEL</code><span>重新选择已配置模型，或在自定义提供方中添加模型。</span></div>
+          <div><code>401 /models</code><span>检查凭据；不提供模型发现端点时应手动录入模型。</span></div>
+        </div>
 
         <h2 id="workspace">选择工作区<a href="#workspace" class="anchor">#</a></h2>
         <p>点击「选择工作区」，添加你启动 <code>dsh</code> 时所在的项目目录。工作区决定 Agent 能够读取和修改的文件范围。</p>
@@ -111,7 +127,93 @@
         <h2 id="permissions">权限与审批<a href="#permissions" class="anchor">#</a></h2>
         <p>Harness 默认采用最小权限策略。文件写入、网络访问和高风险命令会根据你的配置触发审批，所有工具调用都会保留清晰记录。</p>
 
-        <div class="next-card" id="practice"><div><small>下一篇</small><strong>配置更多模型提供方</strong></div><span>→</span></div>
+        <div class="chapter-break"><span>02</span><div><small>程序化使用</small><strong>从 Web UI 走向 SDK</strong></div></div>
+
+        <h2 id="python">Python SDK 快速上手<a href="#python" class="anchor">#</a></h2>
+        <p>Python SDK 适合批处理、自动化流水线和把 Harness 嵌入现有服务。它要求 Python 3.10+；已发布的 SDK 自带同版本运行时，普通使用不要求系统安装 Node.js。</p>
+        <div class="code-block">
+          <div class="code-head"><span>Terminal</span><button class="copy" data-copy="python -m venv .venv\n. .venv/bin/activate\npython -m pip install deepseek-harness-sdk">复制</button></div>
+          <pre><code><span class="muted">$</span> python -m venv .venv
+<span class="muted">$</span> . .venv/bin/activate
+<span class="muted">$</span> python -m pip install deepseek-harness-sdk</code></pre>
+        </div>
+        <p>最小调用由 <code>DeepSeekHarness</code> 管理内置运行时的生命周期。同一个实例可以复用运行时；只有要延续对话与持久 Shell 状态时才复用 session id。</p>
+        <div class="code-block">
+          <div class="code-head"><span>Python</span><button class="copy" data-copy="from deepseek_harness import DeepSeekHarness\n\nwith DeepSeekHarness(cwd='/workspace', session_root='/sessions') as harness:\n    result = harness.run('检查仓库并修复失败的测试', session_id='task-001')\n\nprint(result.final_response)">复制</button></div>
+          <pre><code><span class="keyword">from</span> deepseek_harness <span class="keyword">import</span> DeepSeekHarness
+
+<span class="keyword">with</span> DeepSeekHarness(
+    cwd=<span class="string">'/workspace'</span>,
+    session_root=<span class="string">'/sessions'</span>,
+) <span class="keyword">as</span> harness:
+    result = harness.run(
+        <span class="string">'检查仓库并修复失败的测试'</span>,
+        session_id=<span class="string">'task-001'</span>,
+    )
+
+print(result.final_response)</code></pre>
+        </div>
+
+        <h3 id="sessions">Workspace 与 Session</h3>
+        <div class="compare-grid">
+          <div><strong>cwd</strong><p>选择 Agent 工作的项目目录。应当指向隔离、可恢复的 checkout。</p></div>
+          <div><strong>session_root</strong><p>保存 JSONL 会话日志、工具调用和组装后的模型请求。</p></div>
+          <div><strong>session_id</strong><p>决定是否延续同一段对话以及持久 Bash 进程状态。</p></div>
+        </div>
+        <div class="warning"><strong>安全边界</strong><p>官方最小 Python 示例使用 <code>danger-full-access</code>，Bash 和编辑器可修改运行时进程能访问的路径。只在可丢弃的 checkout 或容器中运行。</p></div>
+
+        <div class="chapter-break"><span>03</span><div><small>可扩展架构</small><strong>一切皆插件</strong></div></div>
+
+        <h2 id="plugins">创建第一个插件<a href="#plugins" class="anchor">#</a></h2>
+        <p>Harness 由 Cordis 驱动。最小插件是导出 <code>apply</code> 函数的 TypeScript 模块；框架在依赖就绪后传入上下文对象。</p>
+        <div class="code-block">
+          <div class="code-head"><span>my-plugin.ts</span><button class="copy" data-copy="import type { Context } from '@deepseek-ai/cordis'\n\nexport const name = 'hello-plugin'\n\nexport function apply(ctx: Context) {\n  console.log('[hello-plugin] loaded')\n}">复制</button></div>
+          <pre><code><span class="keyword">import type</span> { Context } <span class="keyword">from</span> <span class="string">'@deepseek-ai/cordis'</span>
+
+<span class="keyword">export const</span> name = <span class="string">'hello-plugin'</span>
+
+<span class="keyword">export function</span> apply(ctx: Context) {
+  console.log(<span class="string">'[hello-plugin] loaded'</span>)
+}</code></pre>
+        </div>
+        <p>本地开发时，通过 patch 层加载绝对路径，并以 Web profile 启动：</p>
+        <div class="code-block">
+          <div class="code-head"><span>Terminal</span><button class="copy" data-copy="pnpm dsh web --patch ./scratch-plugin/cordis.yml">复制</button></div>
+          <pre><code><span class="muted">$</span> pnpm dsh web --patch ./scratch-plugin/cordis.yml</code></pre>
+        </div>
+
+        <h2 id="tools">开发一个 Tool<a href="#tools" class="anchor">#</a></h2>
+        <p>工具插件通过 <code>inject = ['tools']</code> 声明依赖，再用 <code>defineTool</code> 同时定义参数校验、规范输出和模型可见的渲染结果。</p>
+        <div class="principles">
+          <div><span>01</span><strong>声明输入</strong><p>Parameters 会推导并校验 execute 的参数。</p></div>
+          <div><span>02</span><strong>返回规范值</strong><p>execute 返回由 output schema 约束的数据。</p></div>
+          <div><span>03</span><strong>渲染模型内容</strong><p>render 将规范值转换为模型真正看到的结果。</p></div>
+        </div>
+
+        <h2 id="lifecycle">插件生命周期<a href="#lifecycle" class="anchor">#</a></h2>
+        <p>每个插件运行在独立 Fiber 中。依赖未就绪时等待，加载成功后进入 ACTIVE；必需服务消失时自动卸载，服务恢复后重新加载。</p>
+        <div class="lifecycle" aria-label="插件生命周期">
+          <span>PENDING</span><i>→</i><span>LOADING</span><i>→</i><span class="active-state">ACTIVE</span><i>→</i><span>UNLOADING</span><i>→</i><span>DISPOSED</span>
+        </div>
+        <p><code>ctx.on()</code>、工具注册和 <code>ctx.effect()</code> 都由 Fiber 追踪，卸载时自动撤销。若多个清理步骤存在先后依赖，应放入同一个 effect 的 disposer 中串行执行。</p>
+
+        <h2 id="profiles">Profile 与组合包<a href="#profiles" class="anchor">#</a></h2>
+        <p><strong>组合包（bundle）</strong>贡献一层配置，<strong>profile</strong>则描述哪些组合包按什么顺序构成一个可启动应用。二者职责不同，不应混为一种 manifest。</p>
+        <div class="layer-stack">
+          <div><span>4</span><strong><code>--patch</code> 临时覆盖层</strong></div>
+          <div><span>3</span><strong><code>$DSH_HOME/cordis.patch.yml</code></strong></div>
+          <div><span>2</span><strong>Profile 自有 patch</strong></div>
+          <div><span>1</span><strong>Bundle patch 列表</strong></div>
+        </div>
+        <p>后应用的层按行胜出。一个 patch 会替换目标行的整个 <code>config</code>，而不是递归合并其中的字段。</p>
+
+        <div class="source-note">
+          <div><span class="pulse"></span><strong>内容来源</strong></div>
+          <p>本页依据 DeepSeek Harness 仓库中的中文指南、CLI 参考与插件开发文档整理，最后核对上游提交 <code>47f9438</code>（2026-08-13）。项目仍处于开发者预览阶段，接口可能发生不兼容变化。</p>
+          <a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noreferrer">查看官方源码 →</a>
+        </div>
+
+        <div class="next-card" id="practice"><div><small>继续探索</small><strong>在官方仓库中查看完整 API 与配置目录</strong></div><span>→</span></div>
         <footer><p>以 Apache-2.0 协议开放 · 由社区维护</p><a href="https://github.com/sandbaseai/dsh101" target="_blank" rel="noreferrer">在 GitHub 上编辑此页</a></footer>
       </article>
 

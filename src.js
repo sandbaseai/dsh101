@@ -1,4 +1,8 @@
 import './style.css'
+import './style-extra.css'
+import { installLocale } from './locales.js'
+
+installLocale()
 
 const root = document.documentElement
 const sidebar = document.querySelector('#sidebar')
@@ -39,22 +43,24 @@ document.addEventListener('keydown', event => {
 
 input.addEventListener('input', () => {
   const query = input.value.trim().toLowerCase()
+  const english = document.documentElement.lang === 'en'
   if (!query) {
-    results.innerHTML = '<p>输入关键词以搜索本页内容</p>'
+    results.innerHTML = `<p>${english ? 'Type to search this page' : '输入关键词以搜索本页内容'}</p>`
     return
   }
   const matches = [...document.querySelectorAll('.content h2')]
     .filter(item => item.textContent.toLowerCase().includes(query))
   results.innerHTML = matches.length
-    ? matches.map(item => `<a href="#${item.id}"><small>使用 Web UI</small><strong>${item.childNodes[0].textContent}</strong></a>`).join('')
-    : '<p>没有找到相关内容</p>'
+    ? matches.map(item => `<a href="#${item.id}"><small>${english ? 'Use the Web UI' : '使用 Web UI'}</small><strong>${item.childNodes[0].textContent}</strong></a>`).join('')
+    : `<p>${english ? 'No matching content' : '没有找到相关内容'}</p>`
   results.querySelectorAll('a').forEach(link => link.addEventListener('click', () => dialog.close()))
 })
 
 document.querySelectorAll('.copy').forEach(button => button.addEventListener('click', async () => {
   await navigator.clipboard.writeText(button.dataset.copy)
-  button.textContent = '已复制'
-  setTimeout(() => { button.textContent = '复制' }, 1400)
+  const english = document.documentElement.lang === 'en'
+  button.textContent = english ? 'Copied' : '已复制'
+  setTimeout(() => { button.textContent = english ? 'Copy' : '复制' }, 1400)
 }))
 
 const headings = [...document.querySelectorAll('.content h2')]

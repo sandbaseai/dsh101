@@ -25,6 +25,9 @@ Last upstream review:
 | Bundles and publishing | `docs/user/develop/basic/publish.zh.md` |
 | Fiber lifecycle | `docs/user/develop/framework/index.zh.md` |
 | Services and dependency injection | `docs/user/develop/framework/service.zh.md` |
+| Event dispatch modes | `docs/user/develop/framework/events.zh.md` |
+| Capability role design | `docs/user/develop/practice/index.zh.md` |
+| LLM adapter protocol | `docs/user/develop/practice/llm-adapter.zh.md` |
 
 ## Refresh checklist
 

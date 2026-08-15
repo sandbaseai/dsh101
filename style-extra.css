@@ -7,7 +7,29 @@
 .error-table > div { display: grid; grid-template-columns: 175px 1fr; gap: 14px; padding: 12px 14px; border-top: 1px solid var(--border); font-size: 13px; }
 .error-table > div:first-child { border-top: 0; }
 .error-table span { color: var(--text-2); }
+.number { color: #f78c6c; }
+.rule-strip { display: flex; gap: 14px; align-items: baseline; margin: 20px 0; padding: 13px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--soft); font-size: 13px; }
+.rule-strip strong { flex: 0 0 auto; color: var(--blue); }
+.rule-strip span { color: var(--text-2); }
+.event-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 22px 0; }
+.event-grid > div { display: grid; grid-template-columns: auto 1fr; column-gap: 10px; padding: 15px; border: 1px solid var(--border); border-radius: 9px; background: var(--soft); }
+.event-grid code { grid-row: span 2; align-self: start; }
+.event-grid p { margin: 3px 0 0; font-size: 12px; line-height: 1.5; }
+.capability-flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 9px; margin: 24px 0; }
+.capability-flow > div { min-height: 140px; padding: 16px; border: 1px solid var(--border); border-radius: 9px; background: var(--soft); }
+.capability-flow span { display: block; margin-bottom: 12px; color: var(--blue); font-size: 11px; font-weight: 700; }
+.capability-flow p { margin: 7px 0 0; font-size: 12px; line-height: 1.5; }
+.capability-flow i, .stream-flow i { color: var(--text-3); font-style: normal; }
+.stream-flow { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 22px 0; padding: 20px 12px; overflow: auto; border: 1px solid var(--border); border-radius: 9px; background: var(--soft); }
+.stream-flow span { padding: 6px 9px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg); font: 10px ui-monospace; white-space: nowrap; }
+.stream-flow .finish { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); }
+.compact-list { padding-left: 20px; color: var(--text-2); }
+.compact-list li { margin: 7px 0; padding-left: 4px; }
 @media (max-width: 760px) {
   .language-btn span { display: none; }
   .error-table > div { grid-template-columns: 1fr; gap: 6px; }
+  .event-grid { grid-template-columns: 1fr; }
+  .capability-flow { grid-template-columns: 1fr; }
+  .capability-flow > i { transform: rotate(90deg); text-align: center; }
+  .stream-flow { justify-content: flex-start; }
 }

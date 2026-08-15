@@ -71,7 +71,11 @@
           <h2>进阶</h2>
           <a href="#plugins">第一个插件</a>
           <a href="#tools">开发 Tool</a>
+          <a href="#config-schema">配置 Schema</a>
+          <a href="#events">事件系统</a>
           <a href="#lifecycle">插件生命周期</a>
+          <a href="#capability-seam">能力三层拆分</a>
+          <a href="#llm-adapter">LLM 适配器</a>
           <a href="#profiles">Profile 与组合包</a>
         </section>
       </nav>
@@ -190,12 +194,63 @@ print(result.final_response)</code></pre>
           <div><span>03</span><strong>渲染模型内容</strong><p>render 将规范值转换为模型真正看到的结果。</p></div>
         </div>
 
+        <h2 id="config-schema">配置 Schema<a href="#config-schema" class="anchor">#</a></h2>
+        <p>插件通过同名的 TypeScript <code>Config</code> 类型和 Schemastery schema 接受配置。默认值属于 schema；无效配置应在插件加载时立即失败，而不是运行到一半才降级。</p>
+        <div class="code-block">
+          <div class="code-head"><span>config.ts</span><button class="copy" data-copy="export interface Config {\n  timeoutMs: number\n  mode: 'fast' | 'accurate'\n}\n\nexport const Config = Schema.object({\n  timeoutMs: Schema.number().default(30000),\n  mode: Schema.union(['fast', 'accurate']).default('fast'),\n})">复制</button></div>
+          <pre><code><span class="keyword">export interface</span> Config {
+  timeoutMs: number
+  mode: <span class="string">'fast'</span> | <span class="string">'accurate'</span>
+}
+
+<span class="keyword">export const</span> Config = Schema.object({
+  timeoutMs: Schema.number().default(<span class="number">30000</span>),
+  mode: Schema.union([<span class="string">'fast'</span>, <span class="string">'accurate'</span>]).default(<span class="string">'fast'</span>),
+})</code></pre>
+        </div>
+        <div class="rule-strip"><strong>判断标准</strong><span>不同部署是否可能需要改变这个值？如果是，它就应该是配置字段，而不是硬编码常量。</span></div>
+        <p>修改 <code>cordis.yml</code> 会触发插件热替换：旧实例先卸载并清理 effects，新实例再使用已校验的配置加载。</p>
+
+        <h2 id="events">事件系统<a href="#events" class="anchor">#</a></h2>
+        <p>事件是插件间松耦合通信的核心机制。Cordis 提供四种模式，它们的执行与返回规则不同：</p>
+        <div class="event-grid">
+          <div><code>emit</code><strong>同步广播</strong><p>执行所有监听器，忽略返回值。</p></div>
+          <div><code>bail</code><strong>同步短路</strong><p>首个有效返回值会停止后续监听器。</p></div>
+          <div><code>serial</code><strong>异步顺序</strong><p>按注册顺序等待，同样支持短路。</p></div>
+          <div><code>waterfall</code><strong>包装流水线</strong><p>监听器包装下游返回值，形成处理链。</p></div>
+        </div>
+        <div class="warning"><strong>Waterfall 的关键规则</strong><p>监听器必须调用 <code>next()</code> 才会继续下游；不调用会有意短路整条流水线，适合拦截器和网关。</p></div>
+        <p>Cordis 事件通常采用 <code>namespace/action</code> 命名。持久化的 <code>turn/*</code>、<code>step/*</code> 和 <code>tool/*</code> 是会话事件类型；观察它们时应监听 <code>session/event</code> 并检查 event type。</p>
+
         <h2 id="lifecycle">插件生命周期<a href="#lifecycle" class="anchor">#</a></h2>
         <p>每个插件运行在独立 Fiber 中。依赖未就绪时等待，加载成功后进入 ACTIVE；必需服务消失时自动卸载，服务恢复后重新加载。</p>
         <div class="lifecycle" aria-label="插件生命周期">
           <span>PENDING</span><i>→</i><span>LOADING</span><i>→</i><span class="active-state">ACTIVE</span><i>→</i><span>UNLOADING</span><i>→</i><span>DISPOSED</span>
         </div>
         <p><code>ctx.on()</code>、工具注册和 <code>ctx.effect()</code> 都由 Fiber 追踪，卸载时自动撤销。若多个清理步骤存在先后依赖，应放入同一个 effect 的 disposer 中串行执行。</p>
+
+        <h2 id="capability-seam">能力的三种角色<a href="#capability-seam" class="anchor">#</a></h2>
+        <p>当能力需要可替换提供方时，Harness 将它拆成三个角色。只有完整组合才构成一个 capability seam；单独一个角色并不完整。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Service Definition</strong><p>定义 Cordis 服务以及 Request / Result 类型。</p></div>
+          <i>←</i>
+          <div><span>02</span><strong>Service Provider</strong><p>实现本地、远程或沙箱中的具体行为。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Consumer</strong><p>把能力呈现为 Tool、API 或其他用户界面。</p></div>
+        </div>
+        <p>Provider 与 Consumer 都依赖 Definition，但彼此不依赖。只有角色需要独立演进或替换时才拆包；简单工具无需预防性拆分。</p>
+
+        <h2 id="llm-adapter">LLM 适配器<a href="#llm-adapter" class="anchor">#</a></h2>
+        <p>新的模型提供方通过继承 <code>LlmAdapter</code> 并实现异步 <code>stream()</code> 接入。适配器把统一请求转换成提供方 API，再把流式响应转换成 Harness 的 <code>StreamChunk</code>。</p>
+        <div class="stream-flow">
+          <span>block-start</span><i>→</i><span>text/tool deltas</span><i>→</i><span>block-end</span><i>→</i><span>usage</span><i>→</i><span class="finish">finish</span>
+        </div>
+        <ul class="compact-list">
+          <li>每个 <code>block-start</code> 必须有对应的 <code>block-end</code>。</li>
+          <li><code>index</code> 从 0 递增，用于标记内容块顺序。</li>
+          <li><code>usage</code> 必须在 <code>finish</code> 之前；<code>finish</code> 必须是最后一个分片。</li>
+          <li>不支持的字段应抛出带稳定 code 的 <code>LlmError</code>，不得静默丢弃。</li>
+        </ul>
 
         <h2 id="profiles">Profile 与组合包<a href="#profiles" class="anchor">#</a></h2>
         <p><strong>组合包（bundle）</strong>贡献一层配置，<strong>profile</strong>则描述哪些组合包按什么顺序构成一个可启动应用。二者职责不同，不应混为一种 manifest。</p>

@@ -21,12 +21,17 @@ for (const marker of ['Python SDK quickstart', 'Configuration schema', 'Event sy
   if (!localeSource.includes(marker)) throw new Error(`English locale is missing: ${marker}`)
 }
 
-for (const asset of ['public/favicon.svg', 'public/social-card.svg', 'public/site.webmanifest', '.github/workflows/ci.yml']) {
+for (const asset of ['public/favicon.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml']) {
   if (!existsSync(new URL(`../${asset}`, import.meta.url))) throw new Error(`Required project asset is missing: ${asset}`)
 }
 
 for (const metadata of ['rel="manifest"', 'property="og:title"', 'name="twitter:card"']) {
   if (!html.includes(metadata)) throw new Error(`Required page metadata is missing: ${metadata}`)
+}
+
+const lockfile = readFileSync(new URL('../package-lock.json', import.meta.url), 'utf8')
+if (/"resolved": "http:/u.test(lockfile) || lockfile.includes('mirrors.tencentyun.com')) {
+  throw new Error('package-lock.json contains a non-portable or insecure package registry URL')
 }
 
 console.log(`content check passed (${ids.size} ids, ${requiredSections.length} required sections)`)

@@ -25,6 +25,10 @@ npm run build
 
 构建产物位于 `dist/`，可以部署到任意静态托管平台。
 
+## Cloudflare Pages
+
+推送到 `main` 后，GitHub Actions 会使用与 `sandbase-blog` 相同的组织级 `CLOUDFLARE_API_TOKEN`，把 `dist/` 部署到 Cloudflare Pages 项目 `dsh101`。也可以在 Actions 页面手动触发 **Deploy Cloudflare Pages**。
+
 提交内容更新前请同时运行：
 
 ```bash

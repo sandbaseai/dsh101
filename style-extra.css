@@ -81,6 +81,12 @@
 .guard-icon { position: absolute; left: 16px; top: 16px; width: 27px; height: 27px; display: grid; place-items: center; border-radius: 7px; background: var(--blue-soft); color: var(--blue); }
 .guard-grid p { margin: 5px 0; font-size: 12px; line-height: 1.5; }
 .guard-grid small { color: var(--text-3); font-size: 10px; }
+:where(a, button, input, [tabindex]):focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.anchor:focus-visible { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  :root { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
 @media (max-width: 760px) {
   .language-btn span { display: none; }
   .error-table > div { grid-template-columns: 1fr; gap: 6px; }

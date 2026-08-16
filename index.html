@@ -121,6 +121,7 @@
           <a href="#cordis-runtime-model">Cordis 三层模型</a>
           <a href="#defensive-patterns">防御性失败模式</a>
           <a href="#client-modules">Web Client 模块</a>
+          <a href="#web-styling">Web 样式系统</a>
           <a href="#ui-slots">UI Slots</a>
           <a href="#slot-injection">Slot 声明注入</a>
           <a href="#client-hmr">Client HMR</a>
@@ -853,6 +854,28 @@ print(result.final_response)</code></pre>
           <div><span>03</span><strong>Activate</strong><p>immediately 只负责预取和登记，真正的激活顺序由 Fiber 依赖等待决定。</p></div>
         </div>
         <p>单个 bundle 的 rev 来自内容哈希，整图 rev 会随任一行变化。开发时 HMR 重新哈希并通过 SSE 广播；生产图不含 HMR。插件元数据会按包名缓存，因此插件集合变化需重启，单纯重建 bundle 则走 rebuilt 通知。</p>
+
+        <h2 id="web-styling">Web 样式系统的所有权边界<a href="#web-styling" class="anchor">#</a></h2>
+        <p>Harness 把共享视觉语言与功能组件样式分开拥有：<code>ui-theme</code> 定义静态色阶和语义 token，<code>ui-layout</code> 把解析后的主题快照投影到文档，功能包只消费语义别名并用 CSS Modules 管理局部呈现。这样主题切换不需要每个插件各自维护暗色分支。</p>
+        <div class="permission-table">
+          <div><code>ui-theme</code><strong>共享视觉权威</strong><span>拥有颜色、排版、动效、渐变、阴影和滚动条 token，以及 light、dark、system 偏好与不可变 ThemeSnapshot。</span></div>
+          <div><code>ui-layout</code><strong>文档呈现边界</strong><span>设置 html color-scheme、body 暗色标记、语义别名变量和 theme-color 元数据；释放时撤销自己写入的全局状态。</span></div>
+          <div><code>feature</code><strong>组件局部约定</strong><span>使用 CSS Modules 与语义别名；布局专属值可以是局部自定义属性，但不得复制静态色板、定义全局主题或写主题选择器。</span></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Bootstrap</strong><p>Host 在页面壳加载前同步应用内置偏好，避免首帧先亮后暗；system 立即按操作系统配色解析。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Resolve</strong><p>ThemeRuntime 发布解析后的不可变快照，并在偏好或系统配色变化时发出 theme/change。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Apply</strong><p>Layout presenter 把快照应用到 DOM；主题服务自身不接触 document，职责可以独立测试与释放。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>Token 而非颜色字面量</strong><p>功能组件使用 <code>--dsw-alias-*</code> 语义层；新增共享值先进入静态尺度，再定义别名，明暗覆盖只留在主题所有方。</p></div>
+          <div><strong>几何不能随装饰跳动</strong><p>终端、源码和 diff 保持列结构并横向滚动；滚动条槽宽由共享变量对齐，显隐或 hover 换色不能推动 composer 与内容。</p></div>
+          <div><strong>键盘与减弱动效同等重要</strong><p>仅 hover 可见的控件也必须有清晰 focus-visible 状态；过渡和动画在 prefers-reduced-motion 下关闭或改为无位移反馈。</p></div>
+        </div>
+        <div class="detail-card"><strong>滚动条只能选择一条引擎路径</strong><p>Firefox 使用标准 scrollbar-color/width，WebKit 系浏览器使用伪元素；标准属性只有放进排除 WebKit 选择器的 supports 分支，才能避免 Chromium 丢弃伪元素 hover 规则。高层表面只重新绑定共享 thumb 变量。</p></div>
+        <div class="warning"><strong>第三方主题目前不是完整产品面</strong><p>注册主题只表示覆盖同名语义变量，运行时不会验证覆盖集合完整。功能包因此不能依赖某个第三方主题碰巧提供的字面值；缺少共享 token 时应先扩展主题契约。</p></div>
 
         <h2 id="ui-slots">UI Slots：声明、选择与清理<a href="#ui-slots" class="anchor">#</a></h2>
         <p>Client bundle 到达浏览器后，通过 Slot 注册表把组件贡献到已有界面。一次注册同时声明目标 slot、可渲染的子 slot、可选 store seat 与业务注入；这张声明表既是类型契约，也是运行时授权边界。</p>

@@ -68,6 +68,7 @@
           <a href="#model">配置模型</a>
           <a href="#onboarding">首次启动诊断</a>
           <a href="#model-selection-state">模型选择收敛</a>
+          <a href="#composer-blocks">输入阻塞与解除</a>
         </section>
         <section>
           <h2>核心概念</h2>
@@ -268,6 +269,15 @@
           <div><strong>重连重新建立目录</strong><p>连接重置会丢弃常驻目录投影，再拉取 Host 恢复的选择；未变化的选择子结构保持稳定，避免无意义的 UI 抖动。</p></div>
         </div>
         <div class="warning"><strong>目录缺失不等于输入必须阻塞</strong><p>只有 Host 明确报告 <code>routable: false</code> 才禁用输入框；首次加载前或加载失败后的 <code>null</code> 不阻塞。已寻址的 subagent 不公开模型选择入口，也拒绝目录刷新和选择操作。</p></div>
+
+        <h3 id="composer-blocks">输入阻塞如何保持可恢复<a href="#composer-blocks" class="anchor">#</a></h3>
+        <p>知道某个会话无法发送消息的功能包，可以通过 conversation.blocks 向输入区推送带本地化理由的 block。InputBar 仍复用原来的 textarea，只把它设为禁用并将理由显示为 placeholder，不会换入另一棵临时表单树。</p>
+        <div class="compare-grid">
+          <div><strong>模型 seat 保持可用</strong><p>在会话 block 姿态中，模型选择是唯一不锁住的控件，因为当前声明的阻塞都依靠重新选择可路由模型解除；同时锁住它会形成无法自救的界面。</p></div>
+          <div><strong>依赖方向避免反向耦合</strong><p>ui-model-selection 等功能包依赖 ui-conversation 并主动注册阻塞；会话壳不反向读取各功能包内部状态。</p></div>
+          <div><strong>无 Workspace 优先</strong><p>如果会话 block 与未选择 Workspace 同时成立，界面使用无 Workspace 姿态，因为选择工作区是发送前更早的前提。</p></div>
+        </div>
+        <div class="warning"><strong>Block 只是客户端提示，不是安全边界</strong><p>即使浏览器已经禁用输入，Host 在真正接收 prompt 时仍会执行权威路由检查并拒绝不可服务的选择；前端状态不能替代宿主验证。</p></div>
 
         <h2 id="workspace">选择工作区<a href="#workspace" class="anchor">#</a></h2>
         <p>点击「选择工作区」，添加你启动 <code>dsh</code> 时所在的项目目录。工作区决定 Agent 能够读取和修改的文件范围。</p>

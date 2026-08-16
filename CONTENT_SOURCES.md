@@ -95,6 +95,7 @@ Last upstream review:
 | Session persistence and crash recovery | `docs/subsystems/persistence.zh.md`, `packages/session/session-checkpoint-policy/README.zh.md` |
 | Session projections and cold-read cache | `docs/subsystems/session-projection.zh.md` |
 | Browser ConversationNode incremental assembly, prepend identity, gap repair, and frame-coalesced streaming | `packages/client/runtime/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
+| Recoverable composer blocks, localized disabled posture, model-seat exception, dependency direction, no-Workspace precedence, and Host authority | `packages/client/ui-conversation/README.zh.md`, `packages/client/ui-model-selection/README.zh.md` |
 | Persistent Chat scroll shell, reserved gutter, sticky composer geometry, textarea wheel chaining, and deferred per-message pagination | `packages/client/ui-conversation/README.zh.md` |
 | Non-user context disclosures, durable producer labels, source-shape rendering, opaque compatibility, and steering presentation | `packages/client/ui-conversation/README.zh.md` |
 | Streaming Think-row summaries, internal tail following, expanded reading control, and settled-state stabilization | `packages/client/ui-conversation/README.zh.md` |

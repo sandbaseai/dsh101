@@ -87,6 +87,12 @@ jobs:
             echo "Attached custom domain ${CLOUDFLARE_CUSTOM_DOMAIN}."
           fi
 
+          curl --fail-with-body --silent --show-error \
+            --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            "${domains_url}" \
+            | jq --exit-status --arg name "${CLOUDFLARE_CUSTOM_DOMAIN}" \
+              -r '.result[] | select(.name == $name) | "Custom domain status: \(.status)"'
+
       - name: Deploy to Cloudflare Pages
         if: env.CLOUDFLARE_API_TOKEN != ''
         uses: cloudflare/wrangler-action@v3

@@ -33,6 +33,7 @@ Last upstream review:
 | First plugin | `docs/user/develop/basic/index.zh.md` |
 | Tool development | `docs/user/develop/basic/tool.zh.md`, `docs/subsystems/tools.zh.md` |
 | Code Mode nested tool-call topology, incremental keyed updates, malformed-edge limits, and UI ownership | `packages/client/runtime/README.zh.md`, `packages/client/ui-tool/README.zh.md` |
+| Chat tool rendering, details-seat raw fallback, unreachable details entry point, and deferred inspector navigation | `packages/client/ui-conversation/README.zh.md`, `packages/client/ui-tool/README.zh.md` |
 | Plugin configuration | `docs/user/develop/basic/config.zh.md` |
 | Bundles and publishing | `docs/user/develop/basic/publish.zh.md` |
 | Fiber lifecycle | `docs/user/develop/framework/index.zh.md` |

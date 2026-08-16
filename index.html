@@ -88,6 +88,7 @@
           <a href="#approval-flow">审批链路</a>
           <a href="#approval-composer">审批面板接管</a>
           <a href="#sandbox">沙箱模式</a>
+          <a href="#sandbox-provider">本地沙箱 Provider</a>
           <a href="#e2b-runtime">E2B 远程执行</a>
         </section>
         <section>
@@ -417,6 +418,23 @@
           <div><code>danger-full-access</code><strong>完整访问</strong><span>不添加文件围栏；默认搭配 <code>never</code>。</span></div>
         </div>
         <p>文件系统围栏会在目标规范化后检查可写根，并在写入前重新规范化以缩小符号链接竞态。不过它是可信进程中的策略围栏，不是针对恶意宿主代码的内核安全边界。</p>
+
+        <h4 id="sandbox-provider">本地进程沙箱如何选择 Runner<a href="#sandbox-provider" class="anchor">#</a></h4>
+        <p>Sandbox Policy 为每次调用解析完整策略：显式获批模式优先于 Session 日志最后一条 sandbox/mode，后者再优先于部署默认值；workspaceRoot 来自创建时冻结的 Session cwd，并先按文件系统语义解析再做词法规范化。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Resolve</strong><p>同一份模式与规范工作区交给 Bash、文件工具和 Terminal 等强制方，避免每种能力自行解释出不同写入世界。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Confine</strong><p>Provider 返回必须替代原命令的包装 argv，并附带 enforcement、拒绝签名和 runner 故障规则；获批升权是用更宽策略重新调用。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Classify</strong><p>消费方区分命令自身退出、策略拒绝和 runner 损坏。没有可用后端时返回 SANDBOX_UNAVAILABLE，绝不原样运行。</p></div>
+        </div>
+        <div class="permission-table">
+          <div><code>Linux</code><strong>bwrap → Landlock</strong><span>优先使用功能探测通过的 Bubblewrap，否则使用 Landlock launcher；旧 ABI 只能覆盖部分访问类别时报告 partial。</span></div>
+          <div><code>macOS</code><strong>Seatbelt</strong><span>用 sandbox-exec 默认允许再拒绝 file-write，按模式放行 /dev/null、规范工作区和平台临时目录。</span></div>
+          <div><code>Windows</code><strong>受限 Token + ACL</strong><span>工作区使用确定性常驻写 SID，会话获得随机私有临时 SID；Provider 始终报告 partial，不把 ACL 边界夸大为完整隔离。</span></div>
+        </div>
+        <div class="detail-card"><strong>Runner 选择会在 Provider 生命周期内缓存</strong><p>安装、修复或移除 bwrap、Landlock 或 Seatbelt 后需要重载插件才会重新探测。自定义 runnerCommand 会跳过探测，因此它是部署方对兼容语义的显式断言。</p></div>
+        <div class="warning"><strong>这些模式只限制文件修改</strong><p>它们不表达网络、进程、设备、凭据或普遍读取隔离。Windows 的 Everyone 授权与 NTFS 硬链接仍可能形成外部写入口，且受限进程可读取调用者能读的文件；容器、microVM 与远程沙箱必须成组替换 fs、shell 等能力 Provider。</p></div>
         <h3>一次性审批</h3>
         <p>审批结果只有 <code>allowed-once</code>、<code>rejected</code>、<code>cancelled</code> 和 <code>unavailable</code>。每次决定都会写入成对审计事件；没有应答者或应答失败时默认拒绝。<code>never</code> 策略会在交互分发前确定性拒绝请求。</p>
 

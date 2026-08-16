@@ -85,8 +85,11 @@
           <a href="#config-schema">配置 Schema</a>
           <a href="#events">事件系统</a>
           <a href="#lifecycle">插件生命周期</a>
+          <a href="#client-modules">Web Client 模块</a>
           <a href="#capability-seam">能力三层拆分</a>
           <a href="#llm-adapter">LLM 适配器</a>
+          <a href="#llm-streaming">流式协议与重试</a>
+          <a href="#dynamic-extensions">动态扩展</a>
           <a href="#profiles">Profile 与组合包</a>
         </section>
         <section>
@@ -307,6 +310,17 @@ print(result.final_response)</code></pre>
         </div>
         <p><code>ctx.on()</code>、工具注册和 <code>ctx.effect()</code> 都由 Fiber 追踪，卸载时自动撤销。若多个清理步骤存在先后依赖，应放入同一个 effect 的 disposer 中串行执行。</p>
 
+        <h2 id="client-modules">Web Client 模块与启动图<a href="#client-modules" class="anchor">#</a></h2>
+        <p>带浏览器界面的插件通过 package.json 的 <code>dsh.client</code> 声明加入 Web 启动图。Host 把每个 bundle 的地址、内容哈希、依赖边和预取标记组合进 <code>window.__DSH_BOOT__</code>；浏览器必须先验证整张图，才会启动任何模块。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Scan</strong><p>以 cordis.yml 所在目录解析包和 client 导出，启动阶段聚合报告所有损坏项。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Serve</strong><p>每个 bundle 从专用插件路由返回；未知 id 明确 404，不会落入 SPA HTML。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Activate</strong><p>immediately 只负责预取和登记，真正的激活顺序由 Fiber 依赖等待决定。</p></div>
+        </div>
+        <p>单个 bundle 的 rev 来自内容哈希，整图 rev 会随任一行变化。开发时 HMR 重新哈希并通过 SSE 广播；生产图不含 HMR。插件元数据会按包名缓存，因此插件集合变化需重启，单纯重建 bundle 则走 rebuilt 通知。</p>
+
         <h2 id="capability-seam">能力的三种角色<a href="#capability-seam" class="anchor">#</a></h2>
         <p>当能力需要可替换提供方时，Harness 将它拆成三个角色。只有完整组合才构成一个 capability seam；单独一个角色并不完整。</p>
         <div class="capability-flow">
@@ -329,6 +343,26 @@ print(result.final_response)</code></pre>
           <li><code>usage</code> 必须在 <code>finish</code> 之前；<code>finish</code> 必须是最后一个分片。</li>
           <li>不支持的字段应抛出带稳定 code 的 <code>LlmError</code>，不得静默丢弃。</li>
         </ul>
+
+        <h2 id="llm-streaming">流式协议、失败与重试<a href="#llm-streaming" class="anchor">#</a></h2>
+        <p>文本、推理和多个工具调用可以在同一响应中交错，<code>index</code> 把 delta 归属到对应内容块；<code>block-end</code> 携带完整块。共享 BlockAssembler 同时记录原始分片并组装最终 Assistant 消息，避免各消费方自行实现不一致的 fold。</p>
+        <div class="compare-grid">
+          <div><strong>Normalized failure</strong><p>抛出的传输错误和流内错误统一为可序列化 LlmFailure，按稳定 code 路由。</p></div>
+          <div><strong>One call, one attempt</strong><p>适配器必须关闭 SDK 自带重试；Agent 恢复会开启新的、持久且编号明确的步骤。</p></div>
+          <div><strong>Frozen policy</strong><p>请求选定路由时捕获不可变重试策略，后续替换 Provider 不会改变进行中的恢复。</p></div>
+        </div>
+        <p>远程流有有限的 idle timeout；上下文溢出统一映射为 <code>CONTEXT_WINDOW_EXCEEDED</code>，空 completion 映射为可重试的 <code>EMPTY_RESPONSE</code>。Provider 的 retry-after 只是事实，不是自动重试决定。</p>
+        <div class="detail-card"><strong>TokenUsage 计数互不重叠</strong><p>未缓存 input、cache read、cache write 三项相加才是计费输入；reasoning tokens 已包含在 output 中，汇总时不能重复计算。</p></div>
+
+        <h2 id="dynamic-extensions">Agent 动态扩展运行时<a href="#dynamic-extensions" class="anchor">#</a></h2>
+        <p>自引用 Cordis 工具让 Agent 先检查活的服务、API、事件和 Client slots，再定义并运行临时动态包。<code>cordis_define</code> 只做语法预检和登记；所有副作用都推迟到显式 <code>cordis_run</code>。</p>
+        <div class="permission-table">
+          <div><code>inspect</code><strong>先查询契约</strong><span>把编译期 API 目录与当前活服务取交集，避免凭空猜测接口。</span></div>
+          <div class="recommended"><code>define → run</code><strong>版本化实验</strong><span>Host 半先在 node:vm 中求值；Client 半必须由打开的页面确认并装载。</span></div>
+          <div><code>stop / undefine</code><strong>完全撤销</strong><span>停止会释放 Fiber 贡献；删除还会忘掉全部不可变 Package 版本。</span></div>
+        </div>
+        <p>动态包只存在于共享进程内存，不写插件文件、不修改 cordis.yml，也不会跨重启恢复。每个操作按定义它的 Session 校验归属；其他会话读取时表现为不存在。</p>
+        <div class="warning"><strong>VM 隔离不是安全边界</strong><p>Host 半仍可通过获准的 fs、web、bash 等服务影响运行时，应当像授予 Bash 一样慎重。带 Client 半的 run 在无人打开页面时会一直等待，直到调用轮次取消；同步 vm timeout 也不约束逃逸出的异步函数体。</p></div>
 
         <h2 id="profiles">Profile 与组合包<a href="#profiles" class="anchor">#</a></h2>
         <p><strong>组合包（bundle）</strong>贡献一层配置，<strong>profile</strong>则描述哪些组合包按什么顺序构成一个可启动应用。二者职责不同，不应混为一种 manifest。</p>

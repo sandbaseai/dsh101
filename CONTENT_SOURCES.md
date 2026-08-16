@@ -24,10 +24,13 @@ Last upstream review:
 | Plugin configuration | `docs/user/develop/basic/config.zh.md` |
 | Bundles and publishing | `docs/user/develop/basic/publish.zh.md` |
 | Fiber lifecycle | `docs/user/develop/framework/index.zh.md` |
+| Web client module graph and bundle delivery | `docs/subsystems/client-modules.zh.md` |
 | Services and dependency injection | `docs/user/develop/framework/service.zh.md` |
 | Event dispatch modes | `docs/user/develop/framework/events.zh.md` |
 | Capability role design | `docs/user/develop/practice/index.zh.md` |
 | LLM adapter protocol | `docs/user/develop/practice/llm-adapter.zh.md` |
+| LLM streaming, normalized failures and retry policy | `docs/subsystems/llm-streaming.zh.md` |
+| Agent-authored dynamic Cordis extensions | `docs/subsystems/extensions.zh.md`, `packages/extensions/README.zh.md`, `packages/extensions/cordis-host-runner/README.zh.md`, `packages/extensions/tool-cordis/README.zh.md` |
 | MCP transports and tool bridge | `packages/mcp/mcp-client/README.zh.md` |
 | Skill discovery and loading | `packages/skill/skill/README.zh.md`, `packages/skill/tool-skill/README.zh.md` |
 | Plan collaboration state | `packages/plan/plan-mode/README.zh.md` |

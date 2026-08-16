@@ -73,6 +73,7 @@ Last upstream review:
 | LSP semantic code navigation | `docs/subsystems/lsp.zh.md`, `packages/lsp/tool-lsp/README.zh.md` |
 | Subagent delegation and lifecycles | `docs/subsystems/subagent.zh.md`, `packages/subagent/subagent/README.zh.md`, `packages/subagent/tool-subagent/README.zh.md` |
 | Todo snapshots | `packages/todo/tool-todo/README.zh.md` |
+| TodoDock current-plan projection, turn-boundary clearing, slot order, collapsed status counts, composer visibility, and single-line limit | `packages/client/ui-conversation/README.zh.md`, `packages/todo/tool-todo/README.zh.md` |
 | Persistent goals and goal rounds | `docs/subsystems/goal.zh.md`, `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |
 | Context compaction | `docs/subsystems/compaction.zh.md`, `packages/compaction/compaction-basic/README.zh.md` |
 | Permission presets and approvals | `packages/interaction/permission-presets/README.zh.md`, `packages/interaction/user-approval/README.zh.md` |

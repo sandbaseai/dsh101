@@ -167,6 +167,7 @@
           <h2>持续执行</h2>
           <a href="#subagents">Subagents</a>
           <a href="#todos">Todo 列表</a>
+          <a href="#todo-dock">Todo 计划条</a>
           <a href="#goals">持久 Goal</a>
           <a href="#compaction">上下文压缩</a>
           <a href="#guardrails">工具 Guardrails</a>
@@ -1133,6 +1134,16 @@ print(result.final_response)</code></pre>
           <div class="done"><i>✓</i><span>completed</span><p>已经完成</p></div>
         </div>
         <p>完整列表写入 <code>todo/write</code> 会话事件，支持日志回放和 UI 投影。是否允许多个任务同时处于 <code>in_progress</code> 由部署配置决定。</p>
+
+        <h3 id="todo-dock">输入区的 Todo 计划条<a href="#todo-dock" class="anchor">#</a></h3>
+        <p>TodoDock 读取 Host 计算的 todos 投影，而不是扫描当前可见消息。当前计划是最近一次 todo/write，且它之后不能已有更晚的 turn/start；新一轮开始会清空旧计划投影，turn/end 则保留刚完成的清单。</p>
+        <div class="compare-grid">
+          <div><strong>空列表不占位置</strong><p>面板收到空列表时自我隐藏；有内容时默认折叠，表头显示计划标题和各状态数量。</p></div>
+          <div><strong>计数只展示非零项</strong><p>已完成、进行中、待处理按“·”连接，例如“1 已完成 · 2 进行中 · 1 待处理”；数量为零的分类直接省略。</p></div>
+          <div><strong>Dock 顺序由 slot 固定</strong><p>Todo 以 order 0 位于 Goal 与 Queue 之前；当 composer 接管链隐藏输入区时，整个 dock 也一起隐藏。</p></div>
+        </div>
+        <p>todo_write 工具调用本身仍由 ui-tool 在消息流中渲染；TodoPanel 只接收纯列表和会话选择，不承担日志折叠或工具状态合成。</p>
+        <div class="warning"><strong>长 Todo 目前只能看单行预览</strong><p>过长条目会以省略号截断，当前没有换行或展开入口；需要保留可读性时，应把任务拆成简短、可验证的条目。</p></div>
 
         <h2 id="goals">持久 Goal<a href="#goals" class="anchor">#</a></h2>
         <p>Goal 用于一个需要跨多个轮次持续推进的同会话目标。它与普通 Todo 不同：Goal 有 phase、revision、Round 上限和明确的暂停、恢复、完成与阻塞生命周期。</p>

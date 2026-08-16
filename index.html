@@ -967,6 +967,15 @@ print(result.final_response)</code></pre>
         </div>
         <p>不受跟踪的记录类工具对重复链透明，因此在两次相同调用之间写 Todo 不会掩盖循环。各 Subagent 的重复链彼此隔离。</p>
 
+        <h3 id="guardrail-semantics">截止时间与重复链的精确语义<a href="#guardrail-semantics" class="anchor">#</a></h3>
+        <div class="compare-grid">
+          <div><strong>只有声明预算才超时</strong><p>策略零配置，只读取工具自己的 <code>ToolDefinition.timeoutMs</code>。未声明预算的工具原样执行；声明预算也意味着该工具承诺转发 <code>exec.signal</code>。</p></div>
+          <div><strong>拒绝调用也参与计数</strong><p>重复检测位于 post-execute，因此被 pre-execute 拒绝后仍反复提交的相同调用也会推进链；这正是需要提醒的循环。</p></div>
+          <div><strong>参数键是完整规范值</strong><p>对象键深度排序后再序列化，所以属性顺序不同仍视为相同；提醒中的参数预览有长度上限，但检测始终比较完整值。</p></div>
+        </div>
+        <p>用户新提示词会重置对应 Agent 的重复链；持久会话恢复会从空链开始，而 compaction 不会重置当前进程内的链。提醒只在精确达到配置阈值时注入，超过最高阈值后不会每次继续追加。</p>
+        <div class="warning"><strong>两种 Guard 都不是硬停止</strong><p>Timeout 只是向协作工具发出中止信号，忽略信号的实现仍可能继续运行；Repeat Reminder 只追加带来源的 user context，保留原工具结果且不否决调用。多个 execute 包装层的注册顺序还决定截止时间覆盖整次重试还是单次尝试。</p></div>
+
         <h2 id="background-jobs">后台任务<a href="#background-jobs" class="anchor">#</a></h2>
         <p>长时间运行的 Bash 与 Subagent 共用后台任务运行时。启动后会立即得到形如 <code>bash-1</code> 或 <code>subagent-2</code> 的 job id，再通过统一接口查看状态、增量读取输出、等待完成或请求终止。</p>
         <div class="todo-demo">

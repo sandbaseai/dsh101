@@ -67,7 +67,7 @@ Last upstream review:
 | Effective permission preset derivation | `docs/subsystems/permission-presets.zh.md` |
 | Approval request lifecycle and audit | `docs/subsystems/approval.zh.md` |
 | Filesystem sandbox policy | `docs/subsystems/sandbox.zh.md`, `packages/fs/fs-sandbox/README.zh.md` |
-| Tool reliability guardrails | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
+| Tool timeout enforcement, wrapper ordering, and per-agent repetition reminders | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
 | Background job runtime | `docs/subsystems/jobs.zh.md` |
 | Append-only session event model | `docs/subsystems/session.zh.md` |
 | Session search and log export | `docs/subsystems/session-query.zh.md`, `packages/session-query/tool-session-query/README.zh.md`, `packages/session-query/session-log-export/README.zh.md` |

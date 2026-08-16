@@ -79,6 +79,7 @@
           <a href="#new-session">New Session 复用</a>
           <a href="#session-row-status">会话行状态</a>
           <a href="#session-log">Session 事件日志</a>
+          <a href="#persistence-catalog">持久事件目录</a>
           <a href="#agent-delivery">Agent 投递与取消</a>
           <a href="#session-queue">实时消息队列</a>
           <a href="#queue-operations">Queue 编辑与插话</a>
@@ -388,6 +389,28 @@
           <div><span>03</span><strong>Surface</strong><p>用户消息、组装后的 Assistant 消息和工具结果形成模型可见表层。</p></div>
         </div>
         <p>原始 assistant chunks 会完整记录以保证流式回放；组装后的 assistant message 才进入派生历史。完整 request header 记录模型、系统提示词与工具 schema，只有配置变化时再写一份新快照，因此任意请求都能从日志重建。</p>
+
+        <h3 id="persistence-catalog">如何阅读持久事件目录<a href="#persistence-catalog" class="anchor">#</a></h3>
+        <p>生成的 Persistence Catalog 扫描核心 <code>SessionEventMap</code> 和仓库内插件的 declaration merging，列出每一种持久事件的 payload、JSDoc、声明位置与 surface 标记。它回答“日志里允许出现什么”，而子系统页面解释“这些事件为何出现、如何折叠”；Cordis 事件则是另一条实时控制通道，所有日志提交只通过统一的 <code>session/event</code> 通知观察者。</p>
+        <div class="permission-table">
+          <div><code>surface</code><strong>进入模型派生历史</strong><span>只有 user/message、assistant/message 与 tool/result 属于封闭的 SurfaceEventType；它们可以携带 sourceEventSeqs 和 surfaceOp。</span></div>
+          <div><code>log-only</code><strong>持久但不进入 transcript</strong><span>边界、流式分片、审批、设置和领域状态仍可回放与审计，却不会直接生成模型消息，也不能携带 surface 替换元数据。</span></div>
+          <div><code>append</code><strong>追加到表层尾部</strong><span>正常用户、助手和工具结果按顺序加入；事件 seq 单调递增，但表层顺序应由投影规则读取，不能自行按来源引用重排。</span></div>
+          <div><code>replace</code><strong>替换已有表层区间</strong><span>压缩等生产方可用闭区间替换节点，并在 sourceEventSeqs 中覆盖所有被遮蔽节点，让回放保留可追溯来源。</span></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>信封强制可恢复</strong><p>每条事件拥有 type、会话内单调 seq、epoch 毫秒 time 与可无损 JSON 化的 data；Session.append 在写入边界强制序列化契约。</p></div>
+          <div><strong>未知必需事件必须拒绝</strong><p>读到当前构建不认识的 type 时默认拒绝重建。只有写入方明确标为 ignorable: true 的纯信息记录才能跳过，宁可过度拒绝，也不恢复残缺状态。</p></div>
+          <div><strong>格式版本不承诺兼容</strong><p>当前 SESSION_FORMAT_VERSION 为 0。更高版本应提示升级 Harness，更低版本若没有迁移路径也会拒绝，不能把无法理解的数据误报为损坏。</p></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Find</strong><p>按事件命名空间定位目录条目，先确认 surface 徽标和完整 payload。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Trace</strong><p>沿声明位置回到拥有包，再到子系统页核对状态机、配对关系和不变量。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Gate</strong><p>事件词汇变化后重新生成目录与已知类型集合，并运行 freshness 和双语配对门禁。</p></div>
+        </div>
+        <div class="warning"><strong>可扩展不等于任意事件都可安全恢复</strong><p>下游插件可以继续合并 SessionEventMap，但上游生成目录只覆盖本仓库包。自定义事件必须定义自己的回放语义与兼容策略；若它会改变重建结果，就不能为了绕过旧读者而标成 ignorable。</p></div>
 
         <h2 id="agent-delivery">Agent 投递、空闲与取消<a href="#agent-delivery" class="anchor">#</a></h2>
         <p>Agent 的公开句柄把所有输入路由到持久 Inbox。next-turn 保存普通后续轮次，next-step 保存最近步骤要消费的 steering 或注入上下文；每条消息拥有稳定 MessageId，并记录插入、认领或丢弃事实。</p>

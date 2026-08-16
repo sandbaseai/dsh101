@@ -99,6 +99,7 @@ Last upstream review:
 | Tool timeout enforcement, wrapper ordering, and per-agent repetition reminders | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
 | Background job runtime, per-owner admission, scoped controllers, first-settlement semantics, output budgets, completion delivery, wake limits, and teardown | `docs/subsystems/jobs.zh.md`, `packages/jobs/jobs/README.zh.md`, `packages/jobs/jobs-local/README.zh.md`, `packages/jobs/tool-jobs/README.zh.md` |
 | Append-only session event model | `docs/subsystems/session.zh.md` |
+| Generated persistence event vocabulary, surface classification, event envelope, declaration merging, unknown-event compatibility, format versioning, and freshness verification | `docs/persistence-catalog.zh.md`, `docs/subsystems/session.zh.md`, `docs/subsystems/persistence.zh.md`, `scripts/gen-persistence-catalog.ts` |
 | Session search and log export | `docs/subsystems/session-query.zh.md`, `packages/session-query/tool-session-query/README.zh.md`, `packages/session-query/session-log-export/README.zh.md` |
 | Browser session search, local metadata fallback, request cancellation, query limits, and result navigation | `packages/client/ui-workspace/README.zh.md`, `packages/client/runtime/README.zh.md` |
 | Structured cross-session references | `docs/subsystems/session-reference.zh.md` |

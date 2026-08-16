@@ -74,16 +74,6 @@ jobs:
             --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
             "${domains_url}" > /tmp/dsh101-domains.json
 
-          if jq --exit-status '.result[]? | select(.name == "dsh101.sandbase.ai")' \
-            /tmp/dsh101-domains.json >/dev/null; then
-            curl --fail-with-body --silent --show-error \
-              --request DELETE \
-              --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-              "${domains_url}/dsh101.sandbase.ai" \
-              | jq --exit-status '.success == true' >/dev/null
-            echo "Removed obsolete custom domain dsh101.sandbase.ai."
-          fi
-
           if jq --exit-status --arg name "${CLOUDFLARE_CUSTOM_DOMAIN}" \
             '.result[]? | select(.name == $name)' /tmp/dsh101-domains.json >/dev/null; then
             echo "Custom domain ${CLOUDFLARE_CUSTOM_DOMAIN} is already attached."

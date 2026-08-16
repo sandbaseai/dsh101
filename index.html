@@ -96,6 +96,7 @@
           <a href="#lifecycle">插件生命周期</a>
           <a href="#client-modules">Web Client 模块</a>
           <a href="#ui-slots">UI Slots</a>
+          <a href="#client-hmr">Client HMR</a>
           <a href="#plugin-inventory">插件清单诊断</a>
           <a href="#scope-routing">Scope 路由</a>
           <a href="#web-server">Web Server</a>
@@ -450,6 +451,18 @@ print(result.final_response)</code></pre>
         </div>
         <div class="detail-card"><strong>生命周期会收回整棵贡献</strong><p>注册 disposer 不只移除当前组件，还会递归撤销它声明的子 slot、贡献记录与 store 挂载。声明代次与普通条目版本分开计数，让运行时识别过期授权。</p></div>
         <div class="warning"><strong>模块可加载不代表 Slot 合法</strong><p>Client Module Loader 负责下载、物化与 HMR invalidate；SlotCore 独立验证布局所有权。插件必须同时满足模块图和 slot 声明，不能靠运行时碰巧存在的组件路径绕过授权。</p></div>
+
+        <h2 id="client-hmr">Client HMR 的替换顺序<a href="#client-hmr" class="anchor">#</a></h2>
+        <p>开发模式下，Host 轮询启动图中的客户端 bundle；只有内容 rev 真正变化才通过系统 SSE 发出 rebuilt 帧。浏览器把多个重建排入串行队列，避免两个插件替换过程交错。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Stage</strong><p>先 invalidate 缓存并 prefetch 新 bundle；此时旧 fiber 仍在服务，新 factory 只完成登记。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Drain</strong><p>从注册表删除旧项，等待旧 fiber 完全释放，再移除该插件拥有的样式标签。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Mount</strong><p>refresh 重新导入并挂载，随后等待新 fiber；启动失败会直接显露给 Loader 状态。</p></div>
+        </div>
+        <p>提供方 fiber 的激活代次包含服务 uid，因此替换服务提供方会由 Cordis 自动级联重载依赖方，不需要浏览器额外分析依赖图。没有 bundle watcher 时 SSE 链路保持空闲，不会伪造重建。</p>
+        <div class="warning"><strong>Bundle HMR 失败不会回滚</strong><p>失败重载会让配置项进入 FAILED，而不是恢复旧 bundle；这不同于用户 patch 热重载的最后可用树策略。插件 React 状态也会随全新组件与 fiber 丢失，但连接、运行时和 Session 数据层不受影响。</p></div>
 
         <h2 id="plugin-inventory">用插件清单核对运行拓扑<a href="#plugin-inventory" class="anchor">#</a></h2>
         <p>设置中的「插件」页面是当前 Cordis Loader 树的只读快照。它首次打开时才查询 Host，跳过结构性 group 行，并按 Loader 顺序列出条目 ID、模块标识、有效启用状态和根 Fiber 阶段。</p>

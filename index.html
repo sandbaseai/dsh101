@@ -166,6 +166,7 @@
           <a href="#guardrails">工具 Guardrails</a>
           <a href="#background-jobs">后台任务</a>
           <a href="#session-history">会话检索与导出</a>
+          <a href="#browser-session-search">浏览器会话搜索</a>
           <a href="#session-reference">跨会话引用</a>
           <a href="#session-title">会话标题</a>
           <a href="#session-management">分支、归档与删除边界</a>
@@ -1108,6 +1109,15 @@ print(result.final_response)</code></pre>
         <div class="detail-card"><strong>导出完整审计材料</strong><p>Web UI 的 Session log 按钮或 <code>/export</code> 会下载包含根会话、子会话和附件的流式 ZIP。命令只在用户命令平面执行，不创建模型轮次，也不消耗模型 token；下载位置由浏览器决定。</p></div>
         <p>导出前先用 HEAD 预检，活动会话会经过 flush 持久性屏障，然后浏览器直接接管 GET 下载；JavaScript 不会把整个 ZIP 缓存在内存。归档保留持久化工件的原始内容，子代理按目录分组，共享附件只写入一次。</p>
         <div class="warning"><strong>导出会明确失败，不会静默缺件</strong><p>缺少根会话返回 404，后端不支持逐会话原始工件返回 501；子会话工件或引用附件读取失败会让整个流失败。HEAD 只能发现开始传输前的错误，后续失败由浏览器下载管理器报告。</p></div>
+
+        <h3 id="browser-session-search">浏览器中的会话搜索<a href="#browser-session-search" class="anchor">#</a></h3>
+        <p>侧边栏搜索把快速本地匹配与 Host 正文检索组合成一个扁平结果列表。标题和 Workspace 子串按不区分大小写立即匹配；非空查询经过 250 ms 防抖后，再加入按相关性排序的对话内容结果与摘要片段。</p>
+        <div class="compare-grid">
+          <div><strong>输入先规范化</strong><p>查询移除 NUL，最多保留 500 个 UTF-16 代码单元，并保证不会在截断处拆开代理项对。只含空白的查询不会发起正文搜索。</p></div>
+          <div><strong>旧请求主动取消</strong><p>每次新查询都会中止前一个 Host 请求。搜索状态属于当前 UI 所有者，不写入共享 Session 列表，因此页面必须自行抑制迟到响应。</p></div>
+          <div><strong>远程失败仍可降级</strong><p>正文检索失败时，标题与 Workspace 的本地匹配继续显示，并附带警告。结果最多展示 20 条，过宽查询会提示进一步缩小。</p></div>
+        </div>
+        <div class="warning"><strong>结果定位到 Session，不定位到事件</strong><p>打开命中项不会清除当前查询，也不会跳到摘要对应的日志事件。当前搜索没有模糊匹配或事件深链接；正文后端采用字面 token 或短语语义。</p></div>
 
         <h2 id="session-reference">结构化跨会话引用<a href="#session-reference" class="anchor">#</a></h2>
         <p>宿主可以把选中的历史 Session 作为结构化引用附在新消息上，而不是把 UI 的 @mention 语法传入核心。Session id 是权威身份，label 只是快照显示信息；候选项使用最新持久标题，并按当前工作目录亲和度排序。</p>

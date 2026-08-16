@@ -77,6 +77,7 @@ Last upstream review:
 | Background job runtime | `docs/subsystems/jobs.zh.md` |
 | Append-only session event model | `docs/subsystems/session.zh.md` |
 | Session search and log export | `docs/subsystems/session-query.zh.md`, `packages/session-query/tool-session-query/README.zh.md`, `packages/session-query/session-log-export/README.zh.md` |
+| Browser session search, local metadata fallback, request cancellation, query limits, and result navigation | `packages/client/ui-workspace/README.zh.md`, `packages/client/runtime/README.zh.md` |
 | Structured cross-session references | `docs/subsystems/session-reference.zh.md` |
 | Durable session titles | `docs/subsystems/session-title.zh.md` |
 | Session fork, rename, archive, and workspace deletion boundaries | `packages/host/apiproxy/README.zh.md`, `packages/client/runtime/README.zh.md`, `packages/client/ui-conversation/README.zh.md`, `packages/client/ui-workspace/README.zh.md` |

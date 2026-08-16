@@ -136,6 +136,7 @@
         <section>
           <h2>Agent 配置</h2>
           <a href="#settings-system">Settings 分层</a>
+          <a href="#locale-runtime">界面语言与双语文档</a>
           <a href="#schema-form">Schema 表单</a>
           <a href="#credentials-system">凭据引用</a>
           <a href="#credential-file-security">凭据文件安全</a>
@@ -994,6 +995,31 @@ print(result.final_response)</code></pre>
         </div>
         <p>删除设置文件会发布空用户文档，让所有 namespace 回退到 base 与 schema 默认值。卸载会先关闭 watcher，再等待已排队和进行中的文档操作完全停稳，此后不再发布。</p>
         <div class="warning"><strong>Watcher 不是持续轮询</strong><p>读取路径不会自行重复 stat；若底层 watcher 真正漏掉事件，外部变更要到下一次文件信号、下一次写入或重启时才会被并入。磁盘已经非法时，产品写入会拒绝，而不是覆盖用户尚未修复的文本。</p></div>
+
+        <h2 id="locale-runtime">界面语言偏好与词典回退<a href="#locale-runtime" class="anchor">#</a></h2>
+        <p>Web UI 的中文／英文偏好由 <code>LocaleRuntime</code> 管理。Host 值保存在 <code>$DSH_HOME/settings.yaml</code> 的 <code>locale.preference</code>；插件激活后异步读取并替换浏览器的暂定选择，因此 Settings 暂时不可用也不会阻塞页面。</p>
+        <div class="permission-table">
+          <div><code>Host</code><strong>持久偏好</strong><span>已保存的 zh 或 en 是最终选择，并可在同一 Harness Home 的新页面中复用。</span></div>
+          <div><code>navigator</code><strong>首次浏览器提示</strong><span>没有显式 Host 值时按主子语言标签匹配；应用不支持浏览器请求的语言时回退到 zh。</span></div>
+          <div><code>remote</code><strong>仅进程内选择</strong><span>Settings API 仅允许回环请求，因此远程浏览器可以切换当前运行期语言，但不能把选择写入 Host 文件。</span></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Register</strong><p>插件按 namespace 注册类型化的 zh 与 en 词典。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Resolve</strong><p>依次查当前 namespace 的活跃语言与 zh，再查 common 的活跃语言与 zh，最后显示原始 key。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Render</strong><p>slot 注入的 t 在语言变化后重新求值；只有真实切换才发出 locale/change。</p></div>
+        </div>
+        <div class="warning"><strong>不是所有界面与已注册文案都会实时切换</strong><p>部分界面仍直接持有静态文本；slot 渲染路径会随 locale 更新，但在注册时已经取成普通字符串的描述，例如命令注册表中的文案，会保持旧语言直到所属贡献重新注册。Locale 只服务浏览器 UI，不进入模型请求，也不影响 KV Cache。</p></div>
+
+        <h3 id="bilingual-docs">上游双语文档如何保持成对<a href="#bilingual-docs" class="anchor">#</a></h3>
+        <p>DeepSeek Harness 把英文与简体中文视为同权文档：每一对由同目录的 <code>foo.md</code>、<code>foo.zh.md</code> 和 <code>foo.i18n.yaml</code> 组成，必须在同一个变更中一起对齐，而不是把某一侧当作永远优先的真源。</p>
+        <div class="compare-grid">
+          <div><strong>内容快照</strong><p>i18n 记录保存两侧最后一次确认一致时的完整 Git blob hash，可精确恢复并只修补发生变化的部分。</p></div>
+          <div><strong>结构门禁</strong><p>CI 检查配对完整性、语言切换行、标题、列表、表格、链接和逐字节一致的代码块；任一侧单独变化都会失去同步。</p></div>
+          <div><strong>语义评审</strong><p>hash 和结构相同只能证明有人确认过当前配对，不能证明翻译忠实、术语准确或行文自然，这些仍由双语评审负责。</p></div>
+        </div>
+        <div class="detail-card"><strong>运行时 Locale 与文档配对是两条独立链路</strong><p>前者决定浏览器界面当前显示什么语言，后者保护仓库 Markdown 的长期一致性。二者都支持中英文，但没有共享存储、事件或模型上下文。</p></div>
 
         <h2 id="credentials-system">凭据引用与热轮换<a href="#credentials-system" class="anchor">#</a></h2>
         <p>配置文件只保存形如环境变量名的 <code>CredentialRef</code>，明文由 Credentials provider 管理。LLM Adapter 在每次请求前重新解析引用，不跨操作缓存，因此轮换后的密钥会在下一次请求生效，无需重启。</p>

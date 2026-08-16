@@ -150,6 +150,7 @@
           <a href="#deliverables">产出文件</a>
           <a href="#user-questions">向用户提问</a>
           <a href="#filesystem-seam">文件系统语义</a>
+          <a href="#fs-observation-policy">文件观察生命周期</a>
           <a href="#file-search">Glob 与 Grep</a>
           <a href="#shell-terminal">Shell 与 Terminal</a>
           <a href="#subprocess-seam">子进程运行时</a>
@@ -1078,6 +1079,16 @@ print(result.final_response)</code></pre>
         </div>
         <p>编辑不是“先读再写”的外部组合：版本检查、字面匹配、换行规范化和原子替换都在同一个后端临界区完成。窗口化读取即使只返回部分行，也会记录完整文件版本；过大的原始字节读取则明确失败，不会静默截断。</p>
         <div class="detail-card"><strong>符号链接需要单独看待</strong><p>resolve 会跟随链接以生成稳定身份；需要守住仓库信任边界的调用方应先使用不跟随最终链接的 lstat，并在解析前拒绝 symlink。</p></div>
+
+        <h3 id="fs-observation-policy">观察记录属于当前 Session 生命周期<a href="#fs-observation-policy" class="anchor">#</a></h3>
+        <p>Observation Policy 不提供服务，也不执行文件 I/O；它监听 fs/observed，并在单槽 write-intent 与 edit-intent 事件上把每个 Session 对目标的未见、确认缺失或版本存在状态转换为提供方 CAS 守卫。</p>
+        <div class="compare-grid">
+          <div><strong>未见时写与编辑不同</strong><p>write 会尝试 createIfAbsent，若文件其实存在则以 FS_NOT_OBSERVED 失败；edit 直接要求先读。确认缺失后仍可安全创建，但 edit 返回 FS_NOT_FOUND。</p></div>
+          <div><strong>观察不会跨恢复保留</strong><p>状态以 Session 对象为 WeakMap 键，只驻留当前进程；插件重载、Session 恢复或新 Activation 都必须重新读取，旧日志中的 read 结果不会自动恢复新鲜度授权。</p></div>
+          <div><strong>只有工具读取发布观察</strong><p>直接调用 ctx.fs 读取不会触发 fs/observed，因此不能授权后续受保护编辑。成功的模型 read、write 或 edit 才会更新当前目标状态。</p></div>
+        </div>
+        <div class="detail-card"><strong>这是单槽决策，不是授权链</strong><p>write-intent 与 edit-intent 按注册顺序由第一个决策器完整裁决，默认策略不会调用 next。权限、审计与沙箱仍应放在工具执行流水线或后端，而不是叠加到这个槽位。</p></div>
+        <div class="warning"><strong>策略插件可选，但移除会改变安全姿态</strong><p>工具依赖的是 ctx.fs 提供方而非策略服务，所以卸载策略不会让工具失效；它会让 write 回到无条件创建或覆盖、edit 回到无条件字面替换。部署应显式加载默认观察策略。</p></div>
 
         <h2 id="file-search">Glob、Grep 与结果预算<a href="#file-search" class="anchor">#</a></h2>
         <p>文件发现工具使用 npm 随包交付的 ripgrep 二进制，并通过 Subprocess seam 以固定 argv 启动；不依赖宿主预装 rg，也不经过 shell。启动时强制 no-config，避免继承的 RIPGREP_CONFIG_PATH 注入预处理器。</p>

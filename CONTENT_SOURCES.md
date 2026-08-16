@@ -67,7 +67,7 @@ Last upstream review:
 | Persistent image attachments and browser admission UX | `docs/subsystems/attachment.zh.md`, `packages/attachment/attachment-local/README.zh.md`, `packages/client/ui-attachment/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | Turn deliverables, clickable file mentions, and native-open boundary | `packages/client/ui-deliverables/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | Structured user questions, response validation, and Web recovery | `docs/subsystems/user-questions.zh.md`, `packages/interaction/tool-ask-user/README.zh.md`, `packages/host/apiproxy/README.zh.md`, `packages/client/ui-user-questions/README.zh.md`, `packages/client/runtime/README.zh.md` |
-| Filesystem targets and observation guards | `docs/subsystems/filesystem.zh.md` |
+| Filesystem targets, per-Session observation lifecycle, guarded mutation decisions, and atomic edits | `docs/subsystems/filesystem.zh.md`, `packages/fs/fs-observation-policy/README.zh.md` |
 | Bundled glob/grep search and result budgets | `packages/fs/tool-fs-search/README.zh.md` |
 | Shell execution and persistent terminals | `docs/subsystems/shell.zh.md`, `docs/subsystems/terminal.zh.md`, `packages/terminal/tool-terminal/README.zh.md` |
 | Subprocess streams and process-tree termination | `docs/subsystems/subprocess.zh.md` |

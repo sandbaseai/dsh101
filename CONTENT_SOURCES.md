@@ -16,6 +16,7 @@ Last upstream review:
 | DSH 101 section | Canonical upstream source |
 | --- | --- |
 | Subsystem catalog and boundaries | `docs/subsystems/README.zh.md` |
+| Canonical domain terminology for capability seams, agent scopes, lineage, loop hierarchy, goals, human commands, and Ralph workflows | `docs/glossary.zh.md` |
 | Install, Node compatibility, npm release, and license | `README.zh.md`, `package.json`, `apps/cli/package.json`, `LICENSE`, npm registry metadata |
 | Web UI quickstart | `docs/user/guide/index.zh.md` |
 | Workspace identity and lifecycle | `docs/subsystems/workspace.zh.md` |

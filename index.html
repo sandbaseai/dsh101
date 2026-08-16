@@ -254,6 +254,7 @@
           <a href="#storage-provider-routing">存储后端路由</a>
           <a href="#spill-output">大结果 Spill</a>
           <a href="#output-retention-boundary">输出保留边界</a>
+          <a href="#glossary">术语速查</a>
         </section>
       </nav>
     </aside>
@@ -2376,6 +2377,31 @@ print(result.final_response)</code></pre>
         <p>通用策略在 post-execute 阶段只处理超过 maxInlineBytes 的最终纯文本 content。它跳过普通 read、嵌套执行、已替换的规范 value、block 结果和任何混合内容；Provider 已经截断的正文也无法被它恢复。Code Mode 的 dispatch-log 另有同预算分支，会限制包括 read 在内的持久日志副本，但完整程序值早已跨过 worker 边界，不受影响。</p>
         <div class="detail-card"><strong>通知也计入同一硬预算</strong><p>策略先为省略字节数、定位符和检索提示预留空间，再把剩余字节分给首尾预览。若通知本身都放不下，它会保留原始内联结果，绝不生成一个超过上限或比原结果更大的替换。</p></div>
         <div class="warning"><strong>Spill Owner 不是读取授权</strong><p>Owner 只决定保存时的命名空间，定位符本身不授予访问权限。本地文件不会随 Session 自动删除，并可能被恢复或 Fork 后的日志继续引用；远程部署需要提供与执行文件系统一致的后端和取回策略。</p></div>
+
+        <h2 id="glossary">DeepSeek Harness 术语速查<a href="#glossary" class="anchor">#</a></h2>
+        <p>这些词不是可以互换的近义词，而是架构与状态机的规范身份。遇到同一概念的不同叫法时，代码、文档和界面应收敛到这里的术语；精确实现仍以对应子系统页面为准。</p>
+        <div class="permission-table">
+          <div><code>seam</code><strong>一整项可替换能力</strong><span>同时包含 Service Definition、一个或多个 Provider，以及注入该服务的 Consumer；seam 不是其中任意单个包或 interface。</span></div>
+          <div><code>scope</code><strong>单个 Agent 的注册可见性</strong><span>贡献只有 global 或恰好一个 agent scope 两层；子代理不会继承父 scope，本地同名贡献可 shadow global 项。</span></div>
+          <div><code>lineage</code><strong>以数据记录的父子关系</strong><span>parentSession、delegationDepth 与 subagentDepth 描述谱系，但绝不改变工具、提示词或监听器可见性。</span></div>
+          <div><code>setup window</code><strong>发布 Agent 前的组装时隙</strong><span>scope 与 Agent 已存在，会话尚未发布、session-start 尚未触发；这里仅注册环境，不驱动 Agent。</span></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>Turn：一次责任区间</strong><p>从已接纳输入开始，到模型、工具和终止策略不再欠工作结束；可以包含零个或多个 Step。</p></div>
+          <div><strong>Step：一次模型请求</strong><p>一条模型请求加上该响应引发的工具执行；重试或工具 continuation 会形成新的 Step。</p></div>
+          <div><strong>Round：外层策略迭代</strong><p>由 Goal 或 Ralph 等策略拥有计数，不等于会话中的每个 Turn，也不属于 Agent loop 的通用计数器。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>Goal 是持久状态</strong><p>附着在现有 Session 上，阶段与修订进入日志；它不是调度器或独立对话。Goal Round 才是一次获准自动续行。</p></div>
+          <div><strong>Activation 是实时权限</strong><p>armed/disarmed 只决定进程内是否可接纳下一次 Goal Round，不参与回放；恢复或 fork 后必须重新获得人类授权。</p></div>
+          <div><strong>Ralph 是全新 Agent 策略</strong><p>每个 Ralph Round 使用新的子会话，通过共享 Workspace 和有界 Handoff 传递状态，不复用同会话 Goal 的对话历史。</p></div>
+        </div>
+        <div class="permission-table">
+          <div><code>/command</code><strong>人类命令平面</strong><span>UI 通过 ctx.commands 发现、解析并执行，不会成为模型消息；除非处理器另行写领域事件，输出只属于 UI 状态。</span></div>
+          <div><code>tool</code><strong>模型调用平面</strong><span>由模型根据 Schema 选择，经过审批、Guard 与执行流水线，调用和结果进入 Session 日志。</span></div>
+          <div><code>shell</code><strong>执行能力</strong><span>通过 ctx.shell 或面向模型的 Bash/Terminal 工具运行命令；斜杠命令并不是 shell 语法。</span></div>
+        </div>
+        <div class="warning"><strong>谱系、作用域和生命周期彼此正交</strong><p>一个 Agent 可以是另一个 Agent 的后代，却拥有完全独立的 scope；scope 可见性也不等于资源所有权。注册可见性由 scope 决定，父子关系由 lineage 决定，清理由 Cordis Fiber 与 AgentHandle 决定。</p></div>
 
         <div class="source-note">
           <div><span class="pulse"></span><strong>内容来源</strong></div>

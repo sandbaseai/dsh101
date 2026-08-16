@@ -63,6 +63,8 @@
           <h2>入门</h2>
           <a class="selected" href="#quickstart">使用 Web UI</a>
           <a href="#install">安装与启动</a>
+          <a href="#headless">Headless 任务</a>
+          <a href="#inspect-config">检查生效配置</a>
           <a href="#model">配置模型</a>
         </section>
         <section>
@@ -169,6 +171,23 @@
 <span class="success">Web UI → http://127.0.0.1:3080</span></code></pre>
         </div>
         <div class="detail-card"><strong>公开预览版本</strong><p>截至 2026-08-16，npm 的 latest 与 next 都指向 0.1.0-rc.6，而当前上游默认分支 manifest 仍为 rc.5。未指定版本的 npx 会跟随 dist-tag；自动化脚本应固定确切版本。</p></div>
+
+        <h2 id="headless">运行一次 Headless 任务<a href="#headless" class="anchor">#</a></h2>
+        <p>Headless profile 适合 CI 或脚本：它创建一个全新的持久 Session，提交任务，等待 Agent 完全空闲并 flush 日志，然后把最后一个非空 Assistant 文本打印到 stdout。</p>
+        <div class="code-block">
+          <div class="code-head"><span>Terminal</span><button class="copy" data-copy="npx @deepseek-ai/dsh --profile headless &quot;run the tests and summarize failures&quot;">复制</button></div>
+          <pre><code><span class="muted">$</span> npx @deepseek-ai/dsh --profile headless <span class="string">"run the tests and summarize failures"</span></code></pre>
+        </div>
+        <p>最终 turn 原因为 completed 时进程以 0 退出，否则以 1 退出。随附 Headless 组合不会启动 HTTP Server、Web Runtime 或浏览器 Client，成功路径也不会向 stderr 写入内容；缺少任务文本属于用法错误。</p>
+
+        <h2 id="inspect-config">启动前检查组合配置<a href="#inspect-config" class="anchor">#</a></h2>
+        <p>配置问题不必等到服务启动才发现。dump-default-config 只展开 bundle 默认层；dump-config 还会叠加 profile、本机 DSH_HOME patch 和命令行 patch，并为每一行标注来源。</p>
+        <div class="code-block">
+          <div class="code-head"><span>Terminal</span><button class="copy" data-copy="npx @deepseek-ai/dsh --profile web --dump-default-config&#10;npx @deepseek-ai/dsh --profile web --patch ./extra.yml --dump-config">复制</button></div>
+          <pre><code><span class="muted">$</span> npx @deepseek-ai/dsh --profile web --dump-default-config
+<span class="muted">$</span> npx @deepseek-ai/dsh --profile web --patch ./extra.yml --dump-config</code></pre>
+        </div>
+        <p>Dump 不运行应用参数提供方，因此展示的是解析 Web 的 host/port 等参数之前的配置；同一次调用若还包含应用参数会被拒绝。Patch 替换目标行的整个 config，而不是递归合并字段。</p>
 
         <h2 id="model">配置模型<a href="#model" class="anchor">#</a></h2>
         <p>打开右上角的 <strong>设置 → 模型</strong>，选择 DeepSeek，输入 API Key 并保存。模型变更会在下一次请求时生效，无需重启服务。</p>

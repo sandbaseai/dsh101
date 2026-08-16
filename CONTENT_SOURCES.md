@@ -20,6 +20,7 @@ Last upstream review:
 | Model providers and credentials | `docs/user/guide/providers.zh.md` |
 | Python SDK and security boundary | `docs/user/guide/python-sdk.zh.md` |
 | CLI and profiles | `apps/cli/README.zh.md` |
+| Headless execution and configuration dumps | `apps/cli/reference/README.zh.md` |
 | First plugin | `docs/user/develop/basic/index.zh.md` |
 | Tool development | `docs/user/develop/basic/tool.zh.md` |
 | Plugin configuration | `docs/user/develop/basic/config.zh.md` |

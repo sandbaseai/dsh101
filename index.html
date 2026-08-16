@@ -162,6 +162,7 @@
           <a href="#hooks">Hooks 桥接</a>
           <a href="#hook-protocol">Hook 协议语义</a>
           <a href="#schedule">定时提醒</a>
+          <a href="#schedule-lifecycle">提醒生命周期</a>
           <a href="#workflows">Workflow 与 Ralph</a>
         </section>
         <section>
@@ -1163,6 +1164,17 @@ print(result.final_response)</code></pre>
           <div><code>every_seconds</code><strong>固定速率</strong><span>至少 300 秒；跳过的周期只补发最新一次。</span></div>
         </div>
         <p>提醒只在拥有它的 Agent live 且完全 idle 时交付，从不打断当前轮次。一次性提醒优先；多个到期的重复提醒会合并进同一个 follow-up。交付是尽力而为的至少一次，不是恰好一次。</p>
+
+        <h3 id="schedule-lifecycle">从持久规则到普通后续轮次<a href="#schedule-lifecycle" class="anchor">#</a></h3>
+        <p>schedule/change 是提醒状态的唯一权威：create 保存完整记录，delete 与一次性 dispatch 终结 id，重复 dispatch 则携带统一判断时刻并推进下一个目标。Timer、列表状态和 follow-up 都是可重建投影。</p>
+        <div class="compare-grid">
+          <div><strong>重复提醒不回放积压</strong><p>Every 规则始终与创建时刻锚定。Session 忙碌或 cold 时错过多个周期，只选择最新一次已到期 occurrence，并直接推进到第一个未来目标；多条逾期规则合并成一轮。</p></div>
+          <div><strong>Fork 保留历史但不接管任务</strong><p>普通 Session 回放完整 Schedule 日志；fork 只折叠 seed 边界之后的新变更，因此可看到父级历史，却不会继承父 Session 仍活动的提醒。</p></div>
+          <div><strong>Dispatch 不是完成回执</strong><p>它只证明稳定 framing 已同步进入 follow-up 队列并记录，不证明模型成功回答或用户已经阅读。页面也没有独立提醒回执或外部通知渠道。</p></div>
+        </div>
+        <div class="detail-card"><strong>每次管理操作先确认持久状态</strong><p>list、create、delete 与到期判断都先越过共享 Session flush 屏障；成功创建或实际删除后再刷盘确认。无法确认时返回 persistence_uncertain，不猜测内存尾部是否已经耐久。</p></div>
+        <div class="warning"><strong>至少一次意味着可能重复</strong><p>follow-up 获准入队后、dispatch 检查点完成前若崩溃，恢复可能再次发送同一提醒。绝对本地时间还必须显式提供时区：夏令时缺口会拒绝，重叠时选择较早一次。</p></div>
+        <p>插件只为加载后新建的 live 根 Agent 安装工具，不会扫描已经存在的 Agent，也不给运行时子 Agent 安装。插件卸载会停止新工作并排空进行中的预检，但不会删除持久提醒。</p>
 
         <h2 id="workflows">Workflow 与 Ralph<a href="#workflows" class="anchor">#</a></h2>
         <p><code>workflow</code> 让模型编写 JavaScript 编排脚本，按阶段启动多个 Subagent 并返回结构化 JSON。它适合用户明确要求的大型多 Agent 编排；一两个委派仍应使用普通 Subagent。</p>

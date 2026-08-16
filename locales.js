@@ -1,5 +1,9 @@
-const en = {
+export const en = {
   '社区指南': 'Community Guide',
+  '中文': 'English',
+  '↵ 选择': '↵ Select',
+  '↑↓ 导航': '↑↓ Navigate',
+  'ESC 关闭': 'ESC Close',
   '入门': 'Guide',
   '概念': 'Concepts',
   '实践': 'Practice',
@@ -458,6 +462,31 @@ const en = {
   '系统分配端口': 'OS-assigned port',
   '操作系统选择空闲端口，服务公开最终监听值。': 'The operating system selects a free port and the service exposes the final value.',
   '静态 SPA fallback 对路径穿越返回 403、非 GET/HEAD 返回 405，未知扩展资源不会伪装成 JavaScript。关闭时同时停止监听并强制关闭 SSE 等长连接，避免插件卸载永久挂起。': 'The static SPA fallback returns 403 for traversal and 405 for non-GET/HEAD requests; unknown extension assets never masquerade as JavaScript. Shutdown stops listening and force-closes long-lived SSE connections so plugin unload cannot hang forever.',
+  'TypeRT Remote 调用边界': 'TypeRT remote boundaries',
+  'TypeRT 把 Host 服务方法生成成可验证的远程调用描述符。请求只发送 namespace、method 和具名 args；取消信号走传输载体，在业务参数之后注入，绝不会混进 JSON 参数。': 'TypeRT generates host service methods into verifiable remote-call descriptors. Requests send only a namespace, method, and named args; cancellation travels through the carrier and is injected after business parameters, never mixed into JSON arguments.',
+  '生成器固定参数顺序、wire 字段、lookup、context 和输入输出 codec。': 'The generator fixes parameter order, wire fields, lookups, context, and input/output codecs.',
+  'Gateway 把不透明 wire identity 解析回当前活的 Host 对象或作用域。': 'The gateway resolves opaque wire identities back to currently live host objects or scopes.',
+  '调用前后都检查边界 schema，基础设施错误使用稳定分类。': 'Boundary schemas are checked before and after invocation, with stable infrastructure error categories.',
+  'Lookup provider 卸载后，wire 声明仍保留，因此请求会明确返回 unavailable，而不会把身份字符串误当普通对象。Client 只看见显式导入并挂载的 Remote namespace；业务服务实例和 JavaScript Proxy 都不会跨边界。': 'After a lookup provider unloads, its wire declaration remains, so requests explicitly return unavailable instead of treating an identity string as an ordinary object. Clients see only explicitly imported and mounted remote namespaces; business service instances and JavaScript proxies never cross the boundary.',
+  '文件系统语义': 'Filesystem semantics',
+  '文件系统目标、观测与原子写入': 'Filesystem targets, observations, and atomic writes',
+  '文件系统能力把服务定义、后端、观测策略和模型工具拆开。路径先解析为带显示路径的不透明目标；消费者不得解析 target key，也不能假设它一定是本地绝对路径。': 'The filesystem capability separates its service definition, backend, observation policy, and model tool. Paths resolve into opaque targets with display paths; consumers must not parse target keys or assume they are local absolute paths.',
+  '读取记录后端版本；后续写入或编辑只在版本仍匹配时原子提交。': 'A read records the backend version; later writes or edits commit atomically only while it still matches.',
+  '确认不存在只授权 create-if-absent，不会授权对缺失文件执行 edit。': 'Confirmed absence authorizes only create-if-absent, never editing a missing file.',
+  '默认策略拒绝盲目编辑，防止覆盖 Agent 尚未读取的外部变化。': 'The default policy rejects blind edits so an agent cannot overwrite external changes it has not read.',
+  '编辑不是“先读再写”的外部组合：版本检查、字面匹配、换行规范化和原子替换都在同一个后端临界区完成。窗口化读取即使只返回部分行，也会记录完整文件版本；过大的原始字节读取则明确失败，不会静默截断。': 'Editing is not an external read-then-write composition: version checking, literal matching, line-ending normalization, and atomic replacement happen inside one backend critical section. A windowed read records the full file version even when returning only some lines; oversized raw-byte reads fail explicitly instead of truncating silently.',
+  '符号链接需要单独看待': 'Treat symbolic links separately',
+  'resolve 会跟随链接以生成稳定身份；需要守住仓库信任边界的调用方应先使用不跟随最终链接的 lstat，并在解析前拒绝 symlink。': 'resolve follows links to produce a stable identity. A caller enforcing a repository trust boundary should first use lstat, which does not follow the final link, and reject symlinks before resolution.',
+  '子进程运行时': 'Subprocess runtime',
+  '子进程、流与进程树终止': 'Subprocesses, streams, and process-tree termination',
+  'Subprocess seam 为 Bash、LSP、PTY 和 ACP 提供同一个底层进程世界。Spawn spec 没有隐藏默认值：argv、cwd、三条 stdio、环境、宽限期和取消信号都由调用方明确给出，argv 永远不经过 shell 解释。': 'The subprocess seam gives Bash, LSP, PTY, and ACP one underlying process world. A spawn spec has no hidden defaults: the caller explicitly supplies argv, cwd, all three stdio modes, environment, grace period, and cancellation signal, and argv is never shell-interpreted.',
+  '协议流': 'Protocol streams',
+  '把原始 Readable/Writable 交给 LSP JSON-RPC 或 ACP ndjson 等协议消费者。': 'Hand raw readable and writable streams to protocol consumers such as LSP JSON-RPC or ACP ndjson.',
+  '直接诊断': 'Direct diagnostics',
+  '子进程输出直接进入 Harness 自己的描述符。': 'Child output goes directly to the Harness process descriptors.',
+  '有界收集': 'Bounded collection',
+  '内存只保留尾部，可选 spill 保存有上限的完整流。': 'Memory retains only the tail, while an optional spill preserves a capped complete stream.',
+  '收集读取使用全流字节 offset，多个读取者不会抢走彼此的数据。终止以整棵进程树为范围：POSIX 先发 SIGTERM，等待 grace period 后升级 SIGKILL；Windows 使用 tree termination。最终 outcome 只报告退出码和信号，超时或取消原因由拥有 deadline 的调用方分类。': 'Collected reads use whole-stream byte offsets, so multiple readers never consume each other’s data. Termination covers the whole process tree: POSIX sends SIGTERM and escalates to SIGKILL after the grace period, while Windows uses tree termination. The final outcome reports only exit code and signal; the caller owning the deadline classifies timeout or cancellation.',
   '跨会话引用': 'Cross-session references',
   '结构化跨会话引用': 'Cross-session references',
   '宿主可以把选中的历史 Session 作为结构化引用附在新消息上，而不是把 UI 的 @mention 语法传入核心。Session id 是权威身份，label 只是快照显示信息；候选项使用最新持久标题，并按当前工作目录亲和度排序。': 'A host can attach selected historical sessions to a new message as structured references instead of passing UI @mention syntax into core. The session id is authoritative and the label is snapshot display metadata; candidates use the latest durable title and rank by working-directory affinity.',
@@ -487,6 +516,7 @@ const en = {
   'TokenUsage 计数互不重叠': 'TokenUsage counters are disjoint',
   '未缓存 input、cache read、cache write 三项相加才是计费输入；reasoning tokens 已包含在 output 中，汇总时不能重复计算。': 'Billed input is uncached input plus cache read and cache write. Reasoning tokens are already included in output and must not be counted twice.',
   '动态扩展': 'Dynamic extensions',
+  '当前支持范围': 'Current support',
   'Agent 动态扩展运行时': 'Dynamic runtime extensions',
   '自引用 Cordis 工具让 Agent 先检查活的服务、API、事件和 Client slots，再定义并运行临时动态包。': 'Self-referential Cordis tools let an agent inspect live services, APIs, events, and client slots before defining and running a temporary dynamic package. ',
   ' 只做语法预检和登记；所有副作用都推迟到显式 ': ' performs syntax preflight and registration only; every side effect waits for an explicit ',
@@ -498,6 +528,7 @@ const en = {
   '完全撤销': 'Fully retract',
   '停止会释放 Fiber 贡献；删除还会忘掉全部不可变 Package 版本。': 'Stopping releases Fiber contributions; undefining also forgets every immutable package version.',
   '动态包只存在于共享进程内存，不写插件文件、不修改 ': 'Dynamic packages live only in shared process memory. They write no plugin files, never modify ',
+  '动态包只存在于共享进程内存，不写插件文件、不修改 cordis.yml，也不会跨重启恢复。每个操作按定义它的 Session 校验归属；其他会话读取时表现为不存在。': 'Dynamic packages live only in shared process memory. They write no plugin files, never modify cordis.yml, and do not survive restart. Every operation verifies ownership against the defining session; other sessions see the package as nonexistent.',
   '，也不会跨重启恢复。每个操作按定义它的 Session 校验归属；其他会话读取时表现为不存在。': ', and do not survive restart. Every operation verifies ownership against the defining session; other sessions see the package as nonexistent.',
   'VM 隔离不是安全边界': 'VM isolation is not a security boundary',
   'Host 半仍可通过获准的 fs、web、bash 等服务影响运行时，应当像授予 Bash 一样慎重。带 Client 半的 run 在无人打开页面时会一直等待，直到调用轮次取消；同步 vm timeout 也不约束逃逸出的异步函数体。': 'The host half can still affect the runtime through approved fs, web, bash, and other services, so grant it as carefully as Bash. A run with a client half waits without an open page until its calling turn is cancelled; the synchronous VM timeout also cannot constrain an escaped async function body.',
@@ -562,6 +593,10 @@ const en = {
   'Web UI 首次 hover 或 focus 时才延迟读取整段会话的反馈，避免对每条消息单独请求。删除不存在的反馈是幂等成功；备注按 UTF-8 字节限制。': 'The Web UI lazily reads feedback for the whole session on first hover or focus instead of requesting each message separately. Deleting absent feedback is idempotently successful, and notes are limited by UTF-8 bytes.'
 }
 
+export const normalizedEn = new Map(
+  Object.entries(en).map(([source, translation]) => [source.trim(), translation.trim()]),
+)
+
 const originals = new WeakMap()
 
 function translateText(root, locale) {
@@ -577,8 +612,9 @@ function translateText(root, locale) {
       continue
     }
     const value = original.trim()
-    if (!value || !en[value]) continue
-    node.nodeValue = original.replace(value, en[value])
+    const translation = normalizedEn.get(value)
+    if (!value || !translation) continue
+    node.nodeValue = original.replace(value, translation)
   }
 }
 
@@ -600,6 +636,17 @@ export function installLocale() {
     label.textContent = locale === 'en' ? 'English' : '中文'
     input.placeholder = locale === 'en' ? 'Search docs' : '搜索文档'
     document.querySelector('#backToTop').setAttribute('aria-label', locale === 'en' ? 'Back to top' : '返回顶部')
+    const labels = {
+      menuButton: ['打开菜单', 'Open menu'],
+      searchButton: ['搜索文档', 'Search docs'],
+      themeButton: ['切换主题', 'Toggle theme'],
+    }
+    for (const [id, values] of Object.entries(labels)) {
+      document.querySelector(`#${id}`).setAttribute('aria-label', values[locale === 'en' ? 1 : 0])
+    }
+    document.querySelector('.brand').setAttribute('aria-label', locale === 'en' ? 'DSH 101 home' : 'DSH 101 首页')
+    document.querySelector('.topnav').setAttribute('aria-label', locale === 'en' ? 'Primary navigation' : '主导航')
+    document.querySelector('.lifecycle').setAttribute('aria-label', locale === 'en' ? 'Plugin lifecycle' : '插件生命周期')
     localStorage.setItem('dsh-locale', locale)
   }
 

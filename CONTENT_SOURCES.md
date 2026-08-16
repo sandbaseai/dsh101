@@ -27,6 +27,7 @@ Last upstream review:
 | Web client module graph and bundle delivery | `docs/subsystems/client-modules.zh.md` |
 | Scoped registration layers and ownership | `docs/subsystems/scope.zh.md` |
 | Web server routing and exposure boundary | `docs/subsystems/web-server.zh.md` |
+| Generated TypeRT remote-call boundary | `docs/subsystems/typert.zh.md` |
 | Services and dependency injection | `docs/user/develop/framework/service.zh.md` |
 | Event dispatch modes | `docs/user/develop/framework/events.zh.md` |
 | Capability role design | `docs/user/develop/practice/index.zh.md` |
@@ -39,7 +40,9 @@ Last upstream review:
 | Web search and fetch tools | `packages/web/tool-web/README.zh.md` |
 | Persistent image attachments | `docs/subsystems/attachment.zh.md` |
 | Structured user questions | `docs/subsystems/user-questions.zh.md` |
+| Filesystem targets and observation guards | `docs/subsystems/filesystem.zh.md` |
 | Shell execution and persistent terminals | `docs/subsystems/shell.zh.md`, `docs/subsystems/terminal.zh.md`, `packages/terminal/tool-terminal/README.zh.md` |
+| Subprocess streams and process-tree termination | `docs/subsystems/subprocess.zh.md` |
 | LSP semantic code navigation | `docs/subsystems/lsp.zh.md`, `packages/lsp/tool-lsp/README.zh.md` |
 | Subagent delegation and lifecycles | `packages/subagent/subagent/README.zh.md`, `packages/subagent/tool-subagent/README.zh.md` |
 | Todo snapshots | `packages/todo/tool-todo/README.zh.md` |

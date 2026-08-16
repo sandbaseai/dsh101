@@ -88,6 +88,7 @@
           <a href="#client-modules">Web Client 模块</a>
           <a href="#scope-routing">Scope 路由</a>
           <a href="#web-server">Web Server</a>
+          <a href="#typert-remote">TypeRT Remote</a>
           <a href="#capability-seam">能力三层拆分</a>
           <a href="#llm-adapter">LLM 适配器</a>
           <a href="#llm-streaming">流式协议与重试</a>
@@ -109,7 +110,9 @@
           <a href="#web-tools">Web 工具</a>
           <a href="#attachments">图片附件</a>
           <a href="#user-questions">向用户提问</a>
+          <a href="#filesystem-seam">文件系统语义</a>
           <a href="#shell-terminal">Shell 与 Terminal</a>
+          <a href="#subprocess-seam">子进程运行时</a>
           <a href="#lsp-navigation">LSP 代码导航</a>
         </section>
         <section>
@@ -342,6 +345,17 @@ print(result.final_response)</code></pre>
         </div>
         <p>静态 SPA fallback 对路径穿越返回 403、非 GET/HEAD 返回 405，未知扩展资源不会伪装成 JavaScript。关闭时同时停止监听并强制关闭 SSE 等长连接，避免插件卸载永久挂起。</p>
 
+        <h2 id="typert-remote">TypeRT Remote 调用边界<a href="#typert-remote" class="anchor">#</a></h2>
+        <p>TypeRT 把 Host 服务方法生成成可验证的远程调用描述符。请求只发送 namespace、method 和具名 args；取消信号走传输载体，在业务参数之后注入，绝不会混进 JSON 参数。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Describe</strong><p>生成器固定参数顺序、wire 字段、lookup、context 和输入输出 codec。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Bind</strong><p>Gateway 把不透明 wire identity 解析回当前活的 Host 对象或作用域。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Validate</strong><p>调用前后都检查边界 schema，基础设施错误使用稳定分类。</p></div>
+        </div>
+        <p>Lookup provider 卸载后，wire 声明仍保留，因此请求会明确返回 unavailable，而不会把身份字符串误当普通对象。Client 只看见显式导入并挂载的 Remote namespace；业务服务实例和 JavaScript Proxy 都不会跨边界。</p>
+
         <h2 id="capability-seam">能力的三种角色<a href="#capability-seam" class="anchor">#</a></h2>
         <p>当能力需要可替换提供方时，Harness 将它拆成三个角色。只有完整组合才构成一个 capability seam；单独一个角色并不完整。</p>
         <div class="capability-flow">
@@ -503,6 +517,16 @@ print(result.final_response)</code></pre>
         </div>
         <div class="warning"><strong>只能由运行时根提问</strong><p>受父 Agent 管理的 Subagent 没有独立的人类应答者，因此不能发起交互请求；取消、没有 UI provider 或调用方已失活都会返回结构化错误，而不是无限等待。</p></div>
 
+        <h2 id="filesystem-seam">文件系统目标、观测与原子写入<a href="#filesystem-seam" class="anchor">#</a></h2>
+        <p>文件系统能力把服务定义、后端、观测策略和模型工具拆开。路径先解析为带显示路径的不透明目标；消费者不得解析 target key，也不能假设它一定是本地绝对路径。</p>
+        <div class="compare-grid">
+          <div><strong>Observed present</strong><p>读取记录后端版本；后续写入或编辑只在版本仍匹配时原子提交。</p></div>
+          <div><strong>Observed absent</strong><p>确认不存在只授权 create-if-absent，不会授权对缺失文件执行 edit。</p></div>
+          <div><strong>Never observed</strong><p>默认策略拒绝盲目编辑，防止覆盖 Agent 尚未读取的外部变化。</p></div>
+        </div>
+        <p>编辑不是“先读再写”的外部组合：版本检查、字面匹配、换行规范化和原子替换都在同一个后端临界区完成。窗口化读取即使只返回部分行，也会记录完整文件版本；过大的原始字节读取则明确失败，不会静默截断。</p>
+        <div class="detail-card"><strong>符号链接需要单独看待</strong><p>resolve 会跟随链接以生成稳定身份；需要守住仓库信任边界的调用方应先使用不跟随最终链接的 lstat，并在解析前拒绝 symlink。</p></div>
+
         <h2 id="shell-terminal">Shell 与持久 Terminal<a href="#shell-terminal" class="anchor">#</a></h2>
         <p>两者都能运行命令，但生命周期不同。默认使用 Shell 完成有边界的一次性操作；只有任务需要交互式 stdin、REPL、开发服务器或持续终端状态时，才打开 PTY Terminal。</p>
         <div class="compare-grid">
@@ -512,6 +536,15 @@ print(result.final_response)</code></pre>
         </div>
         <div class="warning"><strong>返回不代表命令退出</strong><p><code>terminal_send</code> 因 <code>inferred_idle</code> 或 <code>timeout</code> 返回时，顶层 PTY 仍可能运行。应检查 session status，并在不再需要时调用 <code>terminal_close</code>。</p></div>
         <p>Harness 会清除子进程环境中的凭据及继承的 <code>DSH_*</code> 名称，再合并本次受管环境快照。输出超过内存预算时只内联尾部，并用私有 spill 文件保留完整流的恢复信息。</p>
+
+        <h2 id="subprocess-seam">子进程、流与进程树终止<a href="#subprocess-seam" class="anchor">#</a></h2>
+        <p>Subprocess seam 为 Bash、LSP、PTY 和 ACP 提供同一个底层进程世界。Spawn spec 没有隐藏默认值：argv、cwd、三条 stdio、环境、宽限期和取消信号都由调用方明确给出，argv 永远不经过 shell 解释。</p>
+        <div class="permission-table">
+          <div><code>pipe</code><strong>协议流</strong><span>把原始 Readable/Writable 交给 LSP JSON-RPC 或 ACP ndjson 等协议消费者。</span></div>
+          <div><code>inherit</code><strong>直接诊断</strong><span>子进程输出直接进入 Harness 自己的描述符。</span></div>
+          <div><code>collect</code><strong>有界收集</strong><span>内存只保留尾部，可选 spill 保存有上限的完整流。</span></div>
+        </div>
+        <p>收集读取使用全流字节 offset，多个读取者不会抢走彼此的数据。终止以整棵进程树为范围：POSIX 先发 SIGTERM，等待 grace period 后升级 SIGKILL；Windows 使用 tree termination。最终 outcome 只报告退出码和信号，超时或取消原因由拥有 deadline 的调用方分类。</p>
 
         <h2 id="lsp-navigation">LSP 精确代码导航<a href="#lsp-navigation" class="anchor">#</a></h2>
         <p>文本搜索适合普通浏览；当同名符号含义不清，或修改前必须确认精确定义、实现和引用时，使用只读 <code>lsp</code> 工具。它只公开四种闭合操作：</p>

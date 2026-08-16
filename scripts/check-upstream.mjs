@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const upstream = resolve(process.cwd(), process.argv[2] ?? '../deepseek-harness')
@@ -13,6 +13,14 @@ const sources = readFileSync(resolve(process.cwd(), 'CONTENT_SOURCES.md'), 'utf8
 const recorded = sources.match(/- Commit: `([0-9a-f]{40})`/u)?.[1]
 
 if (!recorded) throw new Error('CONTENT_SOURCES.md has no recorded 40-character upstream commit')
+
+const subsystemDocs = readdirSync(resolve(upstream, 'docs/subsystems'))
+  .filter(name => name.endsWith('.zh.md'))
+const unmappedSubsystemDocs = subsystemDocs
+  .filter(name => !sources.includes(`docs/subsystems/${name}`))
+if (unmappedSubsystemDocs.length > 0) {
+  throw new Error(`Unmapped Chinese subsystem docs:\n${unmappedSubsystemDocs.join('\n')}`)
+}
 
 if (recorded === revision) {
   console.log(`content sources are current at ${revision.slice(0, 8)} (${date})`)
@@ -52,6 +60,7 @@ const changed = execFileSync('git', [
   'docs/subsystems/filesystem.zh.md', 'packages/fs',
   'docs/subsystems/subprocess.zh.md', 'packages/subprocess',
   'packages/e2b', 'packages/fs/tool-fs-search', 'packages/identity/anonymous-user-id',
+  'docs/subsystems/core.zh.md', 'docs/subsystems/code-runtime.zh.md', 'packages/code-runtime',
   'packages/llm/token-meter', 'packages/session/session-telemetry',
   'packages/runtime-diagnostics/invariants', 'packages/feedback',
   'docs/subsystems/token-meter.zh.md', 'docs/subsystems/session-telemetry.zh.md',

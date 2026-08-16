@@ -72,6 +72,7 @@
           <a href="#workspace">工作区</a>
           <a href="#session">会话与任务</a>
           <a href="#session-log">Session 事件日志</a>
+          <a href="#agent-delivery">Agent 投递与取消</a>
           <a href="#permissions">权限与审批</a>
           <a href="#permission-presets">权限预设</a>
           <a href="#approval-flow">审批链路</a>
@@ -98,6 +99,7 @@
           <a href="#llm-adapter">LLM 适配器</a>
           <a href="#llm-streaming">流式协议与重试</a>
           <a href="#dynamic-extensions">动态扩展</a>
+          <a href="#code-runtime">Code Runtime</a>
           <a href="#profiles">Profile 与组合包</a>
         </section>
         <section>
@@ -230,6 +232,16 @@
           <div><span>03</span><strong>Surface</strong><p>用户消息、组装后的 Assistant 消息和工具结果形成模型可见表层。</p></div>
         </div>
         <p>原始 assistant chunks 会完整记录以保证流式回放；组装后的 assistant message 才进入派生历史。完整 request header 记录模型、系统提示词与工具 schema，只有配置变化时再写一份新快照，因此任意请求都能从日志重建。</p>
+
+        <h2 id="agent-delivery">Agent 投递、空闲与取消<a href="#agent-delivery" class="anchor">#</a></h2>
+        <p>Agent 的公开句柄把所有输入路由到持久 Inbox。next-turn 保存普通后续轮次，next-step 保存最近步骤要消费的 steering 或注入上下文；每条消息拥有稳定 MessageId，并记录插入、认领或丢弃事实。</p>
+        <div class="compare-grid">
+          <div><strong>followup</strong><p>唤醒 Agent，并让该消息成为自己轮次中的唯一普通输入。</p></div>
+          <div><strong>steer</strong><p>运行中在最近的下一步骤进入；空闲时会主动开启一个轮次。</p></div>
+          <div><strong>inject</strong><p>为下一次 pre-step 排队模型可见上下文，但不会自行唤醒空闲 Agent。</p></div>
+        </div>
+        <p>cancel 只中止当前活动并默认清理排队与 steering；keepInbox 可以保留尚未开始的工作。whenIdle 等待整个 Agent 达到真正静止，包括取消后的收敛、替换工作和 maintenance task，而不是确认某一条消息已经得到回答。</p>
+        <div class="detail-card"><strong>拥有 Handle 才拥有销毁能力</strong><p>创建或恢复 Agent 的调用方拿到 AgentHandle；dispose 会停止 loop、等待退出、注销 Agent、移除内存 Session，最后展开整个 Agent scope。普通 registry 查询只返回不可销毁的 Agent。</p></div>
 
         <h2 id="permissions">权限与审批<a href="#permissions" class="anchor">#</a></h2>
         <p>Harness 把沙箱模式和审批策略作为两项独立机制。权限预设只是在产品层把两者组合成一个选择器；执行时仍由各自服务单独强制。</p>
@@ -454,6 +466,18 @@ print(result.final_response)</code></pre>
         </div>
         <p>动态包只存在于共享进程内存，不写插件文件、不修改 cordis.yml，也不会跨重启恢复。每个操作按定义它的 Session 校验归属；其他会话读取时表现为不存在。</p>
         <div class="warning"><strong>VM 隔离不是安全边界</strong><p>Host 半仍可通过获准的 fs、web、bash 等服务影响运行时，应当像授予 Bash 一样慎重。带 Client 半的 run 在无人打开页面时会一直等待，直到调用轮次取消；同步 vm timeout 也不约束逃逸出的异步函数体。</p></div>
+
+        <h2 id="code-runtime">Code Runtime 与结构化绑定<a href="#code-runtime" class="anchor">#</a></h2>
+        <p>Code Runtime 是可替换的可选 seam，用宿主提供的异步 bindings 执行模型编写的程序。程序作为 async function body 运行，可使用顶层 await 和 return；打印日志与完成值一起形成已解析的结果。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Bind</strong><p>每个 namespace 成为程序全局对象，成员参数与返回值必须是无损 JSON。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Run</strong><p>后端显式声明 TypeScript 或 Python 语言，以及 worker/process/container 基底。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Resolve</strong><p>日志、可选完成值和失败分类都通过正常结果返回，而不是拒绝 Promise。</p></div>
+        </div>
+        <p>异常、预算超时、调用方 abort、worker 退出、非 JSON 输出和结果超限是彼此独立的失败类型。输出超限会明确失败而非塞入替代文本；停止 runtime 时必须终止并等待全部运行结算。</p>
+        <div class="warning"><strong>Isolation 只是诊断标签</strong><p>worker-thread、process 或 container 描述执行基底，不构成安全承诺。Bindings 仍是程序调用宿主能力的入口，必须只暴露确实授权的函数。</p></div>
 
         <h2 id="profiles">Profile 与组合包<a href="#profiles" class="anchor">#</a></h2>
         <p><strong>组合包（bundle）</strong>贡献一层配置，<strong>profile</strong>则描述哪些组合包按什么顺序构成一个可启动应用。二者职责不同，不应混为一种 manifest。</p>

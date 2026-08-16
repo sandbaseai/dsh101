@@ -15,14 +15,16 @@ Last upstream review:
 
 | DSH 101 section | Canonical upstream source |
 | --- | --- |
+| Subsystem catalog and boundaries | `docs/subsystems/README.zh.md` |
 | Install, Node compatibility, npm release, and license | `README.zh.md`, `package.json`, `apps/cli/package.json`, `LICENSE`, npm registry metadata |
 | Web UI quickstart | `docs/user/guide/index.zh.md` |
+| Workspace identity and lifecycle | `docs/subsystems/workspace.zh.md` |
 | Model providers and credentials | `docs/user/guide/providers.zh.md` |
 | Python SDK and security boundary | `docs/user/guide/python-sdk.zh.md` |
 | CLI and profiles | `apps/cli/README.zh.md` |
 | Headless execution and configuration dumps | `apps/cli/reference/README.zh.md` |
 | First plugin | `docs/user/develop/basic/index.zh.md` |
-| Tool development | `docs/user/develop/basic/tool.zh.md` |
+| Tool development | `docs/user/develop/basic/tool.zh.md`, `docs/subsystems/tools.zh.md` |
 | Plugin configuration | `docs/user/develop/basic/config.zh.md` |
 | Bundles and publishing | `docs/user/develop/basic/publish.zh.md` |
 | Fiber lifecycle | `docs/user/develop/framework/index.zh.md` |
@@ -36,10 +38,12 @@ Last upstream review:
 | LLM adapter protocol | `docs/user/develop/practice/llm-adapter.zh.md` |
 | LLM streaming, normalized failures and retry policy | `docs/subsystems/llm-streaming.zh.md` |
 | Agent-authored dynamic Cordis extensions | `docs/subsystems/extensions.zh.md`, `packages/extensions/README.zh.md`, `packages/extensions/cordis-host-runner/README.zh.md`, `packages/extensions/tool-cordis/README.zh.md` |
+| Optional code runtime and structured bindings | `docs/subsystems/code-runtime.zh.md` |
+| Agent delivery, cancellation, and ownership | `docs/subsystems/core.zh.md` |
 | MCP transports and tool bridge | `packages/mcp/mcp-client/README.zh.md` |
-| Skill discovery and loading | `packages/skill/skill/README.zh.md`, `packages/skill/tool-skill/README.zh.md` |
-| Plan collaboration state | `packages/plan/plan-mode/README.zh.md` |
-| Web search and fetch tools | `packages/web/tool-web/README.zh.md` |
+| Skill discovery and loading | `docs/subsystems/skills.zh.md`, `packages/skill/skill/README.zh.md`, `packages/skill/tool-skill/README.zh.md` |
+| Plan collaboration state | `docs/subsystems/plan.zh.md`, `packages/plan/plan-mode/README.zh.md` |
+| Web search and fetch tools | `docs/subsystems/web.zh.md`, `packages/web/tool-web/README.zh.md` |
 | Persistent image attachments | `docs/subsystems/attachment.zh.md` |
 | Structured user questions | `docs/subsystems/user-questions.zh.md` |
 | Filesystem targets and observation guards | `docs/subsystems/filesystem.zh.md` |
@@ -48,14 +52,14 @@ Last upstream review:
 | Subprocess streams and process-tree termination | `docs/subsystems/subprocess.zh.md` |
 | Shared E2B remote filesystem and subprocess runtime | `packages/e2b/e2b/README.zh.md`, `packages/e2b/fs-e2b/README.zh.md`, `packages/e2b/subprocess-e2b/README.zh.md` |
 | LSP semantic code navigation | `docs/subsystems/lsp.zh.md`, `packages/lsp/tool-lsp/README.zh.md` |
-| Subagent delegation and lifecycles | `packages/subagent/subagent/README.zh.md`, `packages/subagent/tool-subagent/README.zh.md` |
+| Subagent delegation and lifecycles | `docs/subsystems/subagent.zh.md`, `packages/subagent/subagent/README.zh.md`, `packages/subagent/tool-subagent/README.zh.md` |
 | Todo snapshots | `packages/todo/tool-todo/README.zh.md` |
-| Persistent goals and goal rounds | `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |
-| Context compaction | `packages/compaction/compaction-basic/README.zh.md` |
+| Persistent goals and goal rounds | `docs/subsystems/goal.zh.md`, `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |
+| Context compaction | `docs/subsystems/compaction.zh.md`, `packages/compaction/compaction-basic/README.zh.md` |
 | Permission presets and approvals | `packages/interaction/permission-presets/README.zh.md`, `packages/interaction/user-approval/README.zh.md` |
 | Effective permission preset derivation | `docs/subsystems/permission-presets.zh.md` |
 | Approval request lifecycle and audit | `docs/subsystems/approval.zh.md` |
-| Filesystem sandbox policy | `packages/fs/fs-sandbox/README.zh.md` |
+| Filesystem sandbox policy | `docs/subsystems/sandbox.zh.md`, `packages/fs/fs-sandbox/README.zh.md` |
 | Tool reliability guardrails | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
 | Background job runtime | `docs/subsystems/jobs.zh.md` |
 | Append-only session event model | `docs/subsystems/session.zh.md` |

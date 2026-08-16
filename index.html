@@ -159,6 +159,7 @@
           <a href="#fs-observation-policy">文件观察生命周期</a>
           <a href="#file-search">Glob 与 Grep</a>
           <a href="#shell-terminal">Shell 与 Terminal</a>
+          <a href="#shell-providers">Shell Provider 选择</a>
           <a href="#subprocess-seam">子进程运行时</a>
           <a href="#lsp-navigation">LSP 代码导航</a>
           <a href="#lsp-provider-lifecycle">LSP Provider 生命周期</a>
@@ -1209,6 +1210,22 @@ print(result.final_response)</code></pre>
         </div>
         <div class="warning"><strong>返回不代表命令退出</strong><p><code>terminal_send</code> 因 <code>inferred_idle</code> 或 <code>timeout</code> 返回时，顶层 PTY 仍可能运行。应检查 session status，并在不再需要时调用 <code>terminal_close</code>。</p></div>
         <p>Harness 会清除子进程环境中的凭据及继承的 <code>DSH_*</code> 名称，再合并本次受管环境快照。输出超过内存预算时只内联尾部，并用私有 spill 文件保留完整流的恢复信息。</p>
+
+        <h3 id="shell-providers">一次性 Bash、持久 Bash 与 PowerShell<a href="#shell-providers" class="anchor">#</a></h3>
+        <div class="permission-table">
+          <div><code>bash-local</code><strong>POSIX 一次性进程</strong><span>每次启动新的非登录 bash -c，不读取 rc，也不保留 cd、export 或函数；前台有超时，后台转交 Jobs 且不设执行器超时。</span></div>
+          <div><code>bash-persistent</code><strong>每 Agent 复用 PTY</strong><span>cwd、环境、激活环境、函数和 shell 后台任务跨调用保留；适合连续命令，但显式 exit、取消或超时都会丢弃整个 shell 状态。</span></div>
+          <div><code>pwsh-local</code><strong>PowerShell 一次性进程</strong><span>每次以 NoLogo、NoProfile、NonInteractive 启动；命令必须使用 PowerShell 方言与原生路径，不经过中间 shell 翻译。</span></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Resolve</strong><p>工具从所属 Session 取得 cwd，再由执行器应用默认超时与上限；一个 Host 只组装一个 ctx.shell Provider，Windows 会用 pwsh 替换 POSIX 实现。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Run</strong><p>非零退出、超时终止和取消终止都是可解释结果；只有 cwd、可执行文件或 spawn 等基础设施故障才把调用标记为错误。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Retain</strong><p>一次性执行器保留有界 stdout/stderr 尾部并可 spill 完整流；持久 PTY 保留最早仍可读前缀，若真正开头已丢失会明确标注。</p></div>
+        </div>
+        <div class="detail-card"><strong>持久 Bash 不是后台 Job 的替代品</strong><p>一次性 Bash 的 run_in_background 会把独立进程句柄交给通用 Jobs；持久 Bash 则只让 shell 自己保留后台任务状态，不提供 Job 所有权、完成通知或独立收集接口。长期服务应选择受管 Job。</p></div>
+        <div class="warning"><strong>Windows 目前没有持久 PTY shell</strong><p>pwsh 每次调用都会新建进程；其 UTF-8 输出 preamble 还会占据脚本最前位置，因此以 param、using 或 #requires 开头的内联脚本可能需要改为脚本块或文件。Windows 强制终止通常只报告退出码 1，而非 POSIX signal。</p></div>
 
         <h2 id="subprocess-seam">子进程、流与进程树终止<a href="#subprocess-seam" class="anchor">#</a></h2>
         <p>Subprocess seam 为 Bash、LSP、PTY 和 ACP 提供同一个底层进程世界。Spawn spec 没有隐藏默认值：argv、cwd、三条 stdio、环境、宽限期和取消信号都由调用方明确给出，argv 永远不经过 shell 解释。</p>

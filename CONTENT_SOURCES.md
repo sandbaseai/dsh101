@@ -66,7 +66,7 @@ Last upstream review:
 | MCP transports and tool bridge | `packages/mcp/mcp-client/README.zh.md` |
 | Skill discovery and loading | `docs/subsystems/skills.zh.md`, `packages/skill/skill/README.zh.md`, `packages/skill/tool-skill/README.zh.md` |
 | Plan collaboration state | `docs/subsystems/plan.zh.md`, `packages/plan/plan-mode/README.zh.md` |
-| Web search and fetch tools | `docs/subsystems/web.zh.md`, `packages/web/tool-web/README.zh.md` |
+| Web search and fetch tools, deterministic provider selection, DeepSeek auxiliary search turns, Perplexity answer/citation mapping, Exa retrieval/highlights, result limits, HTTP transport hygiene, redirect policy, SSRF boundary, timeout layering, and approval limitations | `docs/subsystems/web.zh.md`, `packages/web/web/README.zh.md`, `packages/web/tool-web/README.zh.md`, `packages/web/web-search-deepseek/README.zh.md`, `packages/web/web-search-perplexity/README.zh.md`, `packages/web/web-search-exa/README.zh.md`, `packages/web/web-fetch-http/README.zh.md` |
 | Persistent image attachments and browser admission UX | `docs/subsystems/attachment.zh.md`, `packages/attachment/attachment-local/README.zh.md`, `packages/client/ui-attachment/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | Turn deliverables, clickable file mentions, and native-open boundary | `packages/client/ui-deliverables/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | Structured user questions, response validation, and Web recovery | `docs/subsystems/user-questions.zh.md`, `packages/interaction/tool-ask-user/README.zh.md`, `packages/host/apiproxy/README.zh.md`, `packages/client/ui-user-questions/README.zh.md`, `packages/client/runtime/README.zh.md` |

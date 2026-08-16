@@ -38,6 +38,7 @@ requiredSections.push('shell-providers')
 requiredSections.push('terminal-provider')
 requiredSections.push('subprocess-provider')
 requiredSections.push('filesystem-provider')
+requiredSections.push('web-providers')
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)

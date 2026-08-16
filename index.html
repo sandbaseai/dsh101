@@ -152,6 +152,7 @@
           <a href="#skills">Skills</a>
           <a href="#plan-mode">Plan Mode</a>
           <a href="#web-tools">Web 工具</a>
+          <a href="#web-providers">Web Provider 选择</a>
           <a href="#attachments">图片附件</a>
           <a href="#deliverables">产出文件</a>
           <a href="#user-questions">向用户提问</a>
@@ -1123,6 +1124,24 @@ print(result.final_response)</code></pre>
           <div><div class="tool-icon">↗</div><strong>web_fetch</strong><p>接收 URL，返回状态、最终地址和解码后的正文。</p><small>默认超时 30 秒</small></div>
         </div>
         <p>工具是否注册由产品配置决定，而不是由后端当前是否可用决定。这保持了模型看到的 Schema 稳定；提供方缺失或冲突会在执行时返回结构化 <code>WebError</code>。</p>
+
+        <h3 id="web-providers">DeepSeek、Perplexity、Exa 与 HTTP Fetch<a href="#web-providers" class="anchor">#</a></h3>
+        <p>Provider 选择不依赖注册顺序：显式配置的 id 必须已注册且可用；没有配置时只允许恰好一个可用实现。零个会返回 unavailable，多个会返回 ambiguous，不会随机挑选。</p>
+        <div class="permission-table">
+          <div><code>DeepSeek</code><strong>完整 Messages 模型轮次</strong><span>调用 Anthropic 兼容端点并启用原生 web_search 工具，成本包含生成 token；只信任结构化 tool-result 来源，不把模型正文当作答案。</span></div>
+          <div><code>Perplexity</code><strong>生成答案 + 引用</strong><span>通过 chat/completions 返回答案，优先映射结构化 search_results；缺失时退回仅含 URL 的 citations，结果数量只能事后截断。</span></div>
+          <div><code>Exa</code><strong>专用检索端点</strong><span>直接请求 search 并把 maxResults 下推为 numResults；返回标题、日期和第一条 highlight，没有非空 highlight 的条目会被丢弃。</span></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Search</strong><p>工具配置决定统一来源上限；Provider 先规范化结构化结果，Web seam 再截断并标记 truncated。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Fetch</strong><p>匿名 HTTP Provider 只接受无内嵌凭据的 http/https，限制 URL、响应字节、字符、重定向和内容类型；非 2xx 仍是可读结果。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Present</strong><p>工具把 HTML 前缀转换为 Markdown，并对状态头、正文和截断提示施加最终字符预算；PDF 与二进制不在支持范围。</p></div>
+        </div>
+        <div class="detail-card"><strong>DeepSeek 搜索与对话使用不同基址</strong><p>搜索默认走 https://api.deepseek.com/anthropic/v1，而不是 chat-completions 的 DEEPSEEK_BASE_URL；它复用 DEEPSEEK_API_KEY，并在每次调用时解析凭据，因此轮换无需重启。</p></div>
+        <div class="warning"><strong>HTTP Fetch 当前是 SSRF 原语</strong><p>它不阻止 loopback、私有、link-local、multicast 或 DNS 解析后的内部地址，也不逐跳重新验证。能访问敏感内网的部署禁止启用该 Provider；同源重定向最多按配置跟随，跨源重定向要求新的工具调用。</p></div>
+        <div class="warning"><strong>Web 工具没有内置审批</strong><p>搜索 Provider 会在访问 Location 前拒绝任何 HTTP 重定向；Fetch 只允许跳数受限的同源重定向。工具调用超时由 timeout-policy 强制，Provider 另有直接服务调用的资源兜底；需要域名授权或用户确认时必须加 tools/pre-execute 策略。</p></div>
 
         <h2 id="attachments">图片附件<a href="#attachments" class="anchor">#</a></h2>
         <p>图片进入会话前会先被校验并持久化，再以不可变引用写入消息。会话日志只保存内容寻址的 attachment id、媒体类型、字节数和固有尺寸，不保存浏览器对象 URL、宿主临时路径、提供方 URL 或 base64 正文。</p>

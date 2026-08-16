@@ -685,6 +685,17 @@ print(result.final_response)</code></pre>
           <div><strong>自由输入</strong><p>单选时“其他”会覆盖已选项；多选时可以同时保留选项与补充文本。</p></div>
         </div>
         <div class="warning"><strong>只能由运行时根提问</strong><p>受父 Agent 管理的 Subagent 没有独立的人类应答者，因此不能发起交互请求；取消、没有 UI provider 或调用方已失活都会返回结构化错误，而不是无限等待。</p></div>
+        <h3 id="user-question-lifecycle">回答批次、校验与重连</h3>
+        <p>Web UI 每次显示一个问题并保留整批草稿。单选后会自动前进，多选可以同时提交标签与非空自定义文本；“跳过此问题”仍会为该 id 发送空的 <code>selected: []</code>，从而保持批次完整。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Draft</strong><p>选择状态以请求 rpcId 保存在当前组件内；IME 组合输入期间的 Enter 不会误提交。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Validate</strong><p>Host 对照原请求检查 id、选项标签、重复项、单选互斥、自定义非空与整批完整性。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Resolve</strong><p>只有宿主发出 question/resolved 后才移除编辑器；HTTP 回答成功本身不是最终状态。</p></div>
+        </div>
+        <p>未知标签、重复标签、id 不匹配、缺少批次成员或空自定义文本都会以 <code>bad-response</code> 拒绝。关闭问题卡片会以 <code>ASK_CANCELLED</code> 取消整个等待，而不是只跳过当前页。</p>
+        <div class="warning"><strong>待处理请求可恢复，未提交草稿不可恢复</strong><p>断线时客户端清除当前 generation 的交互状态；重连后的 mux 回放会恢复仍在等待的请求。若组件因此卸载，之前勾选的选项和自由文本不会持久化，需要重新填写。</p></div>
 
         <h2 id="filesystem-seam">文件系统目标、观测与原子写入<a href="#filesystem-seam" class="anchor">#</a></h2>
         <p>文件系统能力把服务定义、后端、观测策略和模型工具拆开。路径先解析为带显示路径的不透明目标；消费者不得解析 target key，也不能假设它一定是本地绝对路径。</p>

@@ -751,7 +751,18 @@ export const en = {
   'Web UI 把连续尝试折叠为一条稳定状态行，显示倒计时、当前次数与有限上限或 ': 'The Web UI folds consecutive attempts into one stable status row showing a countdown, current attempt, and either a finite limit or ',
   '。每个调度事件仍持久保留；失败步骤未完成的流式尾部会被移除，终态失败则留在轮次边界供排查。': '. Every scheduled event remains durable; incomplete streaming tails from failed steps are removed, while terminal failures remain at the turn boundary for diagnosis.',
   '重试可能重复计费': 'Retries may be billed repeatedly',
-  '每次重试都是新的 Provider 请求，可能再次计费输入 token。模型不会看到失败分片、延迟或 Provider 错误；认证错误的界面文案也不会回显提供方返回的凭据片段。': 'Every retry is a new Provider request and may bill input tokens again. The model does not see failed fragments, delays, or Provider errors, and authentication-error UI copy never echoes credential fragments returned by the provider.'
+  '每次重试都是新的 Provider 请求，可能再次计费输入 token。模型不会看到失败分片、延迟或 Provider 错误；认证错误的界面文案也不会回显提供方返回的凭据片段。': 'Every retry is a new Provider request and may bill input tokens again. The model does not see failed fragments, delays, or Provider errors, and authentication-error UI copy never echoes credential fragments returned by the provider.',
+  '回答批次、校验与重连': 'Answer batches, validation, and reconnect',
+  'Web UI 每次显示一个问题并保留整批草稿。单选后会自动前进，多选可以同时提交标签与非空自定义文本；“跳过此问题”仍会为该 id 发送空的 ': 'The Web UI shows one question at a time while retaining the whole batch draft. Single selection advances automatically; multi-select can submit labels together with non-empty custom text. “Skip this question” still sends an empty ',
+  '，从而保持批次完整。': ' for that id, preserving a complete batch.',
+  '选择状态以请求 rpcId 保存在当前组件内；IME 组合输入期间的 Enter 不会误提交。': 'Selection state is kept in the current component under the request rpcId; Enter during IME composition does not submit accidentally.',
+  'Host 对照原请求检查 id、选项标签、重复项、单选互斥、自定义非空与整批完整性。': 'The Host checks ids, option labels, duplicates, single-select exclusivity, non-empty custom text, and complete batch membership against the original request.',
+  '只有宿主发出 question/resolved 后才移除编辑器；HTTP 回答成功本身不是最终状态。': 'The composer is removed only after the Host emits question/resolved; a successful HTTP answer alone is not final state.',
+  '未知标签、重复标签、id 不匹配、缺少批次成员或空自定义文本都会以 ': 'Unknown labels, duplicate labels, mismatched ids, missing batch members, or empty custom text are rejected with ',
+  ' 拒绝。关闭问题卡片会以 ': '. Closing the question card rejects the whole wait with ',
+  ' 取消整个等待，而不是只跳过当前页。': ' rather than skipping only the current page.',
+  '待处理请求可恢复，未提交草稿不可恢复': 'Pending requests recover; unsubmitted drafts do not',
+  '断线时客户端清除当前 generation 的交互状态；重连后的 mux 回放会恢复仍在等待的请求。若组件因此卸载，之前勾选的选项和自由文本不会持久化，需要重新填写。': 'On disconnect, the client clears interaction state for the current generation; mux replay after reconnect restores requests still waiting. If the component was unmounted, previously selected options and free text were not persisted and must be entered again.'
 }
 
 export const normalizedEn = new Map(

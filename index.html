@@ -183,6 +183,7 @@
           <a href="#goal-round-admission">Goal Round 准入</a>
           <a href="#compaction">上下文压缩</a>
           <a href="#compaction-transaction">压缩事务边界</a>
+          <a href="#tool-result-pruning">工具结果剪枝</a>
           <a href="#compaction-checkpoint">压缩检查点 UI</a>
           <a href="#guardrails">工具 Guardrails</a>
           <a href="#background-jobs">后台任务</a>
@@ -1297,6 +1298,16 @@ print(result.final_response)</code></pre>
         </div>
         <div class="detail-card"><strong>范围按表层位置，不按数字区间</strong><p>先前替换会把高 seq 的新节点放进较旧位置，因此 shadowedRange 的 start 可能大于 end。按 surface 顺序记录的 shadowedSeqs 才是被遮蔽节点的权威集合，边界还必须保持工具调用与结果配对。</p></div>
         <div class="warning"><strong>旧生命周期的遗留锁不会永久卡死</strong><p>未配对 start 通常阻止新尝试，但如果它位于较新的 session/end-seed 之前，就被视为先前生命周期的陈旧证据并忽略。</p></div>
+
+        <h3 id="tool-result-pruning">不调用模型的工具结果剪枝<a href="#tool-result-pruning" class="anchor">#</a></h3>
+        <p>可选的 Tool Result Pruner 只在压力或已确认上下文溢出触发后扫描当前表层稳定快照；低于压力的普通步骤检查绝不剪枝。每个超限结果会变成“保留头部 + 固定省略标记 + 保留尾部”。</p>
+        <div class="compare-grid">
+          <div><strong>原始事件仍可精确回放</strong><p>剪枝通过新追加的 tool/result 替换表层单节点，并引用原始 seq；它只改变 content，turn、step、callId、错误、meta 和未来字段全部保留。</p></div>
+          <div><strong>富内容顺序保持稳定</strong><p>只统计和切分 text block，非文本块维持原相对位置。切片按 Unicode 码点执行，不会拆开 UTF-16 代理项对，但仍可能切开多码点字素簇。</p></div>
+          <div><strong>一次替换后会收敛</strong><p>输出严格短于触发输入且不超过 thresholdChars，因此第二次扫描不会再次替换；默认配置保留 4096 个头部码点和 1024 个尾部码点。</p></div>
+        </div>
+        <div class="detail-card"><strong>字符预算仍要换算回请求压力</strong><p>不同模型的 token 密度不同。剪枝完成后 Token Meter 会重新测量：回到安全范围就跳过摘要，否则摘要器读取已剪枝表层继续压缩。</p></div>
+        <div class="warning"><strong>扫描不是全有或全无事务</strong><p>如果 Session 拒绝后续某个替换，调用会抛错，但本次稳定快照中更早已经提交的替换仍然耐久。剪枝也只按语法保留头尾，不判断中间哪些行在语义上最重要。</p></div>
 
         <h3 id="compaction-checkpoint">Chat 中的压缩检查点<a href="#compaction-checkpoint" class="anchor">#</a></h3>
         <p>浏览器在检查点自己的日志位置渲染一行折叠标记，不会用它替换上方已经加载的 transcript。自动压缩显示“上下文已压缩”；若对应 compaction/summary 事件位于当前窗口，完成行会显示被替换条目数和估算 token，并允许展开摘要。</p>

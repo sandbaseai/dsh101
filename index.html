@@ -96,6 +96,8 @@
           <a href="#web-tools">Web 工具</a>
           <a href="#attachments">图片附件</a>
           <a href="#user-questions">向用户提问</a>
+          <a href="#shell-terminal">Shell 与 Terminal</a>
+          <a href="#lsp-navigation">LSP 代码导航</a>
         </section>
         <section>
           <h2>持续执行</h2>
@@ -105,6 +107,7 @@
           <a href="#compaction">上下文压缩</a>
           <a href="#guardrails">工具 Guardrails</a>
           <a href="#background-jobs">后台任务</a>
+          <a href="#session-history">会话检索与导出</a>
         </section>
       </nav>
     </aside>
@@ -366,6 +369,26 @@ print(result.final_response)</code></pre>
         </div>
         <div class="warning"><strong>只能由运行时根提问</strong><p>受父 Agent 管理的 Subagent 没有独立的人类应答者，因此不能发起交互请求；取消、没有 UI provider 或调用方已失活都会返回结构化错误，而不是无限等待。</p></div>
 
+        <h2 id="shell-terminal">Shell 与持久 Terminal<a href="#shell-terminal" class="anchor">#</a></h2>
+        <p>两者都能运行命令，但生命周期不同。默认使用 Shell 完成有边界的一次性操作；只有任务需要交互式 stdin、REPL、开发服务器或持续终端状态时，才打开 PTY Terminal。</p>
+        <div class="compare-grid">
+          <div><strong>Shell foreground</strong><p>等待命令结束，分别报告退出码、信号、超时与调用方取消；非零退出是正常结果，不是基础设施异常。</p></div>
+          <div><strong>Shell background</strong><p>立即转成通用 job；没有执行器超时，通过增量游标读取输出，并可请求终止整个进程组。</p></div>
+          <div><strong>PTY Terminal</strong><p>保留 shell 状态和 scrollback，支持发送输入、分页读取、信号、列出与显式关闭。</p></div>
+        </div>
+        <div class="warning"><strong>返回不代表命令退出</strong><p><code>terminal_send</code> 因 <code>inferred_idle</code> 或 <code>timeout</code> 返回时，顶层 PTY 仍可能运行。应检查 session status，并在不再需要时调用 <code>terminal_close</code>。</p></div>
+        <p>Harness 会清除子进程环境中的凭据及继承的 <code>DSH_*</code> 名称，再合并本次受管环境快照。输出超过内存预算时只内联尾部，并用私有 spill 文件保留完整流的恢复信息。</p>
+
+        <h2 id="lsp-navigation">LSP 精确代码导航<a href="#lsp-navigation" class="anchor">#</a></h2>
+        <p>文本搜索适合普通浏览；当同名符号含义不清，或修改前必须确认精确定义、实现和引用时，使用只读 <code>lsp</code> 工具。它只公开四种闭合操作：</p>
+        <div class="event-grid">
+          <div><code>goToDefinition</code><strong>跳转定义</strong><p>定位当前符号的定义位置。</p></div>
+          <div><code>findReferences</code><strong>查找引用</strong><p>返回引用并始终包含声明本身。</p></div>
+          <div><code>goToImplementation</code><strong>查找实现</strong><p>从接口或抽象符号定位实现。</p></div>
+          <div><code>hover</code><strong>类型信息</strong><p>读取语言服务器给出的 Markdown 或纯文本说明。</p></div>
+        </div>
+        <p>模型输入使用从 1 开始的 UTF-16 行列坐标；没有对准符号可能得到空结果。Provider 按文件扩展名确定性选择，没有匹配项时返回 <code>LSP_UNAVAILABLE</code>。LSP 是可选能力，不属于 Agent loop 主干。</p>
+
         <div class="chapter-break"><span>05</span><div><small>持续执行</small><strong>委派、计划与长上下文</strong></div></div>
 
         <h2 id="subagents">Subagent 委派<a href="#subagents" class="anchor">#</a></h2>
@@ -420,6 +443,16 @@ print(result.final_response)</code></pre>
         </div>
         <p>输出读取使用单一消费游标：流式任务每次返回上次读取后的增量，只有最终输出的任务则在结束后重复返回同一结果。任务访问按拥有者 session 授权；Agent 被释放时，其任务会被取消并等待清理完成。</p>
         <div class="detail-card"><strong>取消不是瞬间完成</strong><p><code>kill</code> 只请求生产方终止并把状态推进到 <code>stopping</code>。只有生产方真正释放资源、<code>done</code> settle 后，任务才进入 <code>killed</code> 或其他终态。</p></div>
+
+        <h2 id="session-history">会话检索与日志导出<a href="#session-history" class="anchor">#</a></h2>
+        <p>可选的 Session Query 工具让 Agent 从既往工作中找回上下文，而不必把所有历史塞进当前请求。搜索先返回标题和最佳匹配摘要，再按需读取事件、关系或会话谱系。</p>
+        <div class="skill-pipeline">
+          <div><small>01</small><strong>session_search</strong><span>跨会话发现相关工作</span></div><i>→</i>
+          <div><small>02</small><strong>event_search</strong><span>缩小到会话内事件</span></div><i>→</i>
+          <div><small>03</small><strong>trace / read</strong><span>取得谱系、关系或原始数据</span></div>
+        </div>
+        <p>跨会话访问要求目标与调用方的 <code>cwd</code> 严格相同；当前会话的搜索会截止到调用步骤之前，避免工具匹配自身。搜索文本按字面量、不区分大小写并灵活匹配空白，过滤条件之间为 AND，同一列表内为 OR。</p>
+        <div class="detail-card"><strong>导出完整审计材料</strong><p>Web UI 的 Session log 按钮或 <code>/export</code> 会下载包含根会话、子会话和附件的流式 ZIP。命令只在用户命令平面执行，不创建模型轮次，也不消耗模型 token；下载位置由浏览器决定。</p></div>
 
         <div class="source-note">
           <div><span class="pulse"></span><strong>内容来源</strong></div>

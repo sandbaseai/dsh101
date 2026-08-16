@@ -34,6 +34,8 @@ Last upstream review:
 | Web search and fetch tools | `packages/web/tool-web/README.zh.md` |
 | Persistent image attachments | `docs/subsystems/attachment.zh.md` |
 | Structured user questions | `docs/subsystems/user-questions.zh.md` |
+| Shell execution and persistent terminals | `docs/subsystems/shell.zh.md`, `docs/subsystems/terminal.zh.md`, `packages/terminal/tool-terminal/README.zh.md` |
+| LSP semantic code navigation | `docs/subsystems/lsp.zh.md`, `packages/lsp/tool-lsp/README.zh.md` |
 | Subagent delegation and lifecycles | `packages/subagent/subagent/README.zh.md`, `packages/subagent/tool-subagent/README.zh.md` |
 | Todo snapshots | `packages/todo/tool-todo/README.zh.md` |
 | Persistent goals and goal rounds | `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |
@@ -42,6 +44,7 @@ Last upstream review:
 | Filesystem sandbox policy | `packages/fs/fs-sandbox/README.zh.md` |
 | Tool reliability guardrails | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
 | Background job runtime | `docs/subsystems/jobs.zh.md` |
+| Session search and log export | `docs/subsystems/session-query.zh.md`, `packages/session-query/tool-session-query/README.zh.md`, `packages/session-query/session-log-export/README.zh.md` |
 
 ## Refresh checklist
 

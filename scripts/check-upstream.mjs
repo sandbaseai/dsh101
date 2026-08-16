@@ -22,7 +22,7 @@ if (recorded === revision) {
 const changed = execFileSync('git', [
   '-C', upstream,
   'diff', '--name-only', `${recorded}..${revision}`, '--',
-  'README.zh.md', 'docs/user', 'apps/cli', 'packages/mcp', 'packages/skill', 'packages/plan', 'packages/web',
+  'README.zh.md', 'package.json', 'LICENSE', 'docs/user', 'apps/cli', 'packages/mcp', 'packages/skill', 'packages/plan', 'packages/web',
   'packages/subagent', 'packages/todo', 'packages/goal', 'packages/compaction',
   'packages/interaction', 'packages/fs', 'packages/guard',
   'packages/attachment', 'packages/jobs', 'docs/subsystems/attachment.zh.md',
@@ -55,6 +55,7 @@ const changed = execFileSync('git', [
   'packages/runtime-diagnostics/invariants', 'packages/feedback',
   'docs/subsystems/token-meter.zh.md', 'docs/subsystems/session-telemetry.zh.md',
   'docs/subsystems/invariants.zh.md', 'docs/subsystems/feedback.zh.md',
+  'docs/subsystems/session.zh.md', 'docs/subsystems/permission-presets.zh.md',
 ], { encoding: 'utf8' }).trim()
 
 console.log(`upstream moved: ${recorded.slice(0, 8)} -> ${revision.slice(0, 8)} (${date})`)

@@ -9,12 +9,13 @@ Last upstream review:
 - Repository: `deepseek-ai/deepseek-harness`
 - Commit: `47f943859bef60e4160492346772ded9b24f765a`
 - Commit date: 2026-08-13
+- npm registry checked: 2026-08-16 (`@deepseek-ai/dsh@0.1.0-rc.6`; `latest` and `next`)
 
 ## Source map
 
 | DSH 101 section | Canonical upstream source |
 | --- | --- |
-| Install and run | `README.zh.md` |
+| Install, Node compatibility, npm release, and license | `README.zh.md`, `package.json`, `apps/cli/package.json`, `LICENSE`, npm registry metadata |
 | Web UI quickstart | `docs/user/guide/index.zh.md` |
 | Model providers and credentials | `docs/user/guide/providers.zh.md` |
 | Python SDK and security boundary | `docs/user/guide/python-sdk.zh.md` |
@@ -49,10 +50,12 @@ Last upstream review:
 | Persistent goals and goal rounds | `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |
 | Context compaction | `packages/compaction/compaction-basic/README.zh.md` |
 | Permission presets and approvals | `packages/interaction/permission-presets/README.zh.md`, `packages/interaction/user-approval/README.zh.md` |
+| Effective permission preset derivation | `docs/subsystems/permission-presets.zh.md` |
 | Approval request lifecycle and audit | `docs/subsystems/approval.zh.md` |
 | Filesystem sandbox policy | `packages/fs/fs-sandbox/README.zh.md` |
 | Tool reliability guardrails | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
 | Background job runtime | `docs/subsystems/jobs.zh.md` |
+| Append-only session event model | `docs/subsystems/session.zh.md` |
 | Session search and log export | `docs/subsystems/session-query.zh.md`, `packages/session-query/tool-session-query/README.zh.md`, `packages/session-query/session-log-export/README.zh.md` |
 | Structured cross-session references | `docs/subsystems/session-reference.zh.md` |
 | Durable session titles | `docs/subsystems/session-title.zh.md` |

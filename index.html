@@ -69,7 +69,9 @@
           <h2>核心概念</h2>
           <a href="#workspace">工作区</a>
           <a href="#session">会话与任务</a>
+          <a href="#session-log">Session 事件日志</a>
           <a href="#permissions">权限与审批</a>
+          <a href="#permission-presets">权限预设</a>
           <a href="#approval-flow">审批链路</a>
           <a href="#sandbox">沙箱模式</a>
         </section>
@@ -156,7 +158,7 @@
 
         <div class="callout">
           <div class="callout-icon">i</div>
-          <div><strong>开始之前</strong><p>你需要 Node.js 20+、一个 DeepSeek API Key，以及一个准备让 Agent 读取的本地项目。</p></div>
+          <div><strong>开始之前</strong><p>建议使用 Node.js 22.19+ 或 24+（与上游源码工作区一致），并准备 DeepSeek API Key 和一个允许 Agent 读取的本地项目。</p></div>
         </div>
 
         <h2 id="install">安装与启动<a href="#install" class="anchor">#</a></h2>
@@ -166,6 +168,7 @@
           <pre><code><span class="muted">$</span> npx @deepseek-ai/dsh web
 <span class="success">Web UI → http://127.0.0.1:3080</span></code></pre>
         </div>
+        <div class="detail-card"><strong>公开预览版本</strong><p>截至 2026-08-16，npm 的 latest 与 next 都指向 0.1.0-rc.6，而当前上游默认分支 manifest 仍为 rc.5。未指定版本的 npx 会跟随 dist-tag；自动化脚本应固定确切版本。</p></div>
 
         <h2 id="model">配置模型<a href="#model" class="anchor">#</a></h2>
         <p>打开右上角的 <strong>设置 → 模型</strong>，选择 DeepSeek，输入 API Key 并保存。模型变更会在下一次请求时生效，无需重启服务。</p>
@@ -195,6 +198,17 @@
         <blockquote>总结这个仓库，列出它的主要模块，并解释各模块之间的关系。</blockquote>
         <p>Agent 可以读取文件、执行命令并维护计划。当某项操作超出当前权限策略时，Web UI 会先请求你的批准。</p>
 
+        <h2 id="session-log">Session 的仅追加事件日志<a href="#session-log" class="anchor">#</a></h2>
+        <p>SessionEvent 日志是一次 Agent 交互的唯一真源；模型消息历史、UI 状态和回放结果都从同一序列派生，不存在另一份单独维护的 transcript。每条事件都有连续 seq 和毫秒时间戳，payload 必须是无损 JSON。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Turn</strong><p>一次排队输入的生命周期；拒绝或空输入也可能只有 start/end 而没有模型步骤。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Step</strong><p>一次模型调用及其请求的工具执行；重试会打开新的编号步骤。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Surface</strong><p>用户消息、组装后的 Assistant 消息和工具结果形成模型可见表层。</p></div>
+        </div>
+        <p>原始 assistant chunks 会完整记录以保证流式回放；组装后的 assistant message 才进入派生历史。完整 request header 记录模型、系统提示词与工具 schema，只有配置变化时再写一份新快照，因此任意请求都能从日志重建。</p>
+
         <h2 id="permissions">权限与审批<a href="#permissions" class="anchor">#</a></h2>
         <p>Harness 把沙箱模式和审批策略作为两项独立机制。权限预设只是在产品层把两者组合成一个选择器；执行时仍由各自服务单独强制。</p>
         <h3 id="sandbox">沙箱模式</h3>
@@ -206,6 +220,15 @@
         <p>文件系统围栏会在目标规范化后检查可写根，并在写入前重新规范化以缩小符号链接竞态。不过它是可信进程中的策略围栏，不是针对恶意宿主代码的内核安全边界。</p>
         <h3>一次性审批</h3>
         <p>审批结果只有 <code>allowed-once</code>、<code>rejected</code>、<code>cancelled</code> 和 <code>unavailable</code>。每次决定都会写入成对审计事件；没有应答者或应答失败时默认拒绝。<code>never</code> 策略会在交互分发前确定性拒绝请求。</p>
+
+        <h2 id="permission-presets">权限预设与 custom 状态<a href="#permission-presets" class="anchor">#</a></h2>
+        <p>Permission Preset 只是把沙箱模式与审批策略这两个独立强制旋钮包装成一个客户端选项。预设自身不执行隔离，也不替代审批；切换时仍通过各自服务的规范 setter 写入日志。</p>
+        <div class="compare-grid">
+          <div><strong>workspace-write</strong><p>默认组合为工作区写入加 ask，适合交互式开发。</p></div>
+          <div><strong>danger-full-access</strong><p>默认组合为完整访问加 never，只应在受控环境中使用。</p></div>
+          <div><strong>custom</strong><p>当两个旋钮不匹配任何声明预设时派生显示；它不是可选择的目标。</p></div>
+        </div>
+        <p>当前值从 Session 日志中实际生效的旋钮推导，而不是盲信最后一次选择。若多个预设共享相同组合，仍匹配的最后选择优先；否则按声明顺序选择首个匹配项。重新选择当前预设不会追加任何事件。</p>
 
         <h2 id="approval-flow">审批的完整链路<a href="#approval-flow" class="anchor">#</a></h2>
         <p>每一次审批请求都有全新的 <code>ApprovalRequestId</code>，用于把 <code>approval/asked</code> 与 <code>approval/decided</code> 配成一组。请求只携带 Agent、工具名、可选 call id 与理由；工具参数仍由已经流式展示的调用负责，避免 UI 渲染第二份可能漂移的数据。</p>
@@ -763,7 +786,7 @@ print(result.final_response)</code></pre>
         </div>
 
         <div class="next-card" id="practice"><div><small>继续探索</small><strong>在官方仓库中查看完整 API 与配置目录</strong></div><span>→</span></div>
-        <footer><p>以 Apache-2.0 协议开放 · 由社区维护</p><a href="https://github.com/sandbaseai/dsh101" target="_blank" rel="noreferrer">在 GitHub 上编辑此页</a></footer>
+        <footer><p>上游采用 MIT 协议 · 本指南由社区维护</p><a href="https://github.com/sandbaseai/dsh101" target="_blank" rel="noreferrer">在 GitHub 上编辑此页</a></footer>
       </article>
 
       <aside class="toc">

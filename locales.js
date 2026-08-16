@@ -762,7 +762,19 @@ export const en = {
   ' 拒绝。关闭问题卡片会以 ': '. Closing the question card rejects the whole wait with ',
   ' 取消整个等待，而不是只跳过当前页。': ' rather than skipping only the current page.',
   '待处理请求可恢复，未提交草稿不可恢复': 'Pending requests recover; unsubmitted drafts do not',
-  '断线时客户端清除当前 generation 的交互状态；重连后的 mux 回放会恢复仍在等待的请求。若组件因此卸载，之前勾选的选项和自由文本不会持久化，需要重新填写。': 'On disconnect, the client clears interaction state for the current generation; mux replay after reconnect restores requests still waiting. If the component was unmounted, previously selected options and free text were not persisted and must be entered again.'
+  '断线时客户端清除当前 generation 的交互状态；重连后的 mux 回放会恢复仍在等待的请求。若组件因此卸载，之前勾选的选项和自由文本不会持久化，需要重新填写。': 'On disconnect, the client clears interaction state for the current generation; mux replay after reconnect restores requests still waiting. If the component was unmounted, previously selected options and free text were not persisted and must be entered again.',
+  '输出达到 max-tokens 时': 'When output reaches max-tokens',
+  ' 是独立的轮次结束原因，不等于正常完成、错误或取消。只要本轮任一步骤达到输出上限，即使插件随后继续执行并正常结束，整个轮次仍保留截断标记。': ' is a distinct turn-end reason, not normal completion, error, or cancellation. If any step in the turn reaches its output limit, the whole turn retains the truncation marker even if a plugin continues and later completes normally.',
+  '已完成内容块': 'Completed content blocks',
+  '完整结束的文本或推理块会保留为 Assistant 内容，并继续出现在历史中。': 'Fully closed text or reasoning blocks remain as Assistant content and continue to appear in history.',
+  '未完成工具调用': 'Incomplete tool calls',
+  '截断的参数不能安全执行，因此不会发布 tool/call，也不会产生半个外部副作用。': 'Truncated arguments cannot execute safely, so no tool/call is published and no partial external side effect is produced.',
+  '空回答': 'Empty response',
+  '仍记录空的 assistant/message 完成锚点和可用的 usage，但空内容不会进入派生模型 transcript。': 'An empty assistant/message completion anchor and available usage are still recorded, but empty content does not enter the derived model transcript.',
+  'Web UI 在该轮位置显示持久警告，保留已经生成的可见输出，并建议发送“继续”开启新轮次。事件不携带具体 token 数字，因此提示不会猜测上限；刷新、历史分页和恢复后仍能重建相同状态。': 'The Web UI shows a durable warning at that turn, preserves visible output already generated, and suggests sending “Continue” to open a new turn. The event carries no specific token count, so the notice does not guess the limit; refresh, history paging, and recovery rebuild the same state.',
+  '不要把“继续”当成同一次请求': 'Do not treat “Continue” as the same request',
+  '继续是一条新的用户消息和新的 Provider 调用，会使用当前模型配置并产生新的用量。若经常截断，应调整模型或 Agent 的 ': 'Continue is a new user message and Provider call, using the current model configuration and producing new usage. If truncation is frequent, adjust the model or Agent ',
+  '，同时确保不超过提供方实际输出容量。': ' while staying within the provider’s actual output capacity.'
 }
 
 export const normalizedEn = new Map(

@@ -535,6 +535,15 @@ print(result.final_response)</code></pre>
         </div>
         <p>Web UI 把连续尝试折叠为一条稳定状态行，显示倒计时、当前次数与有限上限或 <code>∞</code>。每个调度事件仍持久保留；失败步骤未完成的流式尾部会被移除，终态失败则留在轮次边界供排查。</p>
         <div class="warning"><strong>重试可能重复计费</strong><p>每次重试都是新的 Provider 请求，可能再次计费输入 token。模型不会看到失败分片、延迟或 Provider 错误；认证错误的界面文案也不会回显提供方返回的凭据片段。</p></div>
+        <h3 id="max-tokens">输出达到 max-tokens 时</h3>
+        <p><code>max-tokens</code> 是独立的轮次结束原因，不等于正常完成、错误或取消。只要本轮任一步骤达到输出上限，即使插件随后继续执行并正常结束，整个轮次仍保留截断标记。</p>
+        <div class="compare-grid">
+          <div><strong>已完成内容块</strong><p>完整结束的文本或推理块会保留为 Assistant 内容，并继续出现在历史中。</p></div>
+          <div><strong>未完成工具调用</strong><p>截断的参数不能安全执行，因此不会发布 tool/call，也不会产生半个外部副作用。</p></div>
+          <div><strong>空回答</strong><p>仍记录空的 assistant/message 完成锚点和可用的 usage，但空内容不会进入派生模型 transcript。</p></div>
+        </div>
+        <p>Web UI 在该轮位置显示持久警告，保留已经生成的可见输出，并建议发送“继续”开启新轮次。事件不携带具体 token 数字，因此提示不会猜测上限；刷新、历史分页和恢复后仍能重建相同状态。</p>
+        <div class="warning"><strong>不要把“继续”当成同一次请求</strong><p>继续是一条新的用户消息和新的 Provider 调用，会使用当前模型配置并产生新的用量。若经常截断，应调整模型或 Agent 的 <code>maxTokens</code>，同时确保不超过提供方实际输出容量。</p></div>
 
         <h2 id="dynamic-extensions">Agent 动态扩展运行时<a href="#dynamic-extensions" class="anchor">#</a></h2>
         <p>自引用 Cordis 工具让 Agent 先检查活的服务、API、事件和 Client slots，再定义并运行临时动态包。<code>cordis_define</code> 只做语法预检和登记；所有副作用都推迟到显式 <code>cordis_run</code>。</p>

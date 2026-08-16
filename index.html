@@ -108,6 +108,9 @@
           <a href="#guardrails">工具 Guardrails</a>
           <a href="#background-jobs">后台任务</a>
           <a href="#session-history">会话检索与导出</a>
+          <a href="#persistence">会话持久化</a>
+          <a href="#storage-domains">领域存储</a>
+          <a href="#spill-output">大结果 Spill</a>
         </section>
       </nav>
     </aside>
@@ -453,6 +456,35 @@ print(result.final_response)</code></pre>
         </div>
         <p>跨会话访问要求目标与调用方的 <code>cwd</code> 严格相同；当前会话的搜索会截止到调用步骤之前，避免工具匹配自身。搜索文本按字面量、不区分大小写并灵活匹配空白，过滤条件之间为 AND，同一列表内为 OR。</p>
         <div class="detail-card"><strong>导出完整审计材料</strong><p>Web UI 的 Session log 按钮或 <code>/export</code> 会下载包含根会话、子会话和附件的流式 ZIP。命令只在用户命令平面执行，不创建模型轮次，也不消耗模型 token；下载位置由浏览器决定。</p></div>
+
+        <h2 id="persistence">会话持久化与恢复<a href="#persistence" class="anchor">#</a></h2>
+        <p>内存中的仅追加 <code>SessionEvent</code> 日志是真源，Persistence seam 负责把同一组事件耐久保存；它没有另造一套“持久化事件”。元数据 header 与日志分开保存，记录格式版本、cwd、父会话、seed 边界、委派深度和 Agent preset。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>后台批量追加</strong><p>同步事件通知只复制到会话控制器，固定窗口内的事件合并成耐久批次。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>语义检查点</strong><p>模型请求、顶层工具副作用与下一步开始前执行 flush，失败则阻止继续。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>冷恢复</strong><p>崩溃留下的开放轮次不会被截断，而是补记 interrupted 结束事件后回放。</p></div>
+        </div>
+        <div class="warning"><strong>持久化意图不等于恰好一次</strong><p>工具调用可能已经产生外部副作用、但结果尚未落盘。恢复时 Harness 会写入 <code>TOOL_OUTCOME_UNKNOWN</code>，要求先验证状态；有副作用的 Provider 应尽量把 call id 用作幂等键。</p></div>
+        <p>JSONL 后端为每个会话维护可选 Zstandard 压缩的追加日志；SQLite 后端则把每个事件存成一行。格式版本过新、过旧或遇到未知的必需事件时会明确拒绝恢复，而不是静默丢失语义。</p>
+
+        <h2 id="storage-domains">非会话数据的领域存储<a href="#storage-domains" class="anchor">#</a></h2>
+        <p>设置、索引等不属于对话事件日志的数据进入 Storage subsystem。枢纽只负责注册后端和挂载数据形式，不执行 IO；领域层声明名称、格式版本、global slot、表和 zod schema，再按部署路由到 JSON 或 SQLite 后端。</p>
+        <div class="compare-grid">
+          <div><strong>JSON backend</strong><p>每个 unit 原子重写一份人类可读文件，适合体量较小、更新不频繁的数据。</p></div>
+          <div><strong>SQLite backend</strong><p>在单个数据库中逐行存储文档，适合频繁更新和更多记录。</p></div>
+          <div><strong>Domain API</strong><p>同步读取权威内存态；写入先持久化，再更新内存并发出变更事件。</p></div>
+        </div>
+        <p>同一领域的写入按顺序排队。后端写入失败时内存保持不变，因此读取不会领先于介质；格式版本不匹配或已存记录不符合 schema 会在打开领域时立即失败。</p>
+
+        <h2 id="spill-output">超大工具结果与 Spill<a href="#spill-output" class="anchor">#</a></h2>
+        <p>当工具返回的纯文本超过内联预算时，Spill policy 保存完整 UTF-8 内容，并用首尾预览、不透明定位符、准确字节数和后端给出的检索提示替换模型结果。模型不会被迫为完整大结果支付上下文成本，但仍能按需读取。</p>
+        <div class="stream-flow">
+          <span>full tool text</span><i>→</i><span>private spill artifact</span><i>→</i><span>head + tail preview</span><i>→</i><span class="finish">retrieval hint</span>
+        </div>
+        <p>本地后端使用会话 id 的摘要作为私有目录，并以排他、仅所有者可读写的方式创建随机文件。调用方提供的文件名只是命名提示，永远不会被当作路径；定位符同样是不透明句柄。</p>
+        <div class="detail-card"><strong>尽力而为的降级</strong><p>如果磁盘满、权限不足或后端不可用，Spill policy 会保留原始内联结果，不会把已经成功的工具调用改成错误。Fork 会继承日志中的旧定位符，但不会复制或重新归属已有产物。</p></div>
 
         <div class="source-note">
           <div><span class="pulse"></span><strong>内容来源</strong></div>

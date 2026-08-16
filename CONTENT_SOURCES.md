@@ -45,6 +45,9 @@ Last upstream review:
 | Tool reliability guardrails | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
 | Background job runtime | `docs/subsystems/jobs.zh.md` |
 | Session search and log export | `docs/subsystems/session-query.zh.md`, `packages/session-query/tool-session-query/README.zh.md`, `packages/session-query/session-log-export/README.zh.md` |
+| Session persistence and crash recovery | `docs/subsystems/persistence.zh.md`, `packages/session/session-checkpoint-policy/README.zh.md` |
+| Domain storage | `docs/subsystems/storage.zh.md` |
+| Oversized tool result spill | `docs/subsystems/spill.zh.md` |
 
 ## Refresh checklist
 

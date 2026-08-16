@@ -10,14 +10,14 @@ if (brokenAnchors.length > 0) {
   throw new Error(`Broken local anchors: ${[...new Set(brokenAnchors)].join(', ')}`)
 }
 
-const requiredSections = ['quickstart', 'install', 'model', 'workspace', 'permissions', 'sandbox', 'python', 'plugins', 'tools', 'config-schema', 'events', 'lifecycle', 'capability-seam', 'llm-adapter', 'profiles', 'mcp', 'skills', 'plan-mode', 'web-tools', 'attachments', 'user-questions', 'shell-terminal', 'lsp-navigation', 'subagents', 'todos', 'goals', 'compaction', 'guardrails', 'background-jobs', 'session-history']
+const requiredSections = ['quickstart', 'install', 'model', 'workspace', 'permissions', 'sandbox', 'python', 'plugins', 'tools', 'config-schema', 'events', 'lifecycle', 'capability-seam', 'llm-adapter', 'profiles', 'mcp', 'skills', 'plan-mode', 'web-tools', 'attachments', 'user-questions', 'shell-terminal', 'lsp-navigation', 'subagents', 'todos', 'goals', 'compaction', 'guardrails', 'background-jobs', 'session-history', 'persistence', 'storage-domains', 'spill-output']
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)
 }
 
 const localeSource = readFileSync(new URL('../locales.js', import.meta.url), 'utf8')
-for (const marker of ['Sandbox modes', 'Python SDK quickstart', 'Configuration schema', 'Event system', 'Capability roles', 'LLM adapters', 'Connect an MCP server', 'Skill discovery and loading', 'Web search and fetch', 'Image attachments', 'Ask the user', 'Shell and persistent terminals', 'Precise LSP code navigation', 'Subagent delegation', 'Persistent goals', 'Context compaction', 'Tool guardrails', 'Background jobs', 'Session search and log export', 'Content provenance']) {
+for (const marker of ['Sandbox modes', 'Python SDK quickstart', 'Configuration schema', 'Event system', 'Capability roles', 'LLM adapters', 'Connect an MCP server', 'Skill discovery and loading', 'Web search and fetch', 'Image attachments', 'Ask the user', 'Shell and persistent terminals', 'Precise LSP code navigation', 'Subagent delegation', 'Persistent goals', 'Context compaction', 'Tool guardrails', 'Background jobs', 'Session search and log export', 'Session persistence and recovery', 'Domain storage for non-session data', 'Oversized tool results and spill', 'Content provenance']) {
   if (!localeSource.includes(marker)) throw new Error(`English locale is missing: ${marker}`)
 }
 

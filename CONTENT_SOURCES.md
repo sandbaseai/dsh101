@@ -77,7 +77,7 @@ Last upstream review:
 | Todo snapshots | `packages/todo/tool-todo/README.zh.md` |
 | TodoDock current-plan projection, turn-boundary clearing, slot order, collapsed status counts, composer visibility, and single-line limit | `packages/client/ui-conversation/README.zh.md`, `packages/todo/tool-todo/README.zh.md` |
 | Persistent goals, compare-and-set updates, Goal Round reservation and admission, human-input priority, durability barriers, and cancellation | `docs/subsystems/goal.zh.md`, `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |
-| Context compaction | `docs/subsystems/compaction.zh.md`, `packages/compaction/compaction-basic/README.zh.md` |
+| Context compaction, durable transaction markers, span revalidation, staged failures, positional ranges, and stale-lock handling | `docs/subsystems/compaction.zh.md`, `packages/compaction/compaction-basic/README.zh.md` |
 | Browser compaction markers, explicit summary pairing, manual-command identity, unloaded-summary behavior, accessibility affordances, and model-payload suppression | `packages/client/ui-conversation/README.zh.md` |
 | Permission presets and approvals | `packages/interaction/permission-presets/README.zh.md`, `packages/interaction/user-approval/README.zh.md` |
 | Effective permission preset derivation | `docs/subsystems/permission-presets.zh.md` |

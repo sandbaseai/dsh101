@@ -36,7 +36,7 @@ const changed = execFileSync('git', [
   'packages/llm/llm-deepseek',
   'packages/subagent', 'packages/todo', 'packages/goal', 'packages/compaction',
   'packages/interaction', 'packages/fs', 'packages/guard',
-  'packages/attachment', 'packages/jobs', 'docs/subsystems/attachment.zh.md',
+  'packages/attachment', 'packages/client/ui-attachment', 'packages/jobs', 'docs/subsystems/attachment.zh.md',
   'docs/subsystems/user-questions.zh.md', 'docs/subsystems/jobs.zh.md',
   'packages/shell', 'packages/terminal', 'packages/lsp', 'packages/session-query',
   'docs/subsystems/shell.zh.md', 'docs/subsystems/terminal.zh.md',

@@ -657,6 +657,16 @@ print(result.final_response)</code></pre>
           <div><span>03</span><strong>追加会话事件</strong><p>模型与历史记录拿到耐久引用，读取时再次校验摘要与元数据。</p></div>
         </div>
         <div class="detail-card"><strong>当前支持范围</strong><p>版本一只接受 PNG、JPEG、WebP 和 GIF 栅格图片。<code>AttachmentId</code> 是不透明标识；调用方不得解析它或据此拼接文件路径。</p></div>
+        <h3 id="attachment-ui">粘贴、拖放与限制提示</h3>
+        <p>Web UI 接受剪贴板图片和整页文件拖放；纯文本拖拽不受影响，输入框锁定或忙碌时会显示禁用遮罩并拒绝文件。前置加号是命令启动器，不是文件上传入口。</p>
+        <div class="permission-table">
+          <div><code>5 MiB</code><strong>默认单图上限</strong><span>按编码后的原始字节计算，不按缩略图或 base64 大小计算。</span></div>
+          <div><code>20 images</code><strong>默认消息数量</strong><span>一批加入会同时检查现有草稿，超过数量则整批拒绝。</span></div>
+          <div><code>100 MiB</code><strong>默认消息总量</strong><span>所有图片编码字节之和；单张图片还限制为最多 4000 万像素。</span></div>
+        </div>
+        <p>这些限制由 Host 的 <code>imageLimits</code> 投影发布，浏览器在加入草稿前先检查数量、单图与总字节并显示具体提示；Host 在提交时仍会重新验证真实格式和解码尺寸，因此客户端检查不是安全边界。</p>
+        <div class="warning"><strong>历史图片读取仍会验证完整性</strong><p>本地对象存放在 <code>$DSH_HOME/attachments/v1</code> 的私有内容寻址目录。打开历史图片时会重新检查摘要、媒体签名、尺寸与引用元数据；失败会显示重试入口，而不是展示未经验证的字节。</p></div>
+        <p>当前仅支持图片，没有普通文件卡片或上传进度。收紧部署限制不会让已经接纳的历史图片失效；附件对象可能被恢复后的会话和 Fork 共享，因此目前不会随单个会话删除而立即回收。</p>
 
         <h2 id="user-questions">向用户提问<a href="#user-questions" class="anchor">#</a></h2>
         <p>当 Agent 缺少会实质改变结果的信息时，可以通过结构化问题暂停并等待人类回答。每个问题带稳定 id，可提供单选、多选、自由文本和补充说明；回答仍按 id 返回，避免批量提问时依赖位置。</p>

@@ -50,7 +50,7 @@ Last upstream review:
 | Skill discovery and loading | `docs/subsystems/skills.zh.md`, `packages/skill/skill/README.zh.md`, `packages/skill/tool-skill/README.zh.md` |
 | Plan collaboration state | `docs/subsystems/plan.zh.md`, `packages/plan/plan-mode/README.zh.md` |
 | Web search and fetch tools | `docs/subsystems/web.zh.md`, `packages/web/tool-web/README.zh.md` |
-| Persistent image attachments | `docs/subsystems/attachment.zh.md` |
+| Persistent image attachments and browser admission UX | `docs/subsystems/attachment.zh.md`, `packages/attachment/attachment-local/README.zh.md`, `packages/client/ui-attachment/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | Structured user questions | `docs/subsystems/user-questions.zh.md` |
 | Filesystem targets and observation guards | `docs/subsystems/filesystem.zh.md` |
 | Bundled glob/grep search and result budgets | `packages/fs/tool-fs-search/README.zh.md` |

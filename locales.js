@@ -726,7 +726,21 @@ export const en = {
   '任一流结束都会使整代失效，两条流一起重建；旧代响应不能覆盖新状态。': 'Either stream ending invalidates the whole generation and rebuilds both streams; old-generation responses cannot overwrite new state.',
   '连续失败采用带抖动的指数退避：首次上限 500ms，逐次翻倍，最高 10 秒；成功连接后尝试计数归零。断线时 Host 能力描述会清空，因此目录选择和本地打开等消费者不会沿用过期能力。': 'Consecutive failures use jittered exponential backoff: the first cap is 500ms, doubling each time to at most 10 seconds; a successful connection resets the attempt count. On disconnect, the Host capability description is cleared so consumers such as directory selection and local opening cannot retain stale capabilities.',
   '反向代理必须支持 WebSocket Upgrade': 'The reverse proxy must support WebSocket Upgrade',
-  '代理若只转发普通 HTTP，页面资源和 POST 可能正常，但两条事件流无法就绪。应允许上述两个路径升级，并避免把 426 当成可缓存的应用响应。': 'If a proxy forwards only ordinary HTTP, page assets and POST calls may work while both event streams fail readiness. Allow upgrades on the two paths above and avoid treating 426 as a cacheable application response.'
+  '代理若只转发普通 HTTP，页面资源和 POST 可能正常，但两条事件流无法就绪。应允许上述两个路径升级，并避免把 426 当成可缓存的应用响应。': 'If a proxy forwards only ordinary HTTP, page assets and POST calls may work while both event streams fail readiness. Allow upgrades on the two paths above and avoid treating 426 as a cacheable application response.',
+  '粘贴、拖放与限制提示': 'Paste, drop, and limit feedback',
+  'Web UI 接受剪贴板图片和整页文件拖放；纯文本拖拽不受影响，输入框锁定或忙碌时会显示禁用遮罩并拒绝文件。前置加号是命令启动器，不是文件上传入口。': 'The Web UI accepts clipboard images and page-wide file drops. Plain-text dragging is unaffected, while a locked or busy composer shows a disabled overlay and rejects files. The leading plus button launches commands; it is not a file-upload entry point.',
+  '默认单图上限': 'Default per-image limit',
+  '按编码后的原始字节计算，不按缩略图或 base64 大小计算。': 'Measured using the original encoded bytes, not thumbnail or base64 size.',
+  '默认消息数量': 'Default message count',
+  '一批加入会同时检查现有草稿，超过数量则整批拒绝。': 'A batch addition also checks the existing draft and rejects the whole batch if the count would be exceeded.',
+  '默认消息总量': 'Default message total',
+  '所有图片编码字节之和；单张图片还限制为最多 4000 万像素。': 'The sum of encoded bytes across all images; each image is also limited to 40 million pixels.',
+  '这些限制由 Host 的 ': 'These limits are published by the Host’s ',
+  ' 投影发布，浏览器在加入草稿前先检查数量、单图与总字节并显示具体提示；Host 在提交时仍会重新验证真实格式和解码尺寸，因此客户端检查不是安全边界。': ' projection. Before adding to the draft, the browser checks count, per-image size, and total bytes and shows specific feedback. The Host still revalidates the true format and decoded dimensions on submission, so client checks are not a security boundary.',
+  '历史图片读取仍会验证完整性': 'Historical image reads still verify integrity',
+  '本地对象存放在 ': 'Local objects are stored in the private content-addressed directory under ',
+  ' 的私有内容寻址目录。打开历史图片时会重新检查摘要、媒体签名、尺寸与引用元数据；失败会显示重试入口，而不是展示未经验证的字节。': '. Opening a historical image rechecks its digest, media signature, dimensions, and reference metadata; failures show a retry action instead of rendering unverified bytes.',
+  '当前仅支持图片，没有普通文件卡片或上传进度。收紧部署限制不会让已经接纳的历史图片失效；附件对象可能被恢复后的会话和 Fork 共享，因此目前不会随单个会话删除而立即回收。': 'Only images are supported today, with no generic file card or upload progress. Tightening deployment limits does not invalidate already accepted historical images; attachment objects may be shared by restored sessions and forks, so they are not immediately collected with a single session.'
 }
 
 export const normalizedEn = new Map(

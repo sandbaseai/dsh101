@@ -32,6 +32,10 @@ Last upstream review:
 | Skill discovery and loading | `packages/skill/skill/README.zh.md`, `packages/skill/tool-skill/README.zh.md` |
 | Plan collaboration state | `packages/plan/plan-mode/README.zh.md` |
 | Web search and fetch tools | `packages/web/tool-web/README.zh.md` |
+| Subagent delegation and lifecycles | `packages/subagent/subagent/README.zh.md`, `packages/subagent/tool-subagent/README.zh.md` |
+| Todo snapshots | `packages/todo/tool-todo/README.zh.md` |
+| Persistent goals and goal rounds | `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |
+| Context compaction | `packages/compaction/compaction-basic/README.zh.md` |
 
 ## Refresh checklist
 

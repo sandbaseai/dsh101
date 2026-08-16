@@ -16,6 +16,8 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -36,8 +38,13 @@ jobs:
         run: npm run build
 
       - name: Deploy to Cloudflare Pages
+        if: env.CLOUDFLARE_API_TOKEN != ''
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 244d49f84a987ecfa2cf9480ed9d8628
           command: pages deploy dist --project-name=dsh101 --branch=main
+
+      - name: Report missing Cloudflare credentials
+        if: env.CLOUDFLARE_API_TOKEN == ''
+        run: echo "::warning::CLOUDFLARE_API_TOKEN is not available to this repository; build verified but deployment was skipped."

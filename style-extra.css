@@ -49,6 +49,27 @@
 .tool-icon { position: absolute; left: 16px; top: 16px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 7px; background: var(--blue-soft); color: var(--blue); font-weight: 700; }
 .web-tool-grid p { margin: 5px 0; font-size: 12px; line-height: 1.5; }
 .web-tool-grid small { color: var(--text-3); font-size: 10px; }
+.subagent-modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 22px 0; }
+.subagent-modes > div { padding: 16px; border: 1px solid var(--border); border-radius: 9px; background: var(--soft); }
+.subagent-modes span { display: block; margin-bottom: 9px; color: var(--blue); font: 10px ui-monospace; text-transform: uppercase; }
+.subagent-modes p { margin: 6px 0 0; font-size: 12px; line-height: 1.5; }
+.todo-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 20px 0; }
+.todo-demo > div { display: grid; grid-template-columns: 18px 1fr; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 8px; }
+.todo-demo i { width: 11px; height: 11px; border: 1px solid var(--text-3); border-radius: 50%; font: 8px/10px sans-serif; text-align: center; }
+.todo-demo .doing i { border: 3px solid var(--blue); }
+.todo-demo .done i { border-color: #35b97f; background: #35b97f; color: white; }
+.todo-demo span { font: 11px ui-monospace; }
+.todo-demo p { grid-column: 2; margin: 2px 0 0; font-size: 11px; }
+.goal-cycle { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 22px 0; padding: 18px; border: 1px solid var(--border); border-radius: 9px; background: var(--soft); overflow: auto; }
+.goal-cycle span, .goal-cycle strong { padding: 5px 9px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg); font: 11px ui-monospace; white-space: nowrap; }
+.goal-cycle strong { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); }
+.goal-cycle i { color: var(--text-3); font-style: normal; }
+.compact-visual { display: grid; grid-template-columns: 1.3fr auto 1fr auto 1fr; align-items: center; gap: 9px; margin: 24px 0; }
+.compact-visual > div { min-height: 104px; display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 13px; border: 1px solid var(--border); border-radius: 8px; background: var(--soft); }
+.compact-visual .old { opacity: .55; text-decoration: line-through; }
+.compact-visual .summary { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); }
+.compact-visual span, .compact-visual small { font-size: 10px; }
+.compact-visual i { color: var(--text-3); font-style: normal; text-align: center; }
 @media (max-width: 760px) {
   .language-btn span { display: none; }
   .error-table > div { grid-template-columns: 1fr; gap: 6px; }
@@ -59,4 +80,7 @@
   .skill-pipeline, .plan-flow { grid-template-columns: 1fr; }
   .skill-pipeline > i, .plan-flow > i { transform: rotate(90deg); text-align: center; }
   .web-tool-grid { grid-template-columns: 1fr; }
+  .subagent-modes, .todo-demo { grid-template-columns: 1fr; }
+  .compact-visual { grid-template-columns: 1fr; }
+  .compact-visual > i { transform: rotate(90deg); }
 }

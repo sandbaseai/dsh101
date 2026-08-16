@@ -32,6 +32,7 @@ Last upstream review:
 | Bundles and publishing | `docs/user/develop/basic/publish.zh.md` |
 | Fiber lifecycle | `docs/user/develop/framework/index.zh.md` |
 | Web client module graph and bundle delivery | `docs/subsystems/client-modules.zh.md` |
+| Browser UI slot declarations, chain selection, stores, and recursive lifecycle cleanup | `packages/client/ui-slots/README.zh.md` |
 | Runtime plugin inventory and Settings diagnostics | `packages/host/plugin-inventory/README.zh.md`, `packages/client/ui-settings-plugin-inventory/README.zh.md`, `apps/cli/reference/README.zh.md` |
 | Scoped registration layers and ownership | `docs/subsystems/scope.zh.md` |
 | Web server routing and exposure boundary | `docs/subsystems/web-server.zh.md` |

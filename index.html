@@ -95,6 +95,7 @@
           <a href="#events">事件系统</a>
           <a href="#lifecycle">插件生命周期</a>
           <a href="#client-modules">Web Client 模块</a>
+          <a href="#ui-slots">UI Slots</a>
           <a href="#plugin-inventory">插件清单诊断</a>
           <a href="#scope-routing">Scope 路由</a>
           <a href="#web-server">Web Server</a>
@@ -439,6 +440,16 @@ print(result.final_response)</code></pre>
           <div><span>03</span><strong>Activate</strong><p>immediately 只负责预取和登记，真正的激活顺序由 Fiber 依赖等待决定。</p></div>
         </div>
         <p>单个 bundle 的 rev 来自内容哈希，整图 rev 会随任一行变化。开发时 HMR 重新哈希并通过 SSE 广播；生产图不含 HMR。插件元数据会按包名缓存，因此插件集合变化需重启，单纯重建 bundle 则走 rebuilt 通知。</p>
+
+        <h2 id="ui-slots">UI Slots：声明、选择与清理<a href="#ui-slots" class="anchor">#</a></h2>
+        <p>Client bundle 到达浏览器后，通过 Slot 注册表把组件贡献到已有界面。一次注册同时声明目标 slot、可渲染的子 slot、可选 store seat 与业务注入；这张声明表既是类型契约，也是运行时授权边界。</p>
+        <div class="compare-grid">
+          <div><strong>声明即授权</strong><p>组件只能注册到已经声明的 slot，也只能渲染注册时列出的子 slot。未声明目标、重复子声明或跨 scope 复用同一 handle 都会在注册时失败。</p></div>
+          <div><strong>Chain 由条目提名</strong><p>每个 chain 条目提供纯 selector；按可选升序 priority、再按注册顺序检查，第一个返回非空值的条目获选，否则调用 owner fallback。</p></div>
+          <div><strong>状态由运行时绑定</strong><p>核心只传递裸 snapshot source；React selector hook 在 renderer 中绑定。Store actions 会移除 draft 参数后交给组件与 inject factory。</p></div>
+        </div>
+        <div class="detail-card"><strong>生命周期会收回整棵贡献</strong><p>注册 disposer 不只移除当前组件，还会递归撤销它声明的子 slot、贡献记录与 store 挂载。声明代次与普通条目版本分开计数，让运行时识别过期授权。</p></div>
+        <div class="warning"><strong>模块可加载不代表 Slot 合法</strong><p>Client Module Loader 负责下载、物化与 HMR invalidate；SlotCore 独立验证布局所有权。插件必须同时满足模块图和 slot 声明，不能靠运行时碰巧存在的组件路径绕过授权。</p></div>
 
         <h2 id="plugin-inventory">用插件清单核对运行拓扑<a href="#plugin-inventory" class="anchor">#</a></h2>
         <p>设置中的「插件」页面是当前 Cordis Loader 树的只读快照。它首次打开时才查询 Host，跳过结构性 group 行，并按 Loader 顺序列出条目 ID、模块标识、有效启用状态和根 Fiber 阶段。</p>

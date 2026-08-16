@@ -124,6 +124,7 @@
           <a href="#llm-streaming">流式协议与重试</a>
           <a href="#dynamic-extensions">动态扩展</a>
           <a href="#code-runtime">Code Runtime</a>
+          <a href="#code-mode-entry">Code Mode 入口边界</a>
           <a href="#profiles">Profile 与组合包</a>
         </section>
         <section>
@@ -811,6 +812,16 @@ print(result.final_response)</code></pre>
         </div>
         <p>异常、预算超时、调用方 abort、worker 退出、非 JSON 输出和结果超限是彼此独立的失败类型。输出超限会明确失败而非塞入替代文本；停止 runtime 时必须终止并等待全部运行结算。</p>
         <div class="warning"><strong>Isolation 只是诊断标签</strong><p>worker-thread、process 或 container 描述执行基底，不构成安全承诺。Bindings 仍是程序调用宿主能力的入口，必须只暴露确实授权的函数。</p></div>
+
+        <h3 id="code-mode-entry">Code Mode 只保留一个模型直连入口<a href="#code-mode-entry" class="anchor">#</a></h3>
+        <p>工具注册表在 code 与 both 模式下都会提供保留的 run_code 传输，并按当前 Runtime 语言生成 TypeScript 或 Python SDK。区别在于 both 同时公开普通工具 Schema，而 code 模式只允许模型直接调用 run_code。</p>
+        <div class="compare-grid">
+          <div><strong>直呼原生工具会提前失败</strong><p>code 模式下，模型直接调用其他工具名会在执行创建阶段得到 UNKNOWN_TOOL，早于 pre-execute、审批与 Guard；错误会明确提示改从 run_code 程序内部调用。</p></div>
+          <div><strong>SDK 子调用携带父级身份</strong><p>程序中的绑定分派带有外层执行的 parent token，因此不受单入口限制，并重新进入完整工具流水线。成功返回规范 JSON 值，失败则成为只含 toolName 和 message 的 ToolCallError。</p></div>
+          <div><strong>中间结果不进入对话</strong><p>子调用会留下关联的 code-dispatch 事件供 UI 与审计使用，但派生模型历史只接收程序最终打印的日志和返回值。模型需要主动提取并汇总真正有用的信息。</p></div>
+        </div>
+        <div class="detail-card"><strong>生成 SDK 保持前缀稳定</strong><p>可见工具按字典序生成精确参数与输出类型；工具集合和 Runtime 语言不变时，SDK 文本逐字节稳定。无法精确呈现的原始 Schema 会降级为 unknown 或 Any，而不会让提示词组装抛错。</p></div>
+        <div class="warning"><strong>程序失败不会回滚已经发生的副作用</strong><p>运行结算会中止并排空未完成绑定，但已经执行的工具副作用仍然存在。子调用附加上下文会延迟到父级结果之后，即使程序后来失败也保留来源与元数据。</p></div>
 
         <h2 id="profiles">Profile 与组合包<a href="#profiles" class="anchor">#</a></h2>
         <p><strong>组合包（bundle）</strong>贡献一层配置，<strong>profile</strong>则描述哪些组合包按什么顺序构成一个可启动应用。二者职责不同，不应混为一种 manifest。</p>

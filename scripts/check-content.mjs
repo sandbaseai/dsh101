@@ -17,6 +17,7 @@ requiredSections.push('tool-schema-contract')
 requiredSections.push('tool-output-contract')
 requiredSections.push('parallel-tools')
 requiredSections.push('tool-visibility')
+requiredSections.push('code-mode-entry')
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)

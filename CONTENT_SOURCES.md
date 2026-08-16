@@ -55,7 +55,7 @@ Last upstream review:
 | LLM streaming, normalized failures, retry policy, max-token termination, and Web status | `docs/subsystems/llm-streaming.zh.md`, `docs/subsystems/session.zh.md`, `packages/core/agent-loop/README.zh.md`, `packages/llm/llm-retry/README.zh.md`, `packages/client/runtime/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | Durable retry-notice transitions, browser-relative countdowns, terminal-output freezing, and AUTH display redaction | `packages/client/runtime/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | Agent-authored dynamic Cordis extensions | `docs/subsystems/extensions.zh.md`, `packages/extensions/README.zh.md`, `packages/extensions/cordis-host-runner/README.zh.md`, `packages/extensions/tool-cordis/README.zh.md` |
-| Optional code runtime and structured bindings | `docs/subsystems/code-runtime.zh.md` |
+| Optional code runtime, code/both entry boundaries, generated SDK dispatch, and structured bindings | `docs/subsystems/code-runtime.zh.md`, `packages/core/tools/README.zh.md` |
 | Agent delivery, cancellation, and ownership | `docs/subsystems/core.zh.md` |
 | Web queue snapshots, editing, steering, and keyboard delivery | `packages/host/apiproxy/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | Queue text-only editing, immutable mixed-content steering, subagent read-only behavior, race convergence, and pending-to-durable bubble handoff | `packages/client/ui-conversation/README.zh.md` |

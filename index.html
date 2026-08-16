@@ -160,6 +160,7 @@
           <a href="#commands">斜杠命令</a>
           <a href="#input-triggers">输入触发器</a>
           <a href="#hooks">Hooks 桥接</a>
+          <a href="#hook-protocol">Hook 协议语义</a>
           <a href="#schedule">定时提醒</a>
           <a href="#workflows">Workflow 与 Ralph</a>
         </section>
@@ -1143,6 +1144,16 @@ print(result.final_response)</code></pre>
           <div><code>PostToolUse / Stop</code><strong>反馈与续行</strong><p>工具后可阻塞或追加反馈；Stop 阻塞会 steer 下一步。</p></div>
         </div>
         <div class="warning"><strong>不是完整协议复刻</strong><p>桥接器只运行同步 command hook，且各自只支持官方协议的一个子集。配置在进程加载时读取一次；不支持的事件或字段不会自动获得原产品语义。</p></div>
+
+        <h3 id="hook-protocol">退出状态、结果合并与审计日志<a href="#hook-protocol" class="anchor">#</a></h3>
+        <p>共享 Hook Protocol 是两个桥接器复用的库，不是 Cordis 插件。桥接器负责方言 payload 与 Decision 映射；共享层负责 matcher、stdin 执行、输出解码、最严格合并、会话记账和脱离任务排空。</p>
+        <div class="compare-grid">
+          <div><strong>只有退出码 2 默认阻塞</strong><p>exit 2 使用 stderr 作为阻塞原因；其他非零退出和执行器基础设施故障不会阻塞 Agent。runHook 把故障规范成结果而不抛出，并转发取消信号与单 Hook 超时。</p></div>
+          <div><strong>多个结果按最严格者合并</strong><p>权限优先级固定为 deny、ask、allow；continue:false 一旦出现就保持停止。阻塞原因以空行连接，additionalContext 与 systemMessages 按配置顺序累积。</p></div>
+          <div><strong>方言匹配规则并不相同</strong><p>Codex matcher 始终是未锚定正则；Claude Code 对纯字母数字、下划线和竖线模式使用字面交替，其他模式才作为正则。无效表达式在配置阶段隔离。</p></div>
+        </div>
+        <div class="detail-card"><strong>Hook 调用有成对审计事件</strong><p>轮次内调用追加 hook/invoked 与 hook/result，并按 handler id 配对；它们只进入日志，不改变模型表层。stderr 摘要按配置截断，空值省略。SessionStart 位于首轮之前，因此不写这对事件。</p></div>
+        <div class="warning"><strong>脱离执行也必须完全停稳</strong><p>SessionStart 和部分 Subagent Hook 不会阻塞对应扩展点，但桥接器跟踪完整运行链。插件 dispose 会先发出 abort，再等待 Hook 进程与 continuation 全部结算，避免已卸载上下文继续产生副作用。</p></div>
 
         <h2 id="schedule">Session 内定时提醒<a href="#schedule" class="anchor">#</a></h2>
         <p><code>schedule_create</code> 支持延时一次、绝对时间一次和固定速率重复三种规则。记录持久在原 Session 中，到期后排队一个普通 follow-up；不会发送外部通知，也不会唤醒 cold Session。</p>

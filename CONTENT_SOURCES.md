@@ -106,7 +106,7 @@ Last upstream review:
 | Oversized tool result spill | `docs/subsystems/spill.zh.md` |
 | User slash commands | `docs/subsystems/commands.zh.md` |
 | Browser input triggers, command discovery, and keyboard arbitration | `packages/client/ui-input-trigger/README.zh.md`, `packages/client/ui-commands/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
-| Codex and Claude Code hook bridges | `packages/hooks/hooks-codex/README.zh.md`, `packages/hooks/hooks-claude-code/README.zh.md` |
+| Codex and Claude Code hook bridges, shared exit/output protocol, strict result merging, audit events, and detached-run draining | `packages/hooks/hook-protocol/README.zh.md`, `packages/hooks/hooks-codex/README.zh.md`, `packages/hooks/hooks-claude-code/README.zh.md` |
 | Session-local schedules | `docs/subsystems/schedule.zh.md` |
 | Dynamic workflows and Ralph | `docs/subsystems/workflow.zh.md`, `packages/workflow/tool-workflow/README.zh.md`, `packages/workflow/tool-ralph/README.zh.md` |
 | Layered user settings, file hot reload, safe mutation, revision conflicts, and secret redaction | `docs/subsystems/settings.zh.md`, `packages/settings/settings/README.zh.md`, `packages/settings/settings-file/README.zh.md`, `packages/client/ui-settings/README.zh.md`, `packages/host/apiproxy/README.zh.md` |

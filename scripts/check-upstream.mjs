@@ -59,7 +59,7 @@ const changed = execFileSync('git', [
   'docs/subsystems/extensions.zh.md', 'packages/extensions',
   'docs/subsystems/scope.zh.md', 'packages/core/scope',
   'docs/subsystems/web-server.zh.md', 'packages/host/webserver',
-  'packages/host/apiproxy', 'packages/host/directory-picker',
+  'packages/host/apiproxy', 'packages/host/directory-picker', 'packages/util/native-command',
   'packages/host/directory-picker-auto', 'packages/host/directory-picker-native',
   'packages/host/directory-picker-browse', 'packages/client/connection',
   'packages/client/ui-conversation', 'packages/client/ui-workspace', 'packages/client/ui-input-trigger', 'packages/client/ui-commands',

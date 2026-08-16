@@ -35,6 +35,7 @@ Last upstream review:
 | Scoped registration layers and ownership | `docs/subsystems/scope.zh.md` |
 | Web server routing and exposure boundary | `docs/subsystems/web-server.zh.md` |
 | Browser RPC transport and privileged API boundary | `packages/host/apiproxy/README.zh.md`, `packages/client/connection/README.zh.md` |
+| Host-native path opening, WSL handoff, shell-free command execution, and desktop detection | `packages/host/apiproxy/README.zh.md`, `packages/util/native-command/README.zh.md`, `packages/host/directory-picker-auto/README.zh.md`, `packages/client/connection/README.zh.md` |
 | Browser WebSocket readiness, generations, and reconnect backoff | `packages/client/connection/README.zh.md`, `packages/client/connection/src/client/connection.ts` |
 | Generated TypeRT remote-call boundary | `docs/subsystems/typert.zh.md` |
 | Services and dependency injection | `docs/user/develop/framework/service.zh.md` |

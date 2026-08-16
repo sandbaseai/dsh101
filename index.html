@@ -477,6 +477,15 @@ print(result.final_response)</code></pre>
         </div>
         <div class="warning"><strong>不要把监听地址当成认证</strong><p>底层 Web Server 本身不提供 TLS 或用户认证。需要远程访问时，应在可信反向代理后增加 HTTPS 和访问控制，并审查诊断错误是否适合向多用户公开。</p></div>
 
+        <h3 id="native-open-boundary">Host 原生打开与桌面可见性<a href="#native-open-boundary" class="anchor">#</a></h3>
+        <p><code>host.openPath</code> 把已由 Host 解析的路径交给操作系统默认应用：macOS 使用 <code>open</code>，Windows 使用 <code>Invoke-Item</code>，桌面 Linux 使用 <code>xdg-open</code>。共享 runner 直接 spawn 可执行文件并传递参数，不拼接 shell 字符串；取消会传播到原生子进程。</p>
+        <div class="compare-grid">
+          <div><strong>能力声明</strong><p><code>host.describe.canOpenPath</code> 根据显式 <code>nativeOpen</code>、注入 opener 或平台显示探测发布；断线时客户端清空该能力，不沿用旧判断。</p></div>
+          <div><strong>WSL 路径交接</strong><p>Linux 路径先经 <code>wslpath -w</code> 转成 Windows 或 UNC 路径，再交给 Windows 应用，包括 HTML、SVG 等浏览器文档。</p></div>
+          <div><strong>浏览器双重门禁</strong><p>界面只有在页面来自 loopback 且 Host 同时声明能力时才呈现原生操作；请求仍受同源与特权方法栅栏约束。</p></div>
+        </div>
+        <div class="warning"><strong>Loopback 不能证明桌面属于操作者</strong><p>SSH 端口转发可能让远端 Host 看见来自 <code>127.0.0.1</code> 的请求，却把窗口打开在无人值守的服务器桌面。无头 macOS/Windows、WSL interop 不可用或 Linux display 探测失真时，也应在网关设置 <code>nativeOpen: false</code>，以关闭原生交接。</p></div>
+
         <h2 id="connection-recovery">WebSocket 就绪与断线恢复<a href="#connection-recovery" class="anchor">#</a></h2>
         <p>浏览器分别连接 <code>/api/events.mux</code> 和 <code>/api/events.host</code>。两条连接都只接收文本帧，客户端不会在 socket 上发送业务请求；直接用普通 GET 访问会得到 426，也没有浏览器 SSE 回退。</p>
         <div class="capability-flow">

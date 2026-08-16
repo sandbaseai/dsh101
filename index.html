@@ -66,6 +66,7 @@
           <a href="#headless">Headless 任务</a>
           <a href="#inspect-config">检查生效配置</a>
           <a href="#model">配置模型</a>
+          <a href="#onboarding">首次启动诊断</a>
         </section>
         <section>
           <h2>核心概念</h2>
@@ -202,7 +203,7 @@
         <ol class="steps">
           <li><span>1</span><div><strong>进入模型设置</strong><p>点击设置图标，在侧栏选择「模型」。</p></div></li>
           <li><span>2</span><div><strong>添加凭证</strong><p>选择服务提供方，并粘贴你的 API Key。</p></div></li>
-          <li><span>3</span><div><strong>验证连接</strong><p>保存后状态显示为绿色，即可创建会话。</p></div></li>
+          <li><span>3</span><div><strong>确认凭据与路由</strong><p>绿色圆点只确认具名凭据已经配置；还要在会话模型选择器中确认所选路由可用。</p></div></li>
         </ol>
         <div class="detail-card">
           <strong>凭据不会返回浏览器</strong>
@@ -215,6 +216,18 @@
           <div><code>UNKNOWN_MODEL</code><span>重新选择已配置模型，或在自定义提供方中添加模型。</span></div>
           <div><code>401 /models</code><span>检查凭据；不提供模型发现端点时应手动录入模型。</span></div>
         </div>
+
+        <h2 id="onboarding">首次启动与模型就绪诊断<a href="#onboarding" class="anchor">#</a></h2>
+        <p>首次使用引导不会把“页面上存在模型名称”误当成模型已经可调用。只要任意已注册路由拥有已配置的具名凭据，或该路由使用 Bedrock、Vertex ADC 等原生认证，引导就会自动完成；否则才提示填写 DeepSeek 官方密钥。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Configured</strong><p>设置中存在 provider profile，模型页可以编辑它；这不等于适配器正在提供路由。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Credential</strong><p>绿色状态只表示具名引用已经存储；环境提供的只读凭据同样有效，原生认证则不显示圆点。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Routable</strong><p>会话选择的 provider 当前必须有活跃适配器；否则输入框会被阻塞并提示重新选择模型。</p></div>
+        </div>
+        <p>模型目录只是建议列表，不是路由白名单：一个未列出的模型仍可能由适配器解析，而目录中可见的休眠提供方也可能暂时不可调用。真正发送 prompt 时，宿主会再次执行权威检查，并以 <code>model-unavailable</code> 拒绝不可路由的选择。</p>
+        <div class="warning"><strong>引导跳过不代表配置成功</strong><p>适配器缺失、配置能力只读或联接失败时，凭据步骤会直接让位，Models 页面仍是诊断入口。保存密钥后无需重启；DeepSeek 路由会在下一次调用时重新解析凭据。</p></div>
 
         <h2 id="workspace">选择工作区<a href="#workspace" class="anchor">#</a></h2>
         <p>点击「选择工作区」，添加你启动 <code>dsh</code> 时所在的项目目录。工作区决定 Agent 能够读取和修改的文件范围。</p>

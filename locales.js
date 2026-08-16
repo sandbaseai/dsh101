@@ -94,8 +94,8 @@ export const en = {
   '点击设置图标，在侧栏选择「模型」。': 'Select the settings icon, then choose Models in the sidebar.',
   '添加凭证': 'Add credentials',
   '选择服务提供方，并粘贴你的 API Key。': 'Choose a provider and paste your API key.',
-  '验证连接': 'Verify the connection',
-  '保存后状态显示为绿色，即可创建会话。': 'Once the saved state turns green, you can create a session.',
+  '确认凭据与路由': 'Confirm credentials and routing',
+  '绿色圆点只确认具名凭据已经配置；还要在会话模型选择器中确认所选路由可用。': 'A green dot only confirms that a named credential is configured; also confirm that the selected route is available in the session model selector.',
   '凭据不会返回浏览器': 'Credentials never return to the browser',
   'API Key 是只写字段。保存后前端只会收到脱敏描述符；明文保存在 ': 'The API key is write-only. After saving, the frontend receives only a redacted descriptor; the plaintext value is stored in ',
   '，settings 中只保存凭据引用。': ', while settings retain only a credential reference.',
@@ -680,7 +680,17 @@ export const en = {
   '队列只有一项时直接显示，多项时默认折叠并可逐项编辑、删除或严格 steer。若 Agent 已经领取目标项，操作会收敛为“已开始投递”，客户端不会靠轮次状态擅自移除或重发消息。': 'A single queue item is shown directly; multiple items collapse by default and can be edited, removed, or strictly steered one at a time. If the agent has already claimed an item, the operation converges on delivery already having started; the client never removes or resends messages based on turn state guesses.',
   '导出前先用 HEAD 预检，活动会话会经过 flush 持久性屏障，然后浏览器直接接管 GET 下载；JavaScript 不会把整个 ZIP 缓存在内存。归档保留持久化工件的原始内容，子代理按目录分组，共享附件只写入一次。': 'Export first uses a HEAD preflight, active sessions pass through a flush durability barrier, and the browser then takes over the GET download; JavaScript never buffers the whole ZIP in memory. The archive preserves raw persisted artifacts, groups subagents in directories, and writes shared attachments only once.',
   '导出会明确失败，不会静默缺件': 'Export fails explicitly instead of silently omitting files',
-  '缺少根会话返回 404，后端不支持逐会话原始工件返回 501；子会话工件或引用附件读取失败会让整个流失败。HEAD 只能发现开始传输前的错误，后续失败由浏览器下载管理器报告。': 'A missing root session returns 404, while a backend without per-session raw artifacts returns 501. Failure to read a child-session artifact or referenced attachment fails the entire stream. HEAD can only catch errors before streaming begins; later failures are reported by the browser download manager.'
+  '缺少根会话返回 404，后端不支持逐会话原始工件返回 501；子会话工件或引用附件读取失败会让整个流失败。HEAD 只能发现开始传输前的错误，后续失败由浏览器下载管理器报告。': 'A missing root session returns 404, while a backend without per-session raw artifacts returns 501. Failure to read a child-session artifact or referenced attachment fails the entire stream. HEAD can only catch errors before streaming begins; later failures are reported by the browser download manager.',
+  '首次启动诊断': 'First-run diagnostics',
+  '首次启动与模型就绪诊断': 'First-run and model-readiness diagnostics',
+  '首次使用引导不会把“页面上存在模型名称”误当成模型已经可调用。只要任意已注册路由拥有已配置的具名凭据，或该路由使用 Bedrock、Vertex ADC 等原生认证，引导就会自动完成；否则才提示填写 DeepSeek 官方密钥。': 'First-run onboarding does not mistake a visible model name for a callable model. It completes automatically when any registered route has a configured named credential or uses native authentication such as Bedrock or Vertex ADC; otherwise it asks for a DeepSeek official API key.',
+  '设置中存在 provider profile，模型页可以编辑它；这不等于适配器正在提供路由。': 'A provider profile exists in settings and can be edited on the Models page; this does not mean an adapter is actively serving the route.',
+  '绿色状态只表示具名引用已经存储；环境提供的只读凭据同样有效，原生认证则不显示圆点。': 'Green status means only that a named reference is stored. Read-only credentials supplied by the environment are valid too, while native authentication shows no dot.',
+  '会话选择的 provider 当前必须有活跃适配器；否则输入框会被阻塞并提示重新选择模型。': 'The provider selected by the session must currently have an active adapter; otherwise the composer is blocked and asks for another model.',
+  '模型目录只是建议列表，不是路由白名单：一个未列出的模型仍可能由适配器解析，而目录中可见的休眠提供方也可能暂时不可调用。真正发送 prompt 时，宿主会再次执行权威检查，并以 ': 'The model catalog is advisory, not a routing allowlist: an unlisted model may still be resolved by an adapter, while a visible dormant provider may not currently be callable. When a prompt is sent, the host performs the authoritative check again and rejects an unroutable selection with ',
+  ' 拒绝不可路由的选择。': '.',
+  '引导跳过不代表配置成功': 'Skipped onboarding does not prove successful configuration',
+  '适配器缺失、配置能力只读或联接失败时，凭据步骤会直接让位，Models 页面仍是诊断入口。保存密钥后无需重启；DeepSeek 路由会在下一次调用时重新解析凭据。': 'When the adapter is missing, configuration is read-only, or the joined snapshot fails, the credential step yields immediately and the Models page remains the diagnostic surface. No restart is needed after saving a key; the DeepSeek route resolves credentials again on the next call.'
 }
 
 export const normalizedEn = new Map(

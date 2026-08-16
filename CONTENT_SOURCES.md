@@ -21,6 +21,7 @@ Last upstream review:
 | Workspace identity and lifecycle | `docs/subsystems/workspace.zh.md` |
 | Workspace directory picker and adaptive native/browse behavior | `packages/host/directory-picker/README.zh.md`, `packages/host/directory-picker-auto/README.zh.md`, `packages/host/directory-picker-native/README.zh.md`, `packages/host/directory-picker-browse/README.zh.md` |
 | Model providers and credentials | `docs/user/guide/providers.zh.md` |
+| First-run onboarding, provider readiness, and session model routing | `packages/client/ui-settings-models/README.zh.md`, `packages/client/ui-model-selection/README.zh.md`, `packages/host/apiproxy/README.zh.md`, `packages/llm/llm-deepseek/README.zh.md` |
 | Python SDK and security boundary | `docs/user/guide/python-sdk.zh.md` |
 | CLI and profiles | `apps/cli/README.zh.md` |
 | Headless execution and configuration dumps | `apps/cli/reference/README.zh.md` |

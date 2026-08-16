@@ -115,6 +115,7 @@
           <a href="#agent-presets">Agent Presets</a>
           <a href="#prompt-assembly">Persona 与提示词</a>
           <a href="#workspace-instructions">工作区指令</a>
+          <a href="#time-context">时间上下文</a>
         </section>
         <section>
           <h2>Agent 工作流</h2>
@@ -639,6 +640,16 @@ print(result.final_response)</code></pre>
         </div>
         <p><code>maxBytes</code> 为整个渲染设置硬预算，优先保留最具体的文件：先省略较宽泛来源，再截断最具体来源，并向模型报告省略或截断路径。单文件读取还受 <code>maxSourceBytes</code> 限制。</p>
         <div class="warning"><strong>发现由结构化文件操作驱动</strong><p>插件没有文件 watcher，也不会解析任意 shell 语法；<code>bash</code> 中的 <code>cd</code> 不会发现嵌套指令。外部改动会在下一次成功的第一方文件操作、会话恢复对账或压缩后重建基线时变得可见。候选文件末段 symlink 会被跟随，因此不受信任仓库仍需文件系统策略或 OS 沙箱约束。</p></div>
+
+        <h2 id="time-context">请求本地的持久时间上下文<a href="#time-context" class="anchor">#</a></h2>
+        <p>可选的 <code>time-context</code> 在模型步骤准备期采样带时区时间、经过时长和当前开放轮次的浏览器时区。官方 Schedule Web overlay 会挂载它；默认组合不会自动启用。</p>
+        <div class="compare-grid">
+          <div><strong>唯一时区</strong><p>浏览器为每条提示词采样 IANA 时区，Host 校验后绑定到确切的持久 <code>user-rpc</code> 来源；模型按该请求本地时间解释未限定日期。</p></div>
+          <div><strong>混合或缺失</strong><p>同一开放轮次出现多个时区时标记为 <code>mixed</code>，没有来源时标记为 <code>unavailable</code>；模型被要求澄清，而不是猜测。</p></div>
+          <div><strong>持久读数</strong><p>只在步骤确实进入时，于 <code>step/start</code> 后记录带来源的 user message；恢复和压缩后仍可从原始事件继续间隔调度。</p></div>
+        </div>
+        <p><code>refreshIntervalMs: 0</code> 会为每次合格准备追加读数，正数间隔可减少历史增长。读数只追加在可复用前缀之后，不会使已有 KV cache 失效，但会持续占用 token，直到被压缩遮蔽。</p>
+        <div class="warning"><strong>提示词时区不是工具默认值</strong><p>配置或进程时区可以在来源缺失时格式化时钟，却不代表用户权威。Schedule 等接受本地日历字段的工具仍必须收到显式偏移量或 <code>time_zone</code>，不会从模型上下文、Session 标头或连接状态中偷偷继承。</p></div>
 
         <div class="chapter-break"><span>05</span><div><small>Agent 工作流</small><strong>连接外部能力</strong></div></div>
 

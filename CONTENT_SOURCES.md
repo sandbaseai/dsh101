@@ -86,6 +86,7 @@ Last upstream review:
 | Agent preset composition | `packages/preset/agent-presets/README.zh.md` |
 | Persona and system prompt assembly | `packages/preset/persona/README.zh.md`, `docs/subsystems/system-prompt.zh.md` |
 | Durable workspace instruction discovery, refresh, and byte budgets | `packages/context/agent-instructions/README.zh.md` |
+| Request-local browser time zones and durable per-step time context | `packages/context/time-context/README.zh.md`, `packages/client/runtime/README.zh.md`, `docs/subsystems/schedule.zh.md` |
 | Token metering, context pressure, and Web statistics | `docs/subsystems/token-meter.zh.md`, `packages/llm/token-meter/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | Session telemetry and redaction | `docs/subsystems/session-telemetry.zh.md` |
 | Per-home anonymous user identity | `packages/identity/anonymous-user-id/README.zh.md` |

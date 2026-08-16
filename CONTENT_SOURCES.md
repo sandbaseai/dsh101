@@ -121,7 +121,7 @@ Last upstream review:
 | Token metering, context pressure, and Web statistics | `docs/subsystems/token-meter.zh.md`, `packages/llm/token-meter/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | Full-log session statistics, window fallback, TTFT/throughput sample admission, per-turn timing footers, truncation tooltip, and missing-unit omission | `packages/client/ui-conversation/README.zh.md` |
 | Trajectory event inspection, timeline interaction, virtualized history, stable prefix pagination, composer clearance, and streaming follow | `packages/client/ui-trajectory/README.zh.md` |
-| Session telemetry and redaction | `docs/subsystems/session-telemetry.zh.md` |
+| Session telemetry, chunk sampling, handoff versus delivery, sharing disclosure, shutdown drain, and redaction | `docs/subsystems/session-telemetry.zh.md` |
 | Per-home anonymous user identity | `packages/identity/anonymous-user-id/README.zh.md` |
 | Package-owned runtime invariants | `docs/subsystems/invariants.zh.md` |
 | Per-message feedback | `docs/subsystems/feedback.zh.md` |

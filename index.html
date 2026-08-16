@@ -164,6 +164,7 @@
           <a href="#trajectory">Trajectory 调试视图</a>
           <a href="#trajectory-viewport">Trajectory 视口稳定性</a>
           <a href="#telemetry">Session Telemetry</a>
+          <a href="#telemetry-delivery">遥测交付边界</a>
           <a href="#anonymous-id">匿名身份</a>
           <a href="#invariants">运行时 Invariants</a>
           <a href="#feedback">消息反馈</a>
@@ -1142,6 +1143,15 @@ print(result.final_response)</code></pre>
           <div><span>03</span><strong>Emit</strong><p>后端非阻塞入队；批处理、重试、留存和丢失策略归 SDK。</p></div>
         </div>
         <div class="warning"><strong>尽力而为，不是审计真源</strong><p>记录可能丢失或重复，接收端应按 <code>(session.id, event.seq)</code> 去重 ledger。脱敏只修改导出副本，权威 Session 日志永不改写。</p></div>
+
+        <h3 id="telemetry-delivery">如何解读遥测的交接与送达<a href="#telemetry-delivery" class="anchor">#</a></h3>
+        <p>Harness 的职责止于把逻辑记录非阻塞地交给后端 SDK。协调器不能用本地游标证明远端已经接收，也不拥有 SDK 的批处理、重试、排队与丢弃策略。</p>
+        <div class="compare-grid">
+          <div><strong>序号缺口可能是设计结果</strong><p>每个 turn 与 step 组合只捕获第一条 assistant/chunk，作为流已开始的信号；后续内容分片主动丢弃，因此 ledger 的 event seq 不连续不等于传输丢包。</p></div>
+          <div><strong>共享状态只是策略披露</strong><p>后端披露 full、feedback-only 或 disabled，供反馈确认界面说明当前部署策略；它不承诺某条记录已经送达或会被保留。</p></div>
+          <div><strong>关闭会等待 SDK 静止</strong><p>销毁前先捕获 shutdown 信号，再等待后端排空已入队记录；shutdown 拒绝只记为警告，不会让应用退出失败。</p></div>
+        </div>
+        <div class="warning"><strong>Ledger 与 Ops 的去重方式不同</strong><p>Ledger 可用 session id 与 event seq 组成的身份去重；agent-error 和 shutdown 属于告警信号，刻意没有 event seq，接收端应容忍重复而不是把它们累计成审计条目。</p></div>
 
         <h2 id="anonymous-id">每个 Harness Home 的匿名身份<a href="#anonymous-id" class="anchor">#</a></h2>
         <p>Harness 会为每个 DSH_HOME 生成随机 UUID v4，供 Session telemetry、直接反馈确认和 DeepSeek Provider 请求共同关联。它保存在 .anonymous-user-id，不从 hostname、网络地址、Git remote 或其他身份材料派生。</p>

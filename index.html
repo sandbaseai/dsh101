@@ -175,6 +175,7 @@
           <h2>持续执行</h2>
           <a href="#subagents">Subagents</a>
           <a href="#subagent-activation">Subagent Activation</a>
+          <a href="#subagent-report">Subagent 报告通道</a>
           <a href="#todos">Todo 列表</a>
           <a href="#todo-dock">Todo 计划条</a>
           <a href="#goals">持久 Goal</a>
@@ -1217,6 +1218,16 @@ print(result.final_response)</code></pre>
         </div>
         <div class="detail-card"><strong>父级等待子级优先释放</strong><p>只要 ownedChildren 非空，受管理父级就不能 settle。子级必须完全停稳、释放所有后代、尝试最终 flush 并 dispose 自身 Handle 后，父级所有权才解除；持久子会话不会随进程内 Activation 拆卸而删除。</p></div>
         <div class="warning"><strong>Interrupt 不是 Dispose</strong><p>中断在线子级只对当前 driver 发出取消并立即返回，不等待完全停稳；Activation、尚未领取的 Inbox 工作和已发布后代都会保留。之后的唤醒消息会继续处理被暂停的 FIFO。</p></div>
+
+        <h3 id="subagent-report">主动报告与结算通知不是同一件事<a href="#subagent-report" class="anchor">#</a></h3>
+        <p>可选的 report 工具只安装进可继续的进程内子级作用域。接收方不能由子级指定：运行时从持久 parentSession 推导唯一的直接父级，并要求发送方与父级此刻都在线。</p>
+        <div class="compare-grid">
+          <div><strong>Wakeup：开启父级后续轮次</strong><p>默认策略用 parent followup 投递一个普通新轮次；它不会 steer 正在运行的父级轮次。</p></div>
+          <div><strong>Quiet：只注入后续上下文</strong><p>Quiet 使用 parent inject，不立即发起模型请求；父级繁忙时，内容会等待下一个安全日志位置。</p></div>
+          <div><strong>报告不代表子级结束</strong><p>一次报告不会结束当前轮次或结算 Activation。提示词建议结束前报告，但运行时允许零次或多次调用，最终回答也不会自动变成报告。</p></div>
+        </div>
+        <div class="detail-card"><strong>结算通知由管理器署名</strong><p>对每个已向调用方返回过 id 的子级，Activation 结算时都会在释放父级所有权之前发送 subagent-settled，说明终止原因和最终助手内容；它与子级自写的 subagent-report 使用不同来源，二者可能同时出现并分别消耗父级 token。</p></div>
+        <div class="warning"><strong>Accepted 不是已读或耐久回执</strong><p>Report 返回的 MessageId 只证明父级已接受消息，不证明父级已读、完成轮次或刷盘；没有离线 mailbox、幂等键与重试协议。工具在接受后的 post-execute 阶段仍可能报错，所以失败也不能反向证明消息未送达。</p></div>
 
         <h2 id="todos">Todo 列表<a href="#todos" class="anchor">#</a></h2>
         <p><code>todo_write</code> 属于当前 Agent 会话，每次调用都提交完整列表快照，而不是增量修改。条目只有三种状态：</p>

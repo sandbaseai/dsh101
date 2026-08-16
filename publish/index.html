@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A source-verified bilingual guide to packaging, installing, verifying, and removing a DeepSeek Harness plugin bundle." />
+    <meta name="theme-color" content="#050907" />
+    <link rel="canonical" href="https://dsh101.com/publish/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://dsh101.com/publish/" />
+    <link rel="alternate" hreflang="en-US" href="https://dsh101.com/publish/?lang=en" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>打包与安装插件 · DSH 101</title>
+    <link rel="stylesheet" href="/subpage.css" />
+    <link rel="stylesheet" href="/plugin.css" />
+    <link rel="stylesheet" href="/tool.css" />
+    <link rel="stylesheet" href="/publish.css" />
+  </head>
+  <body>
+    <header class="sub-header">
+      <a class="sub-brand" href="/"><img src="https://www.deepseek.com/harness/images/dsh-logo.svg" alt="DeepSeek Harness" /><span>101</span></a>
+      <a href="/config/" data-zh="插件配置" data-en="Plugin config">插件配置</a>
+      <a href="/" data-zh="返回首页" data-en="Back home">返回首页</a>
+      <a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/basic/publish" target="_blank" rel="noreferrer" data-zh="官方教程 ↗" data-en="Official tutorial ↗">官方教程 ↗</a>
+      <div class="locale-switch" role="group" aria-label="Language"><button type="button" data-locale="zh" class="active">中</button><button type="button" data-locale="en">EN</button></div>
+    </header>
+
+    <main class="sub-main plugin-main publish-main">
+      <section class="plugin-hero publish-hero">
+        <div class="plugin-intro">
+          <p class="sub-kicker" data-zh="从本地 overlay 到可安装组合包" data-en="From local overlay to installable bundle">从本地 overlay 到可安装组合包</p>
+          <h1 data-zh="打包、安装，也能干净卸载。" data-en="Package, install, and remove cleanly.">打包、安装，也能干净卸载。</h1>
+          <p class="sub-lead" data-zh="声明 bundle manifest，把配置层安装进 profile，先检查组合结果，再启动或回滚。" data-en="Declare a bundle manifest, install its layer into a profile, inspect the composition, then boot or roll back.">声明 bundle manifest，把配置层安装进 profile，先检查组合结果，再启动或回滚。</p>
+          <div class="plugin-prerequisite"><strong data-zh="前置条件" data-en="Prerequisite">前置条件</strong><span data-zh="已安装 dsh CLI，并完成插件配置教程。源码运行时把 dsh 命令改为 pnpm dsh。" data-en="Install the dsh CLI and complete Plugin config. From a source checkout, replace dsh commands with pnpm dsh.">已安装 dsh CLI，并完成插件配置教程。源码运行时把 dsh 命令改为 pnpm dsh。</span></div>
+        </div>
+        <div class="code-stage publish-code-stage" aria-label="DeepSeek Harness bundle package manifest">
+          <div class="code-stage-head"><span>hello-plugin/package.json</span><button class="copy-code" type="button" data-copy-target="bundle-manifest" data-zh="复制" data-en="Copy">复制</button></div>
+          <pre><code id="bundle-manifest">{
+  "name": "dsh-hello-plugin",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "cordis.patch.yml"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}</code></pre>
+        </div>
+      </section>
+
+      <aside class="source-note"><span data-zh="核对基线" data-en="Verified baseline">核对基线</span><p data-zh="官方提交 47f9438，2026-08-13。bundle、profile、层顺序、Git 安装权限和回滚命令均来自官方发布教程。" data-en="Official commit 47f9438, 2026-08-13. Bundle, profile, layer order, Git install authority, and rollback commands follow the official publishing tutorial.">官方提交 47f9438，2026-08-13。bundle、profile、层顺序、Git 安装权限和回滚命令均来自官方发布教程。</p></aside>
+
+      <nav class="chapter-nav" aria-label="Tutorial chapters">
+        <a href="#concepts" data-zh="区分概念" data-en="Separate concepts">区分概念</a>
+        <a href="#package" data-zh="创建包" data-en="Create package">创建包</a>
+        <a href="#install" data-zh="安装验证" data-en="Install and verify">安装验证</a>
+        <a href="#layers" data-zh="理解层顺序" data-en="Understand layers">理解层顺序</a>
+        <a href="#git" data-zh="Git 安全" data-en="Git safety">Git 安全</a>
+      </nav>
+
+      <section id="concepts" class="publish-concepts">
+        <div class="tool-section-heading"><h2 data-zh="两个 manifest，回答两个问题" data-en="Two manifests answer two questions">两个 manifest，回答两个问题</h2><p data-zh="两者都写在 package.json 的 dsh 键下，但职责不能重叠。" data-en="Both live under the dsh key in package.json, but their responsibilities never overlap.">两者都写在 package.json 的 dsh 键下，但职责不能重叠。</p></div>
+        <div class="concept-split"><article><code>dsh.bundle</code><h3 data-zh="这个包贡献什么？" data-en="What does this package contribute?">这个包贡献什么？</h3><p data-zh="作者编写并分发的 npm 包，携带一个插入或覆盖插件行的 patch 配置层。" data-en="An npm package authored and distributed with a patch layer that inserts or overrides plugin rows.">作者编写并分发的 npm 包，携带一个插入或覆盖插件行的 patch 配置层。</p></article><article><code>dsh.profile</code><h3 data-zh="这套环境由什么组成？" data-en="What composes this environment?">这套环境由什么组成？</h3><p data-zh="位于 $DSH_HOME/profiles 下的可启动组合，记录有序 bundles 和用户 patch。" data-en="A runnable composition under $DSH_HOME/profiles that records ordered bundles and the user patch.">位于 $DSH_HOME/profiles 下的可启动组合，记录有序 bundles 和用户 patch。</p></article></div>
+        <p class="concept-rule" data-zh="bundle 是你分发的东西，profile 是用户启动的东西。没有东西同时是两者。" data-en="A bundle is what you distribute. A profile is what a user boots. Nothing is both.">bundle 是你分发的东西，profile 是用户启动的东西。没有东西同时是两者。</p>
+      </section>
+
+      <section id="package" class="plugin-chapter">
+        <div class="chapter-copy"><h2 data-zh="用三个文件组成最小 bundle" data-en="Build the smallest bundle with three files">用三个文件组成最小 bundle</h2><p data-zh="package.json 声明配置层，cordis.patch.yml 按包名挂载插件，index.js 提供插件模块。安装后由 Node 从 profile 依赖中解析包名。" data-en="package.json declares the layer, cordis.patch.yml mounts the plugin by package name, and index.js provides the module. Node resolves that package name from profile dependencies after installation.">package.json 声明配置层，cordis.patch.yml 按包名挂载插件，index.js 提供插件模块。安装后由 Node 从 profile 依赖中解析包名。</p></div>
+        <div class="chapter-work">
+          <div class="package-tree"><strong>hello-plugin/</strong><span>package.json <i>declares dsh.bundle</i></span><span>cordis.patch.yml <i>configuration layer</i></span><span>index.js <i>plugin entry</i></span></div>
+          <div class="code-block"><div><span>shell</span><button class="copy-code" type="button" data-copy-target="mkdir-package" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="mkdir-package">mkdir -p hello-plugin</code></pre></div>
+          <div class="code-block"><div><span>hello-plugin/index.js</span><button class="copy-code" type="button" data-copy-target="plugin-entry" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="plugin-entry">export const name = 'hello-plugin'
+
+export function apply() {
+  console.log('[hello-plugin] plugin loaded!')
+}</code></pre></div>
+          <div class="code-block"><div><span>hello-plugin/cordis.patch.yml</span><button class="copy-code" type="button" data-copy-target="bundle-patch" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="bundle-patch">- insert:
+    - id: hello
+      name: dsh-hello-plugin</code></pre></div>
+          <p data-zh="如果包没有 dsh.bundle 声明，它仍会作为普通依赖安装，但不会激活任何配置层。" data-en="Without dsh.bundle, the package still installs as a plain dependency but activates no configuration layer.">如果包没有 dsh.bundle 声明，它仍会作为普通依赖安装，但不会激活任何配置层。</p>
+        </div>
+      </section>
+
+      <section id="install" class="install-section">
+        <div class="tool-section-heading"><h2 data-zh="先安装，再检查，最后启动" data-en="Install, inspect, then boot">先安装，再检查，最后启动</h2><p data-zh="dsh plugin 在 profile 目录中转发 pnpm，并维护 dsh.profile.bundles。profile manifest 不需要手写。" data-en="dsh plugin forwards to pnpm inside the profile directory and maintains dsh.profile.bundles. Do not author the profile manifest by hand.">dsh plugin 在 profile 目录中转发 pnpm，并维护 dsh.profile.bundles。profile manifest 不需要手写。</p></div>
+        <div class="command-path"><div><span data-zh="安装 checkout" data-en="Install checkout">安装 checkout</span><code>dsh plugin --profile demo add ./hello-plugin</code></div><div><span data-zh="检查组合结果" data-en="Inspect composition">检查组合结果</span><code>dsh --profile demo --dump-config</code></div><div><span data-zh="启动 profile" data-en="Boot profile">启动 profile</span><code>dsh --profile demo</code></div><div><span data-zh="移除依赖和层" data-en="Remove dependency and layer">移除依赖和层</span><code>dsh plugin --profile demo remove dsh-hello-plugin</code></div></div>
+        <div class="code-block profile-result"><div><span>$DSH_HOME/profiles/demo/package.json</span><button class="copy-code" type="button" data-copy-target="profile-manifest" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="profile-manifest">{
+  "name": "dsh-profile-demo",
+  "private": true,
+  "dependencies": {
+    "dsh-hello-plugin": "link:/path/to/hello-plugin"
+  },
+  "dsh": {
+    "profile": {
+      "bundles": [
+        "@deepseek-ai/dsh-base",
+        "dsh-hello-plugin"
+      ]
+    }
+  }
+}</code></pre></div>
+      </section>
+
+      <section id="layers" class="layers-section">
+        <div class="tool-section-heading"><h2 data-zh="后应用的配置层胜出" data-en="Later configuration layers win">后应用的配置层胜出</h2><p data-zh="组合从空根开始，按固定顺序应用。覆盖某一行时，config 整体替换，不会按键深度合并。" data-en="Composition starts from an empty root and follows a fixed order. When a row is overridden, its entire config is replaced rather than deep-merged by key.">组合从空根开始，按固定顺序应用。覆盖某一行时，config 整体替换，不会按键深度合并。</p></div>
+        <div class="layer-stack"><div><span>bundles[]</span><p data-zh="dsh-base 在前，随后按安装顺序应用外部 bundle" data-en="dsh-base first, then external bundles in install order">dsh-base 在前，随后按安装顺序应用外部 bundle</p></div><div><span>profile/cordis.patch.yml</span><p data-zh="当前 profile 的用户覆盖" data-en="User overrides for this profile">当前 profile 的用户覆盖</p></div><div><span>$DSH_HOME/cordis.patch.yml</span><p data-zh="所有 profile 共享的机器本地偏好" data-en="Machine-local preferences shared across profiles">所有 profile 共享的机器本地偏好</p></div><div><span>--patch</span><p data-zh="按命令行出现顺序应用的临时 overlay" data-en="Temporary overlays applied in command-line order">按命令行出现顺序应用的临时 overlay</p></div></div>
+        <div class="layer-warning"><strong data-zh="覆盖规则" data-en="Override rule">覆盖规则</strong><p data-zh="按 id 覆盖前一层的行时，必须重述该行需要的所有 config 键。用户仍可在 profile patch 中覆盖你的默认行，而无需修改包。" data-en="When overriding an earlier row by id, restate every config key that row needs. Users can still override your defaults in the profile patch without modifying the package.">按 id 覆盖前一层的行时，必须重述该行需要的所有 config 键。用户仍可在 profile patch 中覆盖你的默认行，而无需修改包。</p></div>
+      </section>
+
+      <section id="git" class="git-install">
+        <div class="tool-section-heading"><h2 data-zh="从 GitHub 安装会执行构建代码" data-en="A GitHub install may execute build code">从 GitHub 安装会执行构建代码</h2><p data-zh="Git 安装拉取源码，不会自动得到 TypeScript 的 lib 产物。作者需要 prepare，用户需要显式 allowBuilds。" data-en="A Git install fetches source, not TypeScript lib artifacts. Authors need prepare, and users must explicitly allowBuilds.">Git 安装拉取源码，不会自动得到 TypeScript 的 lib 产物。作者需要 prepare，用户需要显式 allowBuilds。</p></div>
+        <div class="git-sides"><article><h3 data-zh="作者负责" data-en="Author responsibility">作者负责</h3><p data-zh="提供自包含的 prepare 脚本，从源码构建发布入口，不能依赖旁边存在 monorepo checkout。" data-en="Provide a self-contained prepare script that builds published entry points without relying on a neighboring monorepo checkout.">提供自包含的 prepare 脚本，从源码构建发布入口，不能依赖旁边存在 monorepo checkout。</p></article><article><h3 data-zh="用户负责" data-en="User responsibility">用户负责</h3><p data-zh="把 pnpm 打印的确切包键加入 profile 的 pnpm-workspace.yaml，然后重新 add。" data-en="Add the exact package key printed by pnpm to the profile pnpm-workspace.yaml, then retry add.">把 pnpm 打印的确切包键加入 profile 的 pnpm-workspace.yaml，然后重新 add。</p></article></div>
+        <div class="code-block"><div><span>pnpm-workspace.yaml</span><button class="copy-code" type="button" data-copy-target="allow-builds" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="allow-builds">allowBuilds:
+  dsh-hello-plugin: true</code></pre></div>
+        <div class="security-callout"><strong data-zh="这是一项本机代码执行权限" data-en="This grants local code execution">这是一项本机代码执行权限</strong><p data-zh="prepare 在 Agent 沙箱之外运行。只允许源码可信的包，并锁定 commit：github:you/hello-plugin#&lt;sha&gt;。" data-en="prepare runs outside the agent sandbox. Allow only trusted source and pin a commit: github:you/hello-plugin#&lt;sha&gt;.">prepare 在 Agent 沙箱之外运行。只允许源码可信的包，并锁定 commit：github:you/hello-plugin#&lt;sha&gt;。</p></div>
+        <div class="distribution-options"><div><strong>npm</strong><span data-zh="发布预构建 lib，安装无需构建权限" data-en="Publish prebuilt lib artifacts with no install-time build authority">发布预构建 lib，安装无需构建权限</span></div><div><strong>tarball</strong><span data-zh="pnpm pack 后安装本地 .tgz" data-en="Run pnpm pack and install the local .tgz">pnpm pack 后安装本地 .tgz</span></div></div>
+      </section>
+
+      <section class="plugin-next"><div><h2 data-zh="下一步，理解完整插件生命周期" data-en="Next, understand the full plugin lifecycle">下一步，理解完整插件生命周期</h2></div><div class="next-links"><a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/framework/" target="_blank" rel="noreferrer"><strong data-zh="插件与生命周期" data-en="Plugins and lifecycle">插件与生命周期</strong><span data-zh="深入加载、卸载与作用域 ↗" data-en="Explore loading, unloading, and scopes ↗">深入加载、卸载与作用域 ↗</span></a><a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/apps/cli/reference/README.md" target="_blank" rel="noreferrer"><strong data-zh="CLI 行为参考" data-en="CLI behavior reference">CLI 行为参考</strong><span data-zh="查看精确优先级和 flag ↗" data-en="See exact precedence and flags ↗">查看精确优先级和 flag ↗</span></a></div></section>
+    </main>
+
+    <footer class="sub-footer"><span>DSH 101 / Package and install</span><span data-zh="非 DeepSeek 官方网站，安装第三方代码前请审查来源" data-en="Unofficial site. Review provenance before installing third-party code.">非 DeepSeek 官方网站，安装第三方代码前请审查来源</span></footer>
+    <script type="module" src="/plugin.js"></script>
+  </body>
+</html>

@@ -12,6 +12,7 @@ export default defineConfig({
         plugin: resolve(import.meta.dirname, 'plugin/index.html'),
         tool: resolve(import.meta.dirname, 'tool/index.html'),
         config: resolve(import.meta.dirname, 'config/index.html'),
+        publish: resolve(import.meta.dirname, 'publish/index.html'),
       },
     },
   },

@@ -7,6 +7,7 @@ const quickstart = readFileSync(new URL('../quickstart/index.html', import.meta.
 const plugin = readFileSync(new URL('../plugin/index.html', import.meta.url), 'utf8')
 const tool = readFileSync(new URL('../tool/index.html', import.meta.url), 'utf8')
 const config = readFileSync(new URL('../config/index.html', import.meta.url), 'utf8')
+const publish = readFileSync(new URL('../publish/index.html', import.meta.url), 'utf8')
 const script = readFileSync(new URL('../landing.js', import.meta.url), 'utf8')
 const styles = readFileSync(new URL('../landing.css', import.meta.url), 'utf8')
 const manifest = readFileSync(new URL('../public/site.webmanifest', import.meta.url), 'utf8')
@@ -25,7 +26,7 @@ for (const [label, url] of Object.entries({
   plugins: 'https://github.com/topics/dsh-plugin',
   paper: 'https://github.com/cordiverse/paper',
 })) {
-  if (![html, cordis, ecosystem, quickstart, plugin, tool, config].some(source => source.includes(url))) throw new Error(`Missing ${label} reference: ${url}`)
+  if (![html, cordis, ecosystem, quickstart, plugin, tool, config, publish].some(source => source.includes(url))) throw new Error(`Missing ${label} reference: ${url}`)
 }
 
 for (const required of [
@@ -53,7 +54,9 @@ const toolLocalizedNodes = [...tool.matchAll(/<[^>]+\bdata-zh="([^"]*)"[^>]+\bda
 if (toolLocalizedNodes.length < 35) throw new Error(`Tool guide locale coverage is unexpectedly small: ${toolLocalizedNodes.length}`)
 const configLocalizedNodes = [...config.matchAll(/<[^>]+\bdata-zh="([^"]*)"[^>]+\bdata-en="([^"]*)"[^>]*>/g)]
 if (configLocalizedNodes.length < 40) throw new Error(`Config guide locale coverage is unexpectedly small: ${configLocalizedNodes.length}`)
-for (const [, zh, en] of [...localizedNodes, ...cordisLocalizedNodes, ...ecosystemLocalizedNodes, ...quickstartLocalizedNodes, ...pluginLocalizedNodes, ...toolLocalizedNodes, ...configLocalizedNodes]) {
+const publishLocalizedNodes = [...publish.matchAll(/<[^>]+\bdata-zh="([^"]*)"[^>]+\bdata-en="([^"]*)"[^>]*>/g)]
+if (publishLocalizedNodes.length < 50) throw new Error(`Publish guide locale coverage is unexpectedly small: ${publishLocalizedNodes.length}`)
+for (const [, zh, en] of [...localizedNodes, ...cordisLocalizedNodes, ...ecosystemLocalizedNodes, ...quickstartLocalizedNodes, ...pluginLocalizedNodes, ...toolLocalizedNodes, ...configLocalizedNodes, ...publishLocalizedNodes]) {
   if (!zh.trim() || !en.trim()) throw new Error('Landing locale pair contains an empty value')
 }
 
@@ -62,7 +65,7 @@ for (const forbidden of ['TypeRT', 'DSH 101', '最后核对上游提交']) {
 }
 
 for (const forbidden of ['—', '–']) {
-  if ([html, cordis, ecosystem, quickstart, plugin, tool, config].some(source => source.includes(forbidden))) throw new Error(`Taste preflight failed, forbidden dash remains: ${forbidden}`)
+  if ([html, cordis, ecosystem, quickstart, plugin, tool, config, publish].some(source => source.includes(forbidden))) throw new Error(`Taste preflight failed, forbidden dash remains: ${forbidden}`)
 }
 if (!brandStyles.includes('--brand-green:#22bd7e')) throw new Error('Sandbase brand green token is missing')
 if (!html.includes('class="hero-product"') || !html.includes('feat-plugin.en.png')) throw new Error('Taste preflight failed, hero lacks a real product visual')
@@ -81,6 +84,7 @@ if (!html.includes('href="/quickstart/"')) throw new Error('Landing page does no
 if (!html.includes('href="/plugin/"')) throw new Error('Landing page does not route to the first-plugin guide')
 if (!html.includes('href="/tool/"')) throw new Error('Landing page does not route to the tool guide')
 if (!html.includes('href="/config/"')) throw new Error('Landing page does not route to the config guide')
+if (!html.includes('href="/publish/"')) throw new Error('Landing page does not route to the publishing guide')
 for (const navigation of ['id="primaryNav"', 'class="nav-group"', 'class="menu-toggle"', 'href="#approach"', 'href="#modes"']) {
   if (!html.includes(navigation)) throw new Error(`Landing navigation is missing: ${navigation}`)
 }
@@ -102,6 +106,13 @@ for (const required of ["import Schema from '@deepseek-ai/schemastery'", 'export
 }
 if (!config.includes("官方配置篇片段使用 ./src/my-plugin.ts") || !config.includes('The official config snippet uses ./src/my-plugin.ts')) throw new Error('Config guide does not disclose the upstream path discrepancy')
 
+for (const required of ['"dsh": {', '"bundle": {', '"patch": "./cordis.patch.yml"', 'name: dsh-hello-plugin', 'dsh plugin --profile demo add ./hello-plugin', 'dsh --profile demo --dump-config', 'dsh --profile demo', 'dsh plugin --profile demo remove dsh-hello-plugin', '"@deepseek-ai/dsh-base"', '$DSH_HOME/cordis.patch.yml', 'config 整体替换', 'entire config', 'allowBuilds:', 'github:you/hello-plugin#&lt;sha&gt;', 'pnpm pack', '47f9438']) {
+  if (!publish.includes(required)) throw new Error(`Publish guide is missing verified material: ${required}`)
+}
+for (const safety of ['本机代码执行权限', 'local code execution', 'Agent 沙箱之外', 'outside the agent sandbox']) {
+  if (!publish.includes(safety)) throw new Error(`Publish guide is missing install safety guidance: ${safety}`)
+}
+
 for (const concept of ['官方项目', '社区索引', '第三方项目', '不是 DeepSeek 官方商店或安全认证', '安装审查', '卸载与回滚']) {
   if (!ecosystem.includes(concept)) throw new Error(`Ecosystem guide is missing: ${concept}`)
 }
@@ -109,7 +120,7 @@ for (const repository of ['deepseek-ai/deepseek-harness', 'awesome-dsh-plugin/aw
   if (!ecosystem.includes(`https://github.com/${repository}`)) throw new Error(`Ecosystem guide is missing repository source: ${repository}`)
 }
 
-for (const asset of ['public/favicon.svg', 'public/wordmark.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', 'docs/cloudflare-deploy.md', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml', 'landing.js', 'landing.css', 'navigation.css', 'brand.css', 'redesign.css', 'subpage.js', 'subpage.css', 'ecosystem.css', 'quickstart.css', 'quickstart.js', 'plugin.css', 'plugin.js', 'tool.css', 'config.css', 'cordis/index.html', 'ecosystem/index.html', 'quickstart/index.html', 'plugin/index.html', 'tool/index.html', 'config/index.html', 'vite.config.js']) {
+for (const asset of ['public/favicon.svg', 'public/wordmark.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', 'docs/cloudflare-deploy.md', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml', 'landing.js', 'landing.css', 'navigation.css', 'brand.css', 'redesign.css', 'subpage.js', 'subpage.css', 'ecosystem.css', 'quickstart.css', 'quickstart.js', 'plugin.css', 'plugin.js', 'tool.css', 'config.css', 'publish.css', 'cordis/index.html', 'ecosystem/index.html', 'quickstart/index.html', 'plugin/index.html', 'tool/index.html', 'config/index.html', 'publish/index.html', 'vite.config.js']) {
   if (!existsSync(new URL(`../${asset}`, import.meta.url))) throw new Error(`Required project asset is missing: ${asset}`)
 }
 for (const metadata of ['rel="manifest"', 'rel="canonical"', 'property="og:title"', 'property="og:url"', 'name="twitter:card"', 'hreflang="zh-CN"', 'hreflang="en-US"']) {
@@ -118,4 +129,4 @@ for (const metadata of ['rel="manifest"', 'rel="canonical"', 'property="og:title
 if (!script.includes('navigator.clipboard.writeText')) throw new Error('Quick-start copy interaction is missing')
 if (!styles.includes('@media(max-width:600px)')) throw new Error('Mobile landing breakpoint is missing')
 
-console.log(`content check passed (${ids.size} ids, ${localizedNodes.length} landing + ${cordisLocalizedNodes.length} Cordis + ${ecosystemLocalizedNodes.length} ecosystem + ${quickstartLocalizedNodes.length} quickstart + ${pluginLocalizedNodes.length} plugin + ${toolLocalizedNodes.length} tool + ${configLocalizedNodes.length} config bilingual nodes)`)
+console.log(`content check passed (${ids.size} ids, ${localizedNodes.length} landing + ${cordisLocalizedNodes.length} Cordis + ${ecosystemLocalizedNodes.length} ecosystem + ${quickstartLocalizedNodes.length} quickstart + ${pluginLocalizedNodes.length} plugin + ${toolLocalizedNodes.length} tool + ${configLocalizedNodes.length} config + ${publishLocalizedNodes.length} publish bilingual nodes)`)

@@ -15,6 +15,7 @@ const requiredSections = ['quickstart', 'install', 'headless', 'inspect-config',
 requiredSections.push('tool-execution-pipeline')
 requiredSections.push('tool-output-contract')
 requiredSections.push('parallel-tools')
+requiredSections.push('tool-visibility')
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)

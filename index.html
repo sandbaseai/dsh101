@@ -147,6 +147,7 @@
         <section>
           <h2>可观测性</h2>
           <a href="#token-meter">Token 计量</a>
+          <a href="#trajectory">Trajectory 调试视图</a>
           <a href="#telemetry">Session Telemetry</a>
           <a href="#anonymous-id">匿名身份</a>
           <a href="#invariants">运行时 Invariants</a>
@@ -942,6 +943,16 @@ print(result.final_response)</code></pre>
         </div>
         <div class="warning"><strong>百分比不是账单，也不是准入闸门</strong><p>预计 token、模型容量和组成明细来自独立的后写覆盖投影，并非同一次请求的原子快照。CJK 文本和大型 JSON Schema 可能被明显低估，明细相加也不保证等于标题数字。</p></div>
         <p>统计栏的计费输入为未缓存输入、cache read 和 cache write 三项之和，缓存命中率用 cache read 除以该总量；reasoning token 已包含在输出中，不能重复相加。缺少完整 timing 或 usage 的步骤会从 TTFT 和吞吐计算中退出，而不是用猜测值补齐。</p>
+
+        <h2 id="trajectory">Trajectory 调试视图<a href="#trajectory" class="anchor">#</a></h2>
+        <p>Trajectory 把用户、助手、工具与嵌套子工具事件按轮次排成可检查的执行轨迹。选择一行可查看 token、耗时、输入、输出与计时；独立压缩显示在轮次之间，带编号的压缩仍留在所属轮次。</p>
+        <div class="compare-grid">
+          <div><strong>长历史按需加载</strong><p>视图从当前尾部开始，只挂载可见行和少量缓冲；到达顶部或时间轴省略号时再加载更早一页，不为尚未加载的前缀虚构耗时。</p></div>
+          <div><strong>时间轴可缩放检查</strong><p>拖选闭区间会筛出与它重叠的记录；滚轮缩放，放大后右键拖动平移。助手条分别呈现已记录的 TTFT 与解码时间。</p></div>
+          <div><strong>流式跟随尊重阅读</strong><p>初始状态与流式更新停在尾部；用户向上滚动后暂停跟随，新事件不会抢走旧记录的检查位置。</p></div>
+        </div>
+        <div class="detail-card"><strong>Trajectory 与 Chat 各自投影</strong><p>Trajectory 从共享 Session 原始事件组装自己的记录，也保留因取消而冻结的助手与工具步骤；它不读取或修改 Chat 会话快照。搜索、折叠、选择与请求汇总只覆盖当前已经加载的窗口。</p></div>
+        <div class="warning"><strong>进行中不虚构耗时</strong><p>部分响应和运行中的工具只显示开始标记与运行状态，完成前不会绘制假定时长。时间线与记录选择也只存在于当前页面，不提供可分享的锚点深链接。</p></div>
 
         <h2 id="telemetry">Session Telemetry<a href="#telemetry" class="anchor">#</a></h2>
         <p>Telemetry 把会话 ledger 事件和无日志归宿的 ops 信号投影成外发记录，再交给 OpenTelemetry 等 Provider。它完全位于模型请求之外，不会改变 Agent loop。</p>

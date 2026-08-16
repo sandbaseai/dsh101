@@ -119,6 +119,7 @@
           <a href="#web-api-security">Web API 安全边界</a>
           <a href="#connection-recovery">连接恢复</a>
           <a href="#typert-remote">TypeRT Remote</a>
+          <a href="#api-gateway-lifecycle">Gateway 调用生命周期</a>
           <a href="#capability-seam">能力三层拆分</a>
           <a href="#llm-adapter">LLM 适配器</a>
           <a href="#llm-streaming">流式协议与重试</a>
@@ -736,6 +737,22 @@ print(result.final_response)</code></pre>
           <div><span>03</span><strong>Validate</strong><p>调用前后都检查边界 schema，基础设施错误使用稳定分类。</p></div>
         </div>
         <p>Lookup provider 卸载后，wire 声明仍保留，因此请求会明确返回 unavailable，而不会把身份字符串误当普通对象。Client 只看见显式导入并挂载的 Remote namespace；业务服务实例和 JavaScript Proxy 都不会跨边界。</p>
+
+        <h3 id="api-gateway-lifecycle">API Gateway 调用与撤回生命周期<a href="#api-gateway-lifecycle" class="anchor">#</a></h3>
+        <p>Remote 是生成时选定、运行时解析的一元 RPC。Client 装配只挂载明确选择的贡献；每次调用仍通过 Connection 的 <code>/api</code> 载体取得 Host 当前的描述符、lookup 与 Cordis 服务，因此热替换不会继续使用缓存的业务对象。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Mount</strong><p><code>ctx.remote.$mount()</code> 校验严格 codec，并安装具体方法与可追踪的 <code>remote.&lt;namespace&gt;</code> 子服务。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Invoke</strong><p>Client 校验位置参数并组装具名 args；Host 再校验字段集合、解码 identity、解析实时接收者并检查返回值。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Retract</strong><p>贡献撤回会移除方法与描述符、中止进行中的调用，并让外部保存的陈旧函数句柄拒绝再次调用。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>取消归 Connection 所有</strong><p><code>AbortSignal</code> 是描述符元数据，不属于 wire args。Client 将调用信号与挂载生命周期合并，Connection 负责请求关联和取消，Gateway 只在业务参数之后注入 signal。</p></div>
+          <div><strong>故障保留所属层级</strong><p>字段、codec、binding、lookup 与 context 故障在业务代码边界内明确分类；冷恢复失败和 ownership fence 可以保留原有 RPC error，而不折叠成笼统 internal。</p></div>
+          <div><strong>严格约定不能静默降级</strong><p>Host 曾注册的严格 endpoint 被撤回后直接失败，不回退到较弱的源码参数推断，避免热卸载悄悄降低校验强度。</p></div>
+        </div>
+        <div class="warning"><strong>Remote 不是通用流协议</strong><p>Remote 只表达单请求、单结果的方法。会话事件、增量数据、分页与实体子流可以复用 Connection，但应使用各自的协议；未被 Gateway 认领的 <code>/api</code> endpoint 才回退给既有 API Proxy。</p></div>
 
         <h2 id="capability-seam">能力的三种角色<a href="#capability-seam" class="anchor">#</a></h2>
         <p>当能力需要可替换提供方时，Harness 将它拆成三个角色。只有完整组合才构成一个 capability seam；单独一个角色并不完整。</p>

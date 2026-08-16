@@ -48,6 +48,7 @@ Last upstream review:
 | Runtime plugin inventory and Settings diagnostics | `packages/host/plugin-inventory/README.zh.md`, `packages/client/ui-settings-plugin-inventory/README.zh.md`, `apps/cli/reference/README.zh.md` |
 | Scoped registration layers and ownership | `docs/subsystems/scope.zh.md` |
 | Web server routing and exposure boundary | `docs/subsystems/web-server.zh.md` |
+| Postmortem for validating a substitute Web server instead of the current GUI, canonical URL/mode disclosure, application readiness, same-origin external evidence, managed server lifecycle, and production/HMR update paths | `docs/postmortem/0003-web-agent-gui-feedback-loop.zh.md` |
 | Browser RPC transport and privileged API boundary | `packages/host/apiproxy/README.zh.md`, `packages/client/connection/README.zh.md` |
 | Host-native path opening, WSL handoff, shell-free command execution, and desktop detection | `packages/host/apiproxy/README.zh.md`, `packages/util/native-command/README.zh.md`, `packages/host/directory-picker-auto/README.zh.md`, `packages/client/connection/README.zh.md` |
 | Browser WebSocket readiness, generations, and reconnect backoff | `packages/client/connection/README.zh.md`, `packages/client/connection/src/client/connection.ts` |

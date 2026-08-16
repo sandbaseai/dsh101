@@ -124,6 +124,7 @@
           <a href="#plugin-inventory">插件清单诊断</a>
           <a href="#scope-routing">Scope 路由</a>
           <a href="#web-server">Web Server</a>
+          <a href="#web-validation-loop">GUI 验证闭环</a>
           <a href="#web-api-security">Web API 安全边界</a>
           <a href="#connection-recovery">连接恢复</a>
           <a href="#typert-remote">TypeRT Remote</a>
@@ -842,6 +843,27 @@ print(result.final_response)</code></pre>
           <div><code>port: 0</code><strong>系统分配端口</strong><span>操作系统选择空闲端口，服务公开最终监听值。</span></div>
         </div>
         <p>静态 SPA fallback 对路径穿越返回 403、非 GET/HEAD 返回 405，未知扩展资源不会伪装成 JavaScript。关闭时同时停止监听并强制关闭 SSE 等长连接，避免插件卸载永久挂起。</p>
+
+        <h3 id="web-validation-loop">事故复盘：不要在替代服务器上验收当前 GUI<a href="#web-validation-loop" class="anchor">#</a></h3>
+        <p>一次 Web Agent 会话修改了 GUI 源码，却不知道当前页面的规范 URL、服务进程和更新模式。它先把验收交回用户，再把裸 Vite 的 HTTP 200 当成成功，最后又在另一个端口启动完整 Host；这些证据都没有证明用户正在看的原页面已经改变。</p>
+        <div class="permission-table">
+          <div><code>build</code><strong>产物可以生成</strong><span>只证明源码能编译，不证明承载会话的进程已经读取新产物。</span></div>
+          <div><code>HTTP 200</code><strong>传输层可以响应</strong><span>裸 Vite 没有 Host 注入的 window.__DSH_BOOT__，即使返回 200 也可能只显示白屏。</span></div>
+          <div><code>manifest</code><strong>替代应用可以启动</strong><span>另一个 origin 拥有合法启动 manifest，仍不能证明既有页面完成刷新或 HMR。</span></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Identify</strong><p>从 app:web-surface、DSH_WEB_URL 与 DSH_WEB_MODE 取得当前规范 URL 和真实模式。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Update</strong><p>生产模式重建并刷新既有 URL；开发模式按变更类型走 watcher、bundle 重建或页面刷新。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Observe</strong><p>由外部浏览器、HTTP、进程与会话日志共同证明请求的改动在同一 origin 生效。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>独立 Vite 明确拒绝启动</strong><p>apps/web 的裸服务模式在配置阶段失败；测试要求进程自然退出并插桩 Server.listen，不能用测试超时伪装成快速失败。</p></div>
+          <div><strong>开发模式有两段链路</strong><p>dsh web --dev 只挂载 HMR 接收端；同一源码检出中的 pnpm run dev:web 负责重建客户端插件 bundle，Web shell 与普通包变更仍需刷新。</p></div>
+          <div><strong>长期进程必须受管</strong><p>通过 shell & 启动会绕过任务身份、完成通知、结果收集和清理；确需替代服务时也必须使用受管后台生命周期。</p></div>
+        </div>
+        <div class="warning"><strong>验收目标必须保持同一 identity</strong><p>成功构建、端口可达和启动 manifest 是三个独立事实。只有在明确的目标 origin 上，从外部观察到所请求的界面变化，才证明当前 GUI 已更新；替代服务不能代替这项证据。</p></div>
 
         <h2 id="web-api-security">Web API 的传输与安全边界<a href="#web-api-security" class="anchor">#</a></h2>
         <p>Web API 使用 HTTP POST 承载上行 unary/respond，并以两条只向浏览器发送消息的 WebSocket 承载 mux 与 host 事件。每个请求先校验信封，再按方法校验业务载荷；响应回显原 rpcId。业务错误留在 RPC 结果中，HTTP 状态只表达传输层结果。</p>

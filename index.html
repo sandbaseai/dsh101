@@ -105,6 +105,7 @@
         <section>
           <h2>进阶</h2>
           <a href="#plugins">第一个插件</a>
+          <a href="#extension-choice">选择扩展机制</a>
           <a href="#tools">开发 Tool</a>
           <a href="#tool-schema-contract">Tool Schema 契约</a>
           <a href="#tool-catalog">工具 Schema 目录</a>
@@ -666,6 +667,23 @@ print(result.final_response)</code></pre>
           <div class="code-head"><span>Terminal</span><button class="copy" data-copy="pnpm dsh web --patch ./scratch-plugin/cordis.yml">复制</button></div>
           <pre><code><span class="muted">$</span> pnpm dsh web --patch ./scratch-plugin/cordis.yml</code></pre>
         </div>
+
+        <h3 id="extension-choice">先按所有权选择扩展机制<a href="#extension-choice" class="anchor">#</a></h3>
+        <p>Harness 的功能最终都落到已文档化的服务或事件扩展点，但不代表每个需求都应新建包。先判断行为由谁拥有、是否进入模型请求、是否需要持久回放，以及是否跨进程；再选择最小而完整的机制。</p>
+        <div class="permission-table">
+          <div><code>config</code><strong>改变现有插件的声明值</strong><span>只调整已公开 Schema 中的模型、端点、策略或组合参数时使用配置与 profile patch；它不能创造插件未声明的新行为。</span></div>
+          <div><code>Cordis</code><strong>拥有运行时行为与生命周期</strong><span>需要服务、状态、事件监听、策略拦截或 UI contribution 时写原生插件；注册必须归属 effect，随 Fiber 卸载可逆撤销。</span></div>
+          <div><code>MCP</code><strong>接入现有外部工具服务器</strong><span>每个 Server 由一个插件完成发现并注册原始 JSON Schema 工具；适合复用跨产品协议能力，不替代 Harness 内部状态机。</span></div>
+          <div><code>Skill</code><strong>按需披露操作知识</strong><span>用目录摘要与 loader 在调用时 inject 正文，适合流程、规范和领域知识；Skill 是模型上下文，不是权限或执行强制边界。</span></div>
+          <div><code>Protocol</code><strong>让进程外客户端驱动 Agent</strong><span>UI 或自动化桥接通过 ctx.agents 创建或恢复 Agent，以 followup/cancel 投递，并从 session/event 消费可回放输出。</span></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>新增模型可调用动作</strong><p>注册 Tool，并让 Schema、规范值、模型 content 与可选 UI presentation 各自承担边界；已有 MCP Server 时优先通过 MCP 发现接入。</p></div>
+          <div><strong>拦截或约束现有动作</strong><p>可重排的准入使用 tools/pre-execute；不可放宽的最终拒绝使用 Guard；超时、重试和指标包裹 tools/execute，冻结结果审计使用 tools/result。</p></div>
+          <div><strong>新增界面或客户端</strong><p>展示从 session/event 构建，输入经 followup 或 steer 返回 Agent。内建 Chat 业务行使用 ConversationNodeDefinition 与 keyed renderer。</p></div>
+        </div>
+        <div class="detail-card"><strong>系统提示词整体变换属于专家接口</strong><p>普通上下文贡献优先使用有序 system prompt section。若直接变换完整 assemble 结果，插件必须保留 Code Mode、结构化输出等其他活跃协议，不能把下游贡献意外覆盖。</p></div>
+        <div class="warning"><strong>指导不能代替强制</strong><p>Skill、系统提示词和工具描述只影响模型选择；权限、安全与不变量必须放在审批、Sandbox、Guard 或规范执行流水线中。需要跨重载存活的结果还必须写入 Session 事件，而不是仅保存在 Cordis 实时事件里。</p></div>
 
         <h2 id="tools">开发一个 Tool<a href="#tools" class="anchor">#</a></h2>
         <p>工具插件通过 <code>inject = ['tools']</code> 声明依赖，再用 <code>defineTool</code> 同时定义参数校验、规范输出和模型可见的渲染结果。</p>

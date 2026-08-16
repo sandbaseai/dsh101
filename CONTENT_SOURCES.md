@@ -32,6 +32,7 @@ Last upstream review:
 | User profile patch layering, hot reload, and last-good HMR fallback | `packages/boot/app-boot/README.zh.md` |
 | Headless execution and configuration dumps | `apps/cli/reference/README.zh.md` |
 | First plugin | `docs/user/develop/basic/index.zh.md` |
+| Extension mechanism selection, runtime ownership, tool policy hook choice, UI/protocol drivers, MCP tool discovery, Skill disclosure, and durable-state boundaries | `docs/cookbook/extension-cookbook.zh.md`, `docs/architecture.zh.md`, `docs/subsystems/tools.zh.md`, `docs/subsystems/skills.zh.md`, `packages/mcp/mcp-client/README.zh.md` |
 | Tool development, typed schema and runtime validation, scoped visibility restrictions, canonical output/presentation boundaries, execution pipeline, and ordered parallel scheduling | `docs/user/develop/basic/tool.zh.md`, `docs/subsystems/tools.zh.md`, `docs/tool-execution-pipeline.zh.md`, `packages/core/tools/README.zh.md`, `packages/core/agent-loop/README.zh.md` |
 | Generated model-facing tool Schema catalog, real-context plugin boot, manifest completeness, default-config snapshots, configurable names, package mapping, and freshness verification | `docs/tool-catalog.zh.md`, `scripts/gen-tool-catalog.ts` |
 | Code Mode nested tool-call topology, incremental keyed updates, malformed-edge limits, and UI ownership | `packages/client/runtime/README.zh.md`, `packages/client/ui-tool/README.zh.md` |

@@ -85,7 +85,7 @@ Last upstream review:
 | Codex and Claude Code hook bridges | `packages/hooks/hooks-codex/README.zh.md`, `packages/hooks/hooks-claude-code/README.zh.md` |
 | Session-local schedules | `docs/subsystems/schedule.zh.md` |
 | Dynamic workflows and Ralph | `docs/subsystems/workflow.zh.md`, `packages/workflow/tool-workflow/README.zh.md`, `packages/workflow/tool-ralph/README.zh.md` |
-| Layered user settings, safe mutation, revision conflicts, and secret redaction | `docs/subsystems/settings.zh.md`, `packages/settings/settings/README.zh.md`, `packages/client/ui-settings/README.zh.md`, `packages/host/apiproxy/README.zh.md` |
+| Layered user settings, file hot reload, safe mutation, revision conflicts, and secret redaction | `docs/subsystems/settings.zh.md`, `packages/settings/settings/README.zh.md`, `packages/settings/settings-file/README.zh.md`, `packages/client/ui-settings/README.zh.md`, `packages/host/apiproxy/README.zh.md` |
 | Browser schema rehydration, user-layer drafts, validation, and executable-envelope trust | `packages/client/schema-form/README.zh.md`, `packages/client/ui-settings-plugins/README.zh.md` |
 | Credential references and rotation | `docs/subsystems/credentials.zh.md` |
 | Frozen launch environment, `.env` provenance, and credential-source precedence | `packages/util/launch-environment/README.zh.md`, `packages/boot/app-boot/README.zh.md`, `packages/credentials/credentials-local/README.zh.md` |

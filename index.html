@@ -624,6 +624,16 @@ print(result.final_response)</code></pre>
         <p>当前没有通用 React 表单生成器，各功能围绕草稿辅助函数手写控件。校验返回整份草稿的第一条失败消息及 <code>$.path</code>，不会自动把多项错误分发到每个字段。</p>
         <div class="warning"><strong>序列化 Schema 是可执行信封</strong><p>schemastery 重建回调时会执行动态函数，因此只能接受提供当前页面的同一受信任 Host 所发送的 schema。secret 控件仍必须保持只写：初始为空，只展示是否已配置，空草稿不能清除已有密钥。</p></div>
 
+        <h3 id="settings-file-lifecycle">设置文件的热重载与最后可用快照<a href="#settings-file-lifecycle" class="anchor">#</a></h3>
+        <p><code>settings-file</code> 用一份 YAML 或 JSON 文档承载所有 namespace。启动时存在但非法的文档会让插件明确失败；运行期外部编辑若不可读、不可解析或无法通过某个 namespace 校验，则告警并保留对应的最后可用值，不拖垮进程。</p>
+        <div class="compare-grid">
+          <div><strong>写前重新读取</strong><p>每次 persist 都在锁内先读取最新磁盘文本并发布差异，再基于它渲染，因此能并入 watcher 防抖窗口、漏报事件和其他进程写入。</p></div>
+          <div><strong>YAML 叶子级修改</strong><p>只改动变化的 map 叶子，保留未触碰节点的注释、锚点与排版；数组和其他非 map 值整体替换，JSON 则整体重新序列化。</p></div>
+          <div><strong>同一操作队列</strong><p>watcher 刷新与各 namespace 写入逐个执行；ready 时再对账一次启动竞态，内容等于最后文本的自写事件直接抑制。</p></div>
+        </div>
+        <p>删除设置文件会发布空用户文档，让所有 namespace 回退到 base 与 schema 默认值。卸载会先关闭 watcher，再等待已排队和进行中的文档操作完全停稳，此后不再发布。</p>
+        <div class="warning"><strong>Watcher 不是持续轮询</strong><p>读取路径不会自行重复 stat；若底层 watcher 真正漏掉事件，外部变更要到下一次文件信号、下一次写入或重启时才会被并入。磁盘已经非法时，产品写入会拒绝，而不是覆盖用户尚未修复的文本。</p></div>
+
         <h2 id="credentials-system">凭据引用与热轮换<a href="#credentials-system" class="anchor">#</a></h2>
         <p>配置文件只保存形如环境变量名的 <code>CredentialRef</code>，明文由 Credentials provider 管理。LLM Adapter 在每次请求前重新解析引用，不跨操作缓存，因此轮换后的密钥会在下一次请求生效，无需重启。</p>
         <div class="compare-grid">

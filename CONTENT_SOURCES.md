@@ -72,7 +72,7 @@ Last upstream review:
 | Shell execution and persistent terminals | `docs/subsystems/shell.zh.md`, `docs/subsystems/terminal.zh.md`, `packages/terminal/tool-terminal/README.zh.md` |
 | Subprocess streams and process-tree termination | `docs/subsystems/subprocess.zh.md` |
 | Shared E2B remote filesystem and subprocess runtime | `packages/e2b/e2b/README.zh.md`, `packages/e2b/fs-e2b/README.zh.md`, `packages/e2b/subprocess-e2b/README.zh.md` |
-| LSP semantic code navigation | `docs/subsystems/lsp.zh.md`, `packages/lsp/tool-lsp/README.zh.md` |
+| LSP semantic navigation, transient documents, pooled stdio server lifecycle, and workspace safety | `docs/subsystems/lsp.zh.md`, `packages/lsp/lsp-stdio/README.zh.md`, `packages/lsp/tool-lsp/README.zh.md` |
 | Subagent delegation, continuable Activation routing, Inbox ownership, child-first disposal, interrupt boundaries, explicit reports, settlement notices, and durable directory discovery | `docs/subsystems/subagent.zh.md`, `packages/subagent/subagent/README.zh.md`, `packages/subagent/tool-subagent/README.zh.md`, `packages/subagent/tool-subagent-control/README.zh.md`, `packages/subagent/tool-subagent-report/README.zh.md` |
 | Todo snapshots | `packages/todo/tool-todo/README.zh.md` |
 | TodoDock current-plan projection, turn-boundary clearing, slot order, collapsed status counts, composer visibility, and single-line limit | `packages/client/ui-conversation/README.zh.md`, `packages/todo/tool-todo/README.zh.md` |

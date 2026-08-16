@@ -155,6 +155,7 @@
           <a href="#shell-terminal">Shell 与 Terminal</a>
           <a href="#subprocess-seam">子进程运行时</a>
           <a href="#lsp-navigation">LSP 代码导航</a>
+          <a href="#lsp-provider-lifecycle">LSP Provider 生命周期</a>
         </section>
         <section>
           <h2>自动化</h2>
@@ -1127,6 +1128,16 @@ print(result.final_response)</code></pre>
           <div><code>hover</code><strong>类型信息</strong><p>读取语言服务器给出的 Markdown 或纯文本说明。</p></div>
         </div>
         <p>模型输入使用从 1 开始的 UTF-16 行列坐标；没有对准符号可能得到空结果。Provider 按文件扩展名确定性选择，没有匹配项时返回 <code>LSP_UNAVAILABLE</code>。LSP 是可选能力，不属于 Agent loop 主干。</p>
+
+        <h3 id="lsp-provider-lifecycle">临时打开文档，复用 Workspace Server<a href="#lsp-provider-lifecycle" class="anchor">#</a></h3>
+        <p>stdio Provider 按 Server id 与规范 Workspace 目标惰性 single-flight 一个语言服务器进程。每次查询独立按扩展名选路；Provider 注册会原子预留 id 与全部扩展名，任何冲突都不会留下部分路由。</p>
+        <div class="compare-grid">
+          <div><strong>每次查询读取当前文件</strong><p>轮到请求执行时才从 ctx.fs 流式读取源码，发送版本 1 的完整 didOpen，完成语义查询，并在 finally 中 didClose。第一版因此不需要 didChange、内容缓存或文档 LRU。</p></div>
+          <div><strong>同 Workspace 串行，不同 Workspace 并行</strong><p>逐 Workspace 可取消队列覆盖读取、打开、查询和关闭完整生命周期，防止共享文档状态交错。工具默认 60 秒的预算也覆盖排队时间，而不只是协议请求。</p></div>
+          <div><strong>传输故障最多重试一次</strong><p>若池化进程在只读查询前或期间损坏，Provider 等待旧实例完全 dispose，再用新进程重试一次；语言服务器正常返回的错误不会触发重试。</p></div>
+        </div>
+        <div class="detail-card"><strong>查询源必须位于规范 Workspace 内</strong><p>Provider 在打开前拒绝缺失、非普通文件、非 UTF-8、超大或位于 Workspace 外的源文件。结果位置可以指向外部；相对化时使用 Provider 返回的 resolvedWorkspaceUri，而不是猜测宿主路径。</p></div>
+        <div class="warning"><strong>LSP 既不授权编辑，也不提供沙箱</strong><p>LSP 读取不会发出 fs/observed，因此不能满足先读后写策略；客户端也拒绝 workspace/applyEdit。配置的语言服务器仍是受信任进程，隔离必须由同一执行世界的文件系统与 Subprocess Provider 提供。</p></div>
 
         <div class="chapter-break"><span>06</span><div><small>自动化</small><strong>命令、钩子与编排</strong></div></div>
 

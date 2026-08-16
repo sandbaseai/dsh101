@@ -75,6 +75,7 @@
           <a href="#directory-picker">工作区选择器</a>
           <a href="#session">会话与任务</a>
           <a href="#new-session">New Session 复用</a>
+          <a href="#session-row-status">会话行状态</a>
           <a href="#session-log">Session 事件日志</a>
           <a href="#agent-delivery">Agent 投递与取消</a>
           <a href="#session-queue">实时消息队列</a>
@@ -282,6 +283,16 @@
           <div><strong>占位行不是历史</strong><p>空白 Session 保留在运行时 store，但普通列表隐藏它；临时“新会话”行没有时间、菜单或可复制标题，首条提示落地后才开放重命名、fork 与归档。</p></div>
         </div>
         <div class="warning"><strong>只匹配 cwd 不足以复用</strong><p>路径相同但不在目标 Workspace 记账中的空白 Session 不会被接管。成员关系与 blank 位都来自 Host 投影，避免不同工作区意外共享同一会话。</p></div>
+
+        <h3 id="session-row-status">侧边栏会话行的注意力状态<a href="#session-row-status" class="anchor">#</a></h3>
+        <p>Session 行把当前需要用户处理的交互归为等待审批、计划待审或等待回答，并使用琥珀色警告点。运行中使用蓝色指示器；悬浮卡片与视觉隐藏文本会给出相同的本地化状态，而不是只靠颜色传达。</p>
+        <div class="compare-grid">
+          <div><strong>请求在打开前已跟踪</strong><p>Manager 按稳定请求 id 缓冲 requested 与 resolved 帧，即使 Session 对象尚未实例化。回放重复项会被替换，已解决项会被移除。</p></div>
+          <div><strong>交互优先于运行</strong><p>待处理交互是会话行的主要状态，优先于自身运行指示。审批与普通问题并发时，第一个待回答问题优先，以匹配输入框路由。</p></div>
+          <div><strong>重连只恢复仍待处理项</strong><p>pendingInteraction 只在当前连接代次有效；断线时清空，mux 重新打开后的权威回放不会复活已经结算的请求。</p></div>
+        </div>
+        <p>子代理 Session 行在共享侧边栏隐藏，但可见 parent 会聚合不间断 subagent 谱系中的运行后代数量。普通 fork 会开启独立子树，不计入聚合；主要交互或自身运行都不存在时，后代活动才优先于绿色未查看完成提醒。</p>
+        <div class="warning"><strong>父行变蓝不代表父 Agent 在运行</strong><p>蓝色可能来自运行中的子代理。悬浮与无障碍文本会报告确切后代数量，最后一个后代停止后，先前的未查看完成提醒会重新出现。</p></div>
 
         <h2 id="session-log">Session 的仅追加事件日志<a href="#session-log" class="anchor">#</a></h2>
         <p>SessionEvent 日志是一次 Agent 交互的唯一真源；模型消息历史、UI 状态和回放结果都从同一序列派生，不存在另一份单独维护的 transcript。每条事件都有连续 seq 和毫秒时间戳，payload 必须是无损 JSON。</p>

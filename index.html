@@ -242,6 +242,7 @@
           <a href="#checkpoint-policy">持久性检查点</a>
           <a href="#session-projection">会话投影</a>
           <a href="#chat-assembly">Chat 增量组装</a>
+          <a href="#conversation-node-extension">扩展 Conversation Node</a>
           <a href="#chat-scroll-shell">Chat 滚动壳</a>
           <a href="#context-disclosure">上下文来源展开项</a>
           <a href="#thinking-tail">实时 Think 摘要</a>
@@ -2220,6 +2221,29 @@ print(result.final_response)</code></pre>
         </div>
         <p>Assistant 的每个流式 chunk 都会更新 Definition State，但物化请求最多每个 animation frame 一次；final message 与 Turn/Step 关闭则立即发布。prepend 只增加行，不替换已经存在的 keyed 节点。</p>
         <div class="warning"><strong>业务节点不能扫描 Chat 集合</strong><p>Definition 只根据当前事件匹配稳定业务 id，并保证 update 可按日志 seq 回放；renderer 只消费最终 Node data 与受限 Location。否则分页和 HMR 会产生与加载顺序相关的结果。</p></div>
+
+        <h3 id="conversation-node-extension">把业务事件扩展成 Conversation Node<a href="#conversation-node-extension" class="anchor">#</a></h3>
+        <p>为 Chat 增加一类业务行不是直接监听实时事件并插入 React 元素。完整交付需要生产方先拥有可回放的 Session 事件族，Client Definition 再把同一业务实例折叠为 State、发布类型化 Turn/Step 数据，并通过稳定 key 交给目标 renderer。</p>
+        <div class="capability-flow four-step">
+          <div><span>01</span><strong>Design</strong><p>为 start、progress 与 end 选择同一个 branded 业务 id，并在 payload 中记录位置和可回放事实；每个 kind/id 只能有一个 start。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Fold</strong><p>match 只从当前事件提取 id 与角色；start 建立 State，update 按日志 seq 确定性返回下一份 State。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Publish</strong><p>把共享数据写入类型化 Location，目标节点保留 context.key、持久 anchorSeq 与直接可渲染 data。</p></div>
+          <i>→</i>
+          <div><span>04</span><strong>Render</strong><p>向 conversation.chat.node 注入 keyed renderer；组件只读取 node.data 和受限 Location hook，不取得 Session 或扫描其他节点。</p></div>
+        </div>
+        <div class="permission-table">
+          <div><code>update-only</code><strong>允许暂存，不能猜 start</strong><span>尾页只有 progress/end 时，Assembler 保留 pending Context；向前分页补到唯一 start 后再按 seq 回放，不能把它归给“最近未完成项”。</span></div>
+          <div><code>checkpoint</code><strong>完整值可跨窗口自启动</strong><span>若产品要求 start 尚未加载也能展示，terminal 或 checkpoint 必须携带足够 fallback 状态，让 Definition 独立构造结果。</span></div>
+          <div><code>visibility</code><strong>发布后保持同一身份</strong><span>一个 target Node 发布后应持续返回相同 key；暂时离开可见流使用 hidden，不要返回 null 撤销再重建。</span></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>证明 replace 正确</strong><p>完整窗口应产生预期最终 State、Location data、Node payload 与 anchorSeq，且每个事件只按日志顺序折叠。</p></div>
+          <div><strong>证明 prepend 等价</strong><p>先加载只有 update 的尾页，再补 start，结果必须与一次完整 replace 相同；既有 keyed value 未变化时保持引用身份。</p></div>
+          <div><strong>证明 append 等价</strong><p>历史后实时追加得到的最终结果必须等同于完整回放；高频 delta 可按 animation-frame 合并发布，但 State 更新不能丢。</p></div>
+        </div>
+        <div class="warning"><strong>热路径复杂度属于扩展契约</strong><p>注册 D 个 Definition 时，每条新事件只应做 D 次当前事件匹配和一次常数时间 Context 查找。不要遍历完整窗口、context.matches、所有 Context 或已渲染 Node；累计事实放进 State，前序依赖只在 start 中使用 reader.previous。</p></div>
 
         <h3 id="chat-scroll-shell">Chat 滚动壳与编辑器几何<a href="#chat-scroll-shell" class="anchor">#</a></h3>
         <p>无会话、空白会话和活跃会话复用同一个根滚动容器、Hero 与编辑器子树；会话出现时，标题栏和主体只填入各自 outlet，不会替换 textarea 或编辑器 seat。Workspace 切换因此能保留草稿、焦点相关状态与 DOM identity。</p>

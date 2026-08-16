@@ -30,6 +30,7 @@ requiredSections.push('sdk-runtime-protocol', 'sdk-run-interval')
 requiredSections.push('external-subagent-providers')
 requiredSections.push('job-admission-delivery')
 requiredSections.push('storage-provider-routing')
+requiredSections.push('output-retention-boundary', 'spill-policy-scope')
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)

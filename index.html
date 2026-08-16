@@ -222,6 +222,7 @@
           <a href="#storage-domains">领域存储</a>
           <a href="#storage-provider-routing">存储后端路由</a>
           <a href="#spill-output">大结果 Spill</a>
+          <a href="#output-retention-boundary">输出保留边界</a>
         </section>
       </nav>
     </aside>
@@ -1768,6 +1769,18 @@ print(result.final_response)</code></pre>
         </div>
         <p>本地后端使用会话 id 的摘要作为私有目录，并以排他、仅所有者可读写的方式创建随机文件。调用方提供的文件名只是命名提示，永远不会被当作路径；定位符同样是不透明句柄。</p>
         <div class="detail-card"><strong>尽力而为的降级</strong><p>如果磁盘满、权限不足或后端不可用，Spill policy 会保留原始内联结果，不会把已经成功的工具调用改成错误。Fork 会继承日志中的旧定位符，但不会复制或重新归属已有产物。</p></div>
+
+        <h3 id="output-retention-boundary">预算保留不等于来源不完整<a href="#output-retention-boundary" class="anchor">#</a></h3>
+        <p>Output Retention 是一次调用内的轻量库，只回答“预算内保留了什么、又省略了多少”。ItemRetainer 为 glob、grep 和搜索来源保留前 N 个完整逻辑项；TextRetainer 为 Bash 与 Web 文本保留 head、tail 或 headTail，并生成精确或未知的省略元数据。</p>
+        <div class="compare-grid">
+          <div><strong>truncated 是预算事实</strong><p>它只表示 retainer 省略了本可获得的内容。权限失败、二进制跳过、Provider 部分失败、不可读候选项和无效输入仍由工具自己的 incomplete 或错误字段表达。</p></div>
+          <div><strong>文本预算按 UTF-8 字节</strong><p>上限和 omittedBytes 不按字符或行计算。finish 会修剪切口处不完整的码点，首尾分别解码，不会跨被省略的中段拼出虚假字符。</p></div>
+          <div><strong>完整集合可独立保存</strong><p>Item retainer 可一边保留内联首页，一边让调用方继续收集完整排序结果用于 Spill；工具仍拥有分组、行号、状态、恢复指引和业务完整性。</p></div>
+        </div>
+        <h4 id="spill-policy-scope">通用 Spill Policy 能看见什么<a href="#spill-policy-scope" class="anchor">#</a></h4>
+        <p>通用策略在 post-execute 阶段只处理超过 maxInlineBytes 的最终纯文本 content。它跳过普通 read、嵌套执行、已替换的规范 value、block 结果和任何混合内容；Provider 已经截断的正文也无法被它恢复。Code Mode 的 dispatch-log 另有同预算分支，会限制包括 read 在内的持久日志副本，但完整程序值早已跨过 worker 边界，不受影响。</p>
+        <div class="detail-card"><strong>通知也计入同一硬预算</strong><p>策略先为省略字节数、定位符和检索提示预留空间，再把剩余字节分给首尾预览。若通知本身都放不下，它会保留原始内联结果，绝不生成一个超过上限或比原结果更大的替换。</p></div>
+        <div class="warning"><strong>Spill Owner 不是读取授权</strong><p>Owner 只决定保存时的命名空间，定位符本身不授予访问权限。本地文件不会随 Session 自动删除，并可能被恢复或 Fork 后的日志继续引用；远程部署需要提供与执行文件系统一致的后端和取回策略。</p></div>
 
         <div class="source-note">
           <div><span class="pulse"></span><strong>内容来源</strong></div>

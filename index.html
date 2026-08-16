@@ -149,6 +149,7 @@
         <section>
           <h2>Agent 工作流</h2>
           <a href="#mcp">连接 MCP</a>
+          <a href="#mcp-transport">MCP 传输与重连</a>
           <a href="#skills">Skills</a>
           <a href="#skill-provider">Skill Provider 发现</a>
           <a href="#plan-mode">Plan Mode</a>
@@ -1098,6 +1099,23 @@ print(result.final_response)</code></pre>
         <div class="naming-demo"><span>server</span><strong>github</strong><i>+</i><span>tool</span><strong>create_issue</strong><i>→</i><code>mcp__github__create_issue</code></div>
         <p>公开名称是 <code>(serverName, rawName)</code> 的确定性函数，因此重连和重新同步不会改名。服务器崩溃后默认指数退避重连；正常工具世代在恢复期间保持注册，但调用会暂时失败。</p>
         <div class="detail-card"><strong>当前范围</strong><p>目前只桥接 MCP Tools。Resources 与 Prompts 尚无 Harness 消费接口；非文本结果在模型上下文中会变成占位符，但完整 JSON 块仍保留在执行局部的规范值中。</p></div>
+
+        <h3 id="mcp-transport">工具命名、同步世代与断线恢复<a href="#mcp-transport" class="anchor">#</a></h3>
+        <div class="permission-table">
+          <div><code>stdio</code><strong>受管本地子进程</strong><span>通过 command、args、cwd 和清理后的环境启动；子进程崩溃会触发 Supervisor 指数退避重启与重新发现。</span></div>
+          <div><code>streamable-http</code><strong>远程 MCP URL</strong><span>通过 URL 与可选 headers 连接；不可达通常按每次调用失败，SDK 自己处理 SSE 流恢复，不由 Supervisor 重新 spawn。</span></div>
+          <div><code>60s</code><strong>默认工具调用上限</strong><span>toolCallTimeoutMs 同时适用于两种传输；连接 initialize 与分页 tools/list 仍沿用 MCP SDK 默认 60 秒，暂时不可单独配置。</span></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Discover</strong><p>激活先等待 listTools；failOnStartupError 为 false 时，失败只记录日志并让插件以空工具集继续运行。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Publish</strong><p>每项工具注册为 mcp__serverName__rawName；超长或非法字符名称会规范化并追加确定性 hash，连接顺序不会改名。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Replace</strong><p>tools/list_changed 或重连成功后以完整新世代替换旧集合；发现失败保留旧世代，注册冲突则回滚整次尝试并移除该服务器的所有工具，绝不暴露部分集合。</p></div>
+        </div>
+        <div class="detail-card"><strong>断线期间最后一个正常世代仍可见</strong><p>调用会在连接恢复前失败，但 Schema 不会来回闪烁。连续失败达到 maxAttempts 后才注销整代工具并停止重连；稳定存活超过 maxDelayMs 会重置失败预算。</p></div>
+        <div class="warning"><strong>关闭自动重连不是自动注销</strong><p>reconnect.enabled 为 false 时，断线后的工具继续注册但调用失败，直到 HMR 重载或 Host 重启。配置修改会断开并重新连接；serverName 不变时公开工具名保持一致。</p></div>
+        <div class="warning"><strong>模型看到的是有损文本投影</strong><p>文本块按换行拼接，图片、音频、资源与不支持块只显示占位符。完整 MCP JSON 块和 structuredContent 只存在于本次执行的规范值中；声明了不受支持 outputSchema 词汇时也只按普通 JsonValue 处理。</p></div>
 
         <h2 id="skills">Skills 的发现与加载<a href="#skills" class="anchor">#</a></h2>
         <p>Skill 是可复用的 Agent 指令。提供方负责发现候选项，注册表合并全局层与当前 scope，<code>tool-skill</code> 再向模型公开目录和按需加载工具。</p>

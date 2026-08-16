@@ -40,6 +40,7 @@ requiredSections.push('subprocess-provider')
 requiredSections.push('filesystem-provider')
 requiredSections.push('web-providers')
 requiredSections.push('skill-provider')
+requiredSections.push('mcp-transport')
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)

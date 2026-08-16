@@ -32,6 +32,7 @@ requiredSections.push('job-admission-delivery')
 requiredSections.push('storage-provider-routing')
 requiredSections.push('output-retention-boundary', 'spill-policy-scope')
 requiredSections.push('sandbox-provider')
+requiredSections.push('session-title-strategies')
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)

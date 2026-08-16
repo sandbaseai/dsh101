@@ -94,7 +94,7 @@ Last upstream review:
 | Session search and log export | `docs/subsystems/session-query.zh.md`, `packages/session-query/tool-session-query/README.zh.md`, `packages/session-query/session-log-export/README.zh.md` |
 | Browser session search, local metadata fallback, request cancellation, query limits, and result navigation | `packages/client/ui-workspace/README.zh.md`, `packages/client/runtime/README.zh.md` |
 | Structured cross-session references | `docs/subsystems/session-reference.zh.md` |
-| Durable session titles | `docs/subsystems/session-title.zh.md` |
+| Durable session titles, deterministic fallback, first-prompt and all-prompts LLM cadence, route inheritance, request provenance, supersession, failure behavior, and fork semantics | `docs/subsystems/session-title.zh.md`, `packages/session/session-title/README.zh.md`, `packages/session/session-title-llm/README.zh.md`, `packages/session/session-title-first-prompt-llm/README.zh.md`, `packages/session/session-title-all-prompts-llm/README.zh.md` |
 | Session fork, rename, archive, and workspace deletion boundaries | `packages/host/apiproxy/README.zh.md`, `packages/client/runtime/README.zh.md`, `packages/client/ui-conversation/README.zh.md`, `packages/client/ui-workspace/README.zh.md` |
 | Assistant footer action placement, completed-turn branching, read-only user messages, and selection behavior on failure | `packages/client/ui-conversation/README.zh.md` |
 | Full-snapshot archive set, cross-tab and reconnect convergence, selection clearing, and UI failure behavior | `packages/client/runtime/README.zh.md`, `packages/client/ui-workspace/README.zh.md` |

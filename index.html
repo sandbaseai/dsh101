@@ -210,6 +210,7 @@
           <a href="#browser-session-search">浏览器会话搜索</a>
           <a href="#session-reference">跨会话引用</a>
           <a href="#session-title">会话标题</a>
+          <a href="#session-title-strategies">标题生成策略</a>
           <a href="#session-management">分支、归档与删除边界</a>
           <a href="#message-actions">消息操作边界</a>
           <a href="#archive-convergence">归档跨标签页收敛</a>
@@ -1642,6 +1643,22 @@ print(result.final_response)</code></pre>
           <div><strong>User rename</strong><p>显式重命名会抢占正在生成的修订；主动 refresh 才会重新解锁生成。</p></div>
         </div>
         <p>服务接纳结果时会验证来源 seq、规范化非空文本并执行 UTF-8 字节上限。即使辅助 LLM 最终失败，请求记录仍能还原当时模型实际看见的输入与路由。</p>
+
+        <h3 id="session-title-strategies">Fallback、首消息与全消息策略<a href="#session-title-strategies" class="anchor">#</a></h3>
+        <div class="permission-table">
+          <div><code>fallback</code><strong>即时确定性标题</strong><span>第一条合格文本提示到达后，取开头若干词，规范化空白、移除终端控制序列，并按 UTF-8 码点安全截断。</span></div>
+          <div><code>first-prompt</code><strong>首消息 LLM</strong><span>全新且非 Fork 的 Session 最多自动请求一次，只把第一条合格用户消息交给辅助模型；失败后保留 fallback，需显式 refresh 才重试。</span></div>
+          <div><code>all-prompts</code><strong>全消息 LLM</strong><span>每条新用户提示都生成新 revision，输入包含截至当时的全部合格消息；新 revision 会中止旧工作，迟到结果不能提交。</span></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Route</strong><p>provider 与 model 必须同时覆盖或同时省略；省略时继承当前日志中已记录的主请求路由。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Record</strong><p>分发前先追加 session/title-llm-request，记录精确消息 seq、系统指令、路由和输出预算；验证阶段失败则不伪造请求记录。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Accept</strong><p>只接受纯文本、stop 结束且仍属最新 revision 的输出；自动失败仅告警并保留上一标题，显式 refresh 则向调用方返回失败。</p></div>
+        </div>
+        <div class="detail-card"><strong>标题生成不阻塞主 Agent</strong><p>辅助请求是独立模型调用，不进入主会话历史，也不改变主请求 KV Cache。DeepSeek 路由会为标题用途关闭思考，把有限输出预算留给可见标题。</p></div>
+        <div class="warning"><strong>全消息策略不会偷偷截断长会话</strong><p>最终 JSON 封装超过 maxInputBytes 时整次请求失败并保留旧标题，不会裁剪某条消息或改用摘要。Fork 会继承已有标题；只有 all-prompts 在子会话收到新提示后才会自动追加修订。</p></div>
 
         <h2 id="session-management">会话分支、归档与删除边界<a href="#session-management" class="anchor">#</a></h2>
         <p>Fork 不会在任意半成品事件处截断。消息下方的分支操作只在已完成轮次的最后一条 Assistant 文本上启用；宿主把事件锚点推进到该位置之后的首个 <code>turn/end</code>，确保子会话继承完整轮次。</p>

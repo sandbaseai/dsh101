@@ -99,6 +99,7 @@
           <h2>进阶</h2>
           <a href="#plugins">第一个插件</a>
           <a href="#tools">开发 Tool</a>
+          <a href="#tool-execution-pipeline">Tool 执行流水线</a>
           <a href="#tool-call-tree">Code Mode 调用树</a>
           <a href="#tool-details-boundary">工具详情边界</a>
           <a href="#config-schema">配置 Schema</a>
@@ -505,6 +506,18 @@ print(result.final_response)</code></pre>
           <div><span>02</span><strong>返回规范值</strong><p>execute 返回由 output schema 约束的数据。</p></div>
           <div><span>03</span><strong>渲染模型内容</strong><p>render 将规范值转换为模型真正看到的结果。</p></div>
         </div>
+
+        <h3 id="tool-execution-pipeline">从调用记录到权威结果的执行流水线<a href="#tool-execution-pipeline" class="anchor">#</a></h3>
+        <p>模型产生完整工具块后，Harness 先记录 tool/call，再把同一次调用依次交给可改写的前置流水线、不可放宽的单调 Guard、环绕执行器和后置流水线。工具正文只是其中一段，不拥有整条策略顺序。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>准入与约束</strong><p>tools/pre-execute 承载 Hook、审批与沙箱改写；随后注册 Guard 只能拒绝或放行，后来的策略不能恢复已经被拒绝的身份。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>分派与重写</strong><p>tools/execute 用于超时、重试和指标等环绕关注点；正文完成或被拒绝后，tools/post-execute 仍可接受、阻止、替换结果或添加上下文。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>冻结与记录</strong><p>注册表把候选结果规范成无损 JSON 快照，finalizeContent 最后只约束 content；同步 tools/result 通知观察冻结结果，随后只追加一个模型可见 tool/result。</p></div>
+        </div>
+        <div class="detail-card"><strong>附加上下文必须等整批工具结算</strong><p>所有 tool/result 按调用顺序写入后，活动批次才把 additionalContexts 作为 FIFO user/message 注入，避免上下文插进调用与结果之间。Code Mode 子调用把上下文延迟到父级 run_code 结果之后，并记录自己的 tool/code-dispatch。</p></div>
+        <div class="warning"><strong>拒绝与异常也会收敛成一个结果</strong><p>审批拒绝会跳过工具正文但继续经过后置与收尾阶段；流水线抛错或结果无法无损快照时，外层规范化会生成 isError 结果。这样 Session、模型与 UI 共享同一份不可变权威结局。</p></div>
 
         <h3 id="tool-call-tree">Code Mode 的嵌套工具调用树<a href="#tool-call-tree" class="anchor">#</a></h3>
         <p>Chat 按 call id 配对根工具调用与结果，再把 Code Dispatch 的 start 与 settlement 折叠进该根 Context。每个 ToolCallBlock 通过 <code>subCalls</code> 按启动顺序递归拥有 child；child 不会成为独立 Chat 根记录。</p>

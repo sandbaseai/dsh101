@@ -31,7 +31,7 @@ Last upstream review:
 | User profile patch layering, hot reload, and last-good HMR fallback | `packages/boot/app-boot/README.zh.md` |
 | Headless execution and configuration dumps | `apps/cli/reference/README.zh.md` |
 | First plugin | `docs/user/develop/basic/index.zh.md` |
-| Tool development | `docs/user/develop/basic/tool.zh.md`, `docs/subsystems/tools.zh.md` |
+| Tool development and the execution pipeline from admission through frozen authoritative result | `docs/user/develop/basic/tool.zh.md`, `docs/subsystems/tools.zh.md`, `docs/tool-execution-pipeline.zh.md` |
 | Code Mode nested tool-call topology, incremental keyed updates, malformed-edge limits, and UI ownership | `packages/client/runtime/README.zh.md`, `packages/client/ui-tool/README.zh.md` |
 | Chat tool rendering, details-seat raw fallback, unreachable details entry point, and deferred inspector navigation | `packages/client/ui-conversation/README.zh.md`, `packages/client/ui-tool/README.zh.md` |
 | Plugin configuration | `docs/user/develop/basic/config.zh.md` |

@@ -41,11 +41,14 @@ Last upstream review:
 | Persistent goals and goal rounds | `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |
 | Context compaction | `packages/compaction/compaction-basic/README.zh.md` |
 | Permission presets and approvals | `packages/interaction/permission-presets/README.zh.md`, `packages/interaction/user-approval/README.zh.md` |
+| Approval request lifecycle and audit | `docs/subsystems/approval.zh.md` |
 | Filesystem sandbox policy | `packages/fs/fs-sandbox/README.zh.md` |
 | Tool reliability guardrails | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
 | Background job runtime | `docs/subsystems/jobs.zh.md` |
 | Session search and log export | `docs/subsystems/session-query.zh.md`, `packages/session-query/tool-session-query/README.zh.md`, `packages/session-query/session-log-export/README.zh.md` |
+| Durable session titles | `docs/subsystems/session-title.zh.md` |
 | Session persistence and crash recovery | `docs/subsystems/persistence.zh.md`, `packages/session/session-checkpoint-policy/README.zh.md` |
+| Session projections and cold-read cache | `docs/subsystems/session-projection.zh.md` |
 | Domain storage | `docs/subsystems/storage.zh.md` |
 | Oversized tool result spill | `docs/subsystems/spill.zh.md` |
 | User slash commands | `docs/subsystems/commands.zh.md` |

@@ -70,6 +70,7 @@
           <a href="#workspace">工作区</a>
           <a href="#session">会话与任务</a>
           <a href="#permissions">权限与审批</a>
+          <a href="#approval-flow">审批链路</a>
           <a href="#sandbox">沙箱模式</a>
         </section>
         <section>
@@ -129,7 +130,9 @@
           <a href="#guardrails">工具 Guardrails</a>
           <a href="#background-jobs">后台任务</a>
           <a href="#session-history">会话检索与导出</a>
+          <a href="#session-title">会话标题</a>
           <a href="#persistence">会话持久化</a>
+          <a href="#session-projection">会话投影</a>
           <a href="#storage-domains">领域存储</a>
           <a href="#spill-output">大结果 Spill</a>
         </section>
@@ -194,6 +197,17 @@
         <p>文件系统围栏会在目标规范化后检查可写根，并在写入前重新规范化以缩小符号链接竞态。不过它是可信进程中的策略围栏，不是针对恶意宿主代码的内核安全边界。</p>
         <h3>一次性审批</h3>
         <p>审批结果只有 <code>allowed-once</code>、<code>rejected</code>、<code>cancelled</code> 和 <code>unavailable</code>。每次决定都会写入成对审计事件；没有应答者或应答失败时默认拒绝。<code>never</code> 策略会在交互分发前确定性拒绝请求。</p>
+
+        <h2 id="approval-flow">审批的完整链路<a href="#approval-flow" class="anchor">#</a></h2>
+        <p>每一次审批请求都有全新的 <code>ApprovalRequestId</code>，用于把 <code>approval/asked</code> 与 <code>approval/decided</code> 配成一组。请求只携带 Agent、工具名、可选 call id 与理由；工具参数仍由已经流式展示的调用负责，避免 UI 渲染第二份可能漂移的数据。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Policy</strong><p><code>never</code> 在应答者运行前直接拒绝；<code>ask</code> 才进入组合链。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Waterfall</strong><p>UI 或 ACP 应答者可认领请求，否则交给下一个；异常与非法返回值归一为 unavailable。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Audit</strong><p>只有 asked 与 decided 都越过日志提交点，结果才会返回调用方。</p></div>
+        </div>
+        <div class="warning"><strong>只有 allowed-once 会放行</strong><p>取消信号会立即撤回问题，迟到的答案被丢弃。审批审计事件不会进入模型 transcript；模型只看到工具派生结果和最新的运行时上下文快照。</p></div>
 
         <div class="chapter-break"><span>02</span><div><small>程序化使用</small><strong>从 Web UI 走向 SDK</strong></div></div>
 
@@ -594,6 +608,15 @@ print(result.final_response)</code></pre>
         <p>跨会话访问要求目标与调用方的 <code>cwd</code> 严格相同；当前会话的搜索会截止到调用步骤之前，避免工具匹配自身。搜索文本按字面量、不区分大小写并灵活匹配空白，过滤条件之间为 AND，同一列表内为 OR。</p>
         <div class="detail-card"><strong>导出完整审计材料</strong><p>Web UI 的 Session log 按钮或 <code>/export</code> 会下载包含根会话、子会话和附件的流式 ZIP。命令只在用户命令平面执行，不创建模型轮次，也不消耗模型 token；下载位置由浏览器决定。</p></div>
 
+        <h2 id="session-title">会话标题的生成与固定<a href="#session-title" class="anchor">#</a></h2>
+        <p>标题是后写覆盖的持久日志状态。内置 fallback 或可选 Provider 会根据合格的人类文本消息生成标题，并记录精确的来源消息 seq；用户手动重命名后，标题会被固定，后续自动生成停止调度。</p>
+        <div class="compare-grid">
+          <div><strong>Fallback</strong><p>没有 Provider 时仍可从合格输入生成确定性的基础标题。</p></div>
+          <div><strong>Provider</strong><p>异步生成会记录提供方、模型路由、系统输入、消息输入与输出上限。</p></div>
+          <div><strong>User rename</strong><p>显式重命名会抢占正在生成的修订；主动 refresh 才会重新解锁生成。</p></div>
+        </div>
+        <p>服务接纳结果时会验证来源 seq、规范化非空文本并执行 UTF-8 字节上限。即使辅助 LLM 最终失败，请求记录仍能还原当时模型实际看见的输入与路由。</p>
+
         <h2 id="persistence">会话持久化与恢复<a href="#persistence" class="anchor">#</a></h2>
         <p>内存中的仅追加 <code>SessionEvent</code> 日志是真源，Persistence seam 负责把同一组事件耐久保存；它没有另造一套“持久化事件”。元数据 header 与日志分开保存，记录格式版本、cwd、父会话、seed 边界、委派深度和 Agent preset。</p>
         <div class="capability-flow">
@@ -605,6 +628,17 @@ print(result.final_response)</code></pre>
         </div>
         <div class="warning"><strong>持久化意图不等于恰好一次</strong><p>工具调用可能已经产生外部副作用、但结果尚未落盘。恢复时 Harness 会写入 <code>TOOL_OUTCOME_UNKNOWN</code>，要求先验证状态；有副作用的 Provider 应尽量把 call id 用作幂等键。</p></div>
         <p>JSONL 后端为每个会话维护可选 Zstandard 压缩的追加日志；SQLite 后端则把每个事件存成一行。格式版本过新、过旧或遇到未知的必需事件时会明确拒绝恢复，而不是静默丢失语义。</p>
+
+        <h2 id="session-projection">会话投影与冷读取<a href="#session-projection" class="anchor">#</a></h2>
+        <p>Session Projection 把仅追加事件日志折叠成供客户端直接消费的完整领域状态。每个领域只注册同步的 <code>init → apply → view</code> 纯计算单元；框架统一订阅已提交事件，客户端从不自行重放领域事件。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Fold</strong><p>无关事件必须返回同一 state 引用，从而不触发下游工作。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Snapshot</strong><p>所有 key 共享一个 asOfSeq 水位线，输出先通过各自 schema。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Cache</strong><p>状态版本与 seq 写入耐久缓存，冷会话只回放缺失尾部。</p></div>
+        </div>
+        <p>缓存是性能层而不是真源：版本变化或日志因崩溃修复而缩短时，旧行会失效并回退到完整重放。写后缓存失败只记录警告，下一次检查点或冷读会自愈；插件卸载后，其投影 key 会从快照中消失。</p>
 
         <h2 id="storage-domains">非会话数据的领域存储<a href="#storage-domains" class="anchor">#</a></h2>
         <p>设置、索引等不属于对话事件日志的数据进入 Storage subsystem。枢纽只负责注册后端和挂载数据形式，不执行 IO；领域层声明名称、格式版本、global slot、表和 zod schema，再按部署路由到 JSON 或 SQLite 后端。</p>

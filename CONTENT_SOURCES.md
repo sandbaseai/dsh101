@@ -89,7 +89,7 @@ Last upstream review:
 | Browser approval composer takeover, sidebar pending projection, one-time-only decisions, restoration, and Full access confirmation | `packages/client/ui-conversation/README.zh.md`, `packages/client/ui-workspace/README.zh.md` |
 | Filesystem sandbox policy | `docs/subsystems/sandbox.zh.md`, `packages/fs/fs-sandbox/README.zh.md` |
 | Tool timeout enforcement, wrapper ordering, and per-agent repetition reminders | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
-| Background job runtime | `docs/subsystems/jobs.zh.md` |
+| Background job runtime, per-owner admission, scoped controllers, first-settlement semantics, output budgets, completion delivery, wake limits, and teardown | `docs/subsystems/jobs.zh.md`, `packages/jobs/jobs/README.zh.md`, `packages/jobs/jobs-local/README.zh.md`, `packages/jobs/tool-jobs/README.zh.md` |
 | Append-only session event model | `docs/subsystems/session.zh.md` |
 | Session search and log export | `docs/subsystems/session-query.zh.md`, `packages/session-query/tool-session-query/README.zh.md`, `packages/session-query/session-log-export/README.zh.md` |
 | Browser session search, local metadata fallback, request cancellation, query limits, and result navigation | `packages/client/ui-workspace/README.zh.md`, `packages/client/runtime/README.zh.md` |

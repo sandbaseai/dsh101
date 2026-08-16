@@ -204,6 +204,7 @@
           <a href="#compaction-checkpoint">压缩检查点 UI</a>
           <a href="#guardrails">工具 Guardrails</a>
           <a href="#background-jobs">后台任务</a>
+          <a href="#job-admission-delivery">任务准入与通知</a>
           <a href="#session-history">会话检索与导出</a>
           <a href="#browser-session-search">浏览器会话搜索</a>
           <a href="#session-reference">跨会话引用</a>
@@ -1563,6 +1564,23 @@ print(result.final_response)</code></pre>
         </div>
         <p>输出读取使用单一消费游标：流式任务每次返回上次读取后的增量，只有最终输出的任务则在结束后重复返回同一结果。任务访问按拥有者 session 授权；Agent 被释放时，其任务会被取消并等待清理完成。</p>
         <div class="detail-card"><strong>取消不是瞬间完成</strong><p><code>kill</code> 只请求生产方终止并把状态推进到 <code>stopping</code>。只有生产方真正释放资源、<code>done</code> settle 后，任务才进入 <code>killed</code> 或其他终态。</p></div>
+
+        <h3 id="job-admission-delivery">任务准入、结算与完成通知<a href="#job-admission-delivery" class="anchor">#</a></h3>
+        <p>本地 Job Registry 默认允许每个 owner 同时拥有 10 个活任务；无 owner 的任务使用独立的服务级桶。running 与 stopping 都占容量，终态历史不占。达到上限会在调用生产方和分配 id 之前失败，注册表不会排队或抢占旧任务。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Admit</strong><p>start 验证精确且存活的 owner、任务 spec、已附加 controller 与并发桶；当前组合没有 tool-jobs controller 时不能借用其他 preset 的控制面。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Settle</strong><p>生产方 done、被隔离的 done 拒绝或销毁强制失败中最先到达者胜出，只提交一条终态记录并释放全部 wait。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Deliver</strong><p>完成记录先对观察者可见，再至多交付一次 owner 通知；listener 抛错或拒绝彼此隔离，不会改写任务结果。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>繁忙 Owner 使用 Inject</strong><p>通知进入 next-step inbox；同批多个完成可以合并进一个后续步骤，不会为每个任务各买一轮模型请求。</p></div>
+          <div><strong>空闲 Owner 使用 Wakeup</strong><p>默认 follow-up 唤醒 Agent，连续最多 3 轮；预算耗尽后降级为 inject，只有用户撰写的新消息会补充预算。</p></div>
+          <div><strong>Quiet 从不主动唤醒</strong><p>completionDelivery 设为 quiet 时，空闲任务通知也只待在 inbox。显式 read、wait 或 kill 已终止任务会标记已报告，抑制重复通知。</p></div>
+        </div>
+        <div class="detail-card"><strong>输出预算由生产方声明</strong><p>可选 outputLimitBytes 限制完整 UTF-8 工具结果和通知；控制器优先保留 job id、状态与 job_output 收集指令，再用剩余字节呈现 label、detail 和输出尾部。</p></div>
+        <div class="warning"><strong>进程本地任务不能跨重启恢复</strong><p>任务记录随 Harness 进程消失。若 cancel 已返回但生产方永不结算 done，Registry 无法区分缓慢停止与失联任务：它会持续占用容量，服务销毁也可能等待不归。</p></div>
 
         <h2 id="session-history">会话检索与日志导出<a href="#session-history" class="anchor">#</a></h2>
         <p>可选的 Session Query 工具让 Agent 从既往工作中找回上下文，而不必把所有历史塞进当前请求。搜索先返回标题和最佳匹配摘要，再按需读取事件、关系或会话谱系。</p>

@@ -110,6 +110,7 @@
           <a href="#tool-call-tree">Code Mode 调用树</a>
           <a href="#tool-details-boundary">工具详情边界</a>
           <a href="#config-schema">配置 Schema</a>
+          <a href="#config-catalog">配置目录阅读</a>
           <a href="#events">事件系统</a>
           <a href="#lifecycle">插件生命周期</a>
           <a href="#defensive-patterns">防御性失败模式</a>
@@ -662,6 +663,22 @@ print(result.final_response)</code></pre>
         </div>
         <div class="rule-strip"><strong>判断标准</strong><span>不同部署是否可能需要改变这个值？如果是，它就应该是配置字段，而不是硬编码常量。</span></div>
         <p>修改 <code>cordis.yml</code> 会触发插件热替换：旧实例先卸载并清理 effects，新实例再使用已校验的配置加载。</p>
+
+        <h3 id="config-catalog">如何阅读自动生成的插件配置目录<a href="#config-catalog" class="anchor">#</a></h3>
+        <p>上游 <code>docs/config-catalog.md</code> 以部署为轴，逐个列出可加载 Harness 包的完整配置声明、JSDoc 与引用类型。它解释每个 <code>cordis.yml</code> 条目的 <code>config:</code> 块；具体字段能否写入仍由运行时 Schema 决定，不能从实现内部字段反推。</p>
+        <div class="compare-grid">
+          <div><strong>Config declaration</strong><p>生成器从插件 apply 函数或服务构造器读取配置类型；包内引用类型直接展开，跨包类型链接到其声明位置。</p></div>
+          <div><strong>Runtime Schema</strong><p>Schemastery 接受的每个键，包括嵌套键，都必须能在配置类型中定位；运行时 Schema 有意排除的字段属于内部 seam，不能从 cordis.yml 设置。</p></div>
+          <div><strong>Requires</strong><p>这一行来自插件 inject 的服务键；同一配置树还必须加载对应 Provider，否则字段即使合法也不能让插件完成激活。</p></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Deploy</strong><p>配置目录回答部署方能设置哪些值。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Connect</strong><p>子系统页的 cordis-surface 回答插件作者如何连接能力。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Expose</strong><p>工具目录回答模型最终看见哪些工具 Schema。</p></div>
+        </div>
+        <div class="detail-card"><strong>目录是生成产物，不是手写清单</strong><p>英文页由源码生成，verify-config-catalog 会检查新鲜度并交叉核对类型与 Schema；中文页作为经评审的双语对侧维护。范围只覆盖 packages 下的 Harness 层，hmr、console logger 等 vendored Cordis 插件不在目录内。</p></div>
 
         <h2 id="events">事件系统<a href="#events" class="anchor">#</a></h2>
         <p>事件是插件间松耦合通信的核心机制。Cordis 提供四种模式，它们的执行与返回规则不同：</p>

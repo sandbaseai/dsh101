@@ -36,6 +36,7 @@ Last upstream review:
 | Code Mode nested tool-call topology, incremental keyed updates, malformed-edge limits, and UI ownership | `packages/client/runtime/README.zh.md`, `packages/client/ui-tool/README.zh.md` |
 | Chat tool rendering, details-seat raw fallback, unreachable details entry point, and deferred inspector navigation | `packages/client/ui-conversation/README.zh.md`, `packages/client/ui-tool/README.zh.md` |
 | Plugin configuration | `docs/user/develop/basic/config.zh.md` |
+| Generated plugin configuration catalog, declared config surface, runtime-schema cross-checking, injected service requirements, freshness verification, and reference-axis boundaries | `docs/config-catalog.zh.md`, `scripts/gen-config-catalog.ts` |
 | Bundles and publishing | `docs/user/develop/basic/publish.zh.md` |
 | Fiber lifecycle | `docs/user/develop/framework/index.zh.md` |
 | Web client module graph and bundle delivery | `docs/subsystems/client-modules.zh.md` |

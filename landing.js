@@ -1,4 +1,5 @@
 import './landing.css'
+import './navigation.css'
 
 const localeButtons = [...document.querySelectorAll('[data-locale]')]
 const translatable = [...document.querySelectorAll('[data-zh][data-en]')]
@@ -40,4 +41,28 @@ for (const button of document.querySelectorAll('.copy-command')) button.addEvent
   const original = button.textContent
   button.textContent = document.documentElement.lang === 'en-US' ? 'Copied' : '已复制'
   setTimeout(() => { button.textContent = original }, 1200)
+})
+
+const header = document.querySelector('.landing-header')
+const menuToggle = document.querySelector('.menu-toggle')
+const primaryNav = document.querySelector('#primaryNav')
+const navGroupButton = document.querySelector('.nav-group > button')
+
+menuToggle?.addEventListener('click', () => {
+  const open = menuToggle.getAttribute('aria-expanded') !== 'true'
+  menuToggle.setAttribute('aria-expanded', String(open))
+  header?.classList.toggle('menu-open', open)
+})
+
+navGroupButton?.addEventListener('click', () => {
+  const open = navGroupButton.getAttribute('aria-expanded') !== 'true'
+  navGroupButton.setAttribute('aria-expanded', String(open))
+  navGroupButton.closest('.nav-group')?.classList.toggle('open', open)
+})
+
+primaryNav?.addEventListener('click', event => {
+  if (event.target.closest('a') && window.matchMedia('(max-width: 900px)').matches) {
+    menuToggle?.setAttribute('aria-expanded', 'false')
+    header?.classList.remove('menu-open')
+  }
 })

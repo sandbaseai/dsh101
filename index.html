@@ -174,6 +174,7 @@
         <section>
           <h2>持续执行</h2>
           <a href="#subagents">Subagents</a>
+          <a href="#subagent-activation">Subagent Activation</a>
           <a href="#todos">Todo 列表</a>
           <a href="#todo-dock">Todo 计划条</a>
           <a href="#goals">持久 Goal</a>
@@ -1206,6 +1207,16 @@ print(result.final_response)</code></pre>
           <div><span>Continuable</span><strong>可继续子级</strong><p>拥有持久 Session，可接收后续消息并在需要时冷恢复。</p></div>
         </div>
         <p>同级委派可以并发执行，结果仍按模型调用顺序提交。子级继承父级显式沙箱覆盖，但审批策略固定为 <code>never</code>，避免无人处理的提权请求。</p>
+
+        <h3 id="subagent-activation">可继续 Subagent 的 Activation 生命周期<a href="#subagent-activation" class="anchor">#</a></h3>
+        <p>可继续子级的持久 Session 是身份与历史；Activation 则是该 Session 当前驻留在进程内的一段运行期。同一 Session 至多有一个 Activation，但它可以执行多个 FIFO 轮次，并在自己的后代仍运行时继续驻留。</p>
+        <div class="compare-grid">
+          <div><strong>Running：在原 Activation 入队</strong><p>子级正在准入、执行轮次或唤醒 Inbox 时，followup 进入同一个 FIFO，不会修改已经进行中的轮次。</p></div>
+          <div><strong>Waiting：唤醒原 Activation</strong><p>子级自身已停稳但仍拥有未释放后代时，followup 唤醒现有 Activation，而不是创建第二个运行化身。</p></div>
+          <div><strong>Cold：恢复新 Activation</strong><p>没有在线 Activation 时，管理器从持久描述符恢复一个新实例。消息一旦被 Inbox 接受，调用方后续取消不会撤回该轮次或销毁子级。</p></div>
+        </div>
+        <div class="detail-card"><strong>父级等待子级优先释放</strong><p>只要 ownedChildren 非空，受管理父级就不能 settle。子级必须完全停稳、释放所有后代、尝试最终 flush 并 dispose 自身 Handle 后，父级所有权才解除；持久子会话不会随进程内 Activation 拆卸而删除。</p></div>
+        <div class="warning"><strong>Interrupt 不是 Dispose</strong><p>中断在线子级只对当前 driver 发出取消并立即返回，不等待完全停稳；Activation、尚未领取的 Inbox 工作和已发布后代都会保留。之后的唤醒消息会继续处理被暂停的 FIFO。</p></div>
 
         <h2 id="todos">Todo 列表<a href="#todos" class="anchor">#</a></h2>
         <p><code>todo_write</code> 属于当前 Agent 会话，每次调用都提交完整列表快照，而不是增量修改。条目只有三种状态：</p>

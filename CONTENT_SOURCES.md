@@ -73,7 +73,7 @@ Last upstream review:
 | Subprocess streams and process-tree termination | `docs/subsystems/subprocess.zh.md` |
 | Shared E2B remote filesystem and subprocess runtime | `packages/e2b/e2b/README.zh.md`, `packages/e2b/fs-e2b/README.zh.md`, `packages/e2b/subprocess-e2b/README.zh.md` |
 | LSP semantic code navigation | `docs/subsystems/lsp.zh.md`, `packages/lsp/tool-lsp/README.zh.md` |
-| Subagent delegation and lifecycles | `docs/subsystems/subagent.zh.md`, `packages/subagent/subagent/README.zh.md`, `packages/subagent/tool-subagent/README.zh.md` |
+| Subagent delegation, continuable Activation routing, Inbox ownership, child-first disposal, and interrupt boundaries | `docs/subsystems/subagent.zh.md`, `packages/subagent/subagent/README.zh.md`, `packages/subagent/tool-subagent/README.zh.md` |
 | Todo snapshots | `packages/todo/tool-todo/README.zh.md` |
 | TodoDock current-plan projection, turn-boundary clearing, slot order, collapsed status counts, composer visibility, and single-line limit | `packages/client/ui-conversation/README.zh.md`, `packages/todo/tool-todo/README.zh.md` |
 | Persistent goals and goal rounds | `docs/subsystems/goal.zh.md`, `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |

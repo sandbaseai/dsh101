@@ -654,7 +654,22 @@ export const en = {
   '每次更新携带 opaque version；冲突直接返回权威当前值供 UI 对账。': 'Every update carries an opaque version; conflicts return the authoritative current value for UI reconciliation.',
   '生命周期隔离': 'Lifecycle isolation',
   'Sidecar 绑定 Session 的 createdAt 与 cwd；Fork 不复制父会话反馈。': 'The sidecar binds to the session createdAt and cwd; a fork does not copy parent feedback.',
-  'Web UI 首次 hover 或 focus 时才延迟读取整段会话的反馈，避免对每条消息单独请求。删除不存在的反馈是幂等成功；备注按 UTF-8 字节限制。': 'The Web UI lazily reads feedback for the whole session on first hover or focus instead of requesting each message separately. Deleting absent feedback is idempotently successful, and notes are limited by UTF-8 bytes.'
+  'Web UI 首次 hover 或 focus 时才延迟读取整段会话的反馈，避免对每条消息单独请求。删除不存在的反馈是幂等成功；备注按 UTF-8 字节限制。': 'The Web UI lazily reads feedback for the whole session on first hover or focus instead of requesting each message separately. Deleting absent feedback is idempotently successful, and notes are limited by UTF-8 bytes.',
+  '工作区选择器': 'Workspace picker',
+  'Web API 安全边界': 'Web API security',
+  '工作区目录如何选择': 'How workspace directories are selected',
+  '目录选择不是浏览器自行读取磁盘，而是由宿主提供稳定的能力。自适应后端只在启动时判定一次：本机回环访问、非 SSH 且存在可用桌面会话时使用原生系统对话框；远程、无显示或情况不明确时使用应用内浏览器。': 'Directory selection does not let the browser read the disk directly; the host provides a stable capability. The adaptive backend decides once at startup: it uses a native system dialog for loopback access outside SSH with a usable desktop session, and the in-app browser for remote, headless, or ambiguous environments.',
+  '在宿主屏幕打开系统选择器。macOS 使用 osascript，Linux 使用 Zenity 或 KDialog，Windows 使用 IFileOpenDialog；取消返回空结果，中止会终止原生进程。': 'Opens the system picker on the host display. macOS uses osascript, Linux uses Zenity or KDialog, and Windows uses IFileOpenDialog; cancellation returns no result, while abort terminates the native process.',
+  '由宿主列举绝对路径中的目录，适合远程客户端。每层默认最多 1000 项，只返回目录并按名称排序，也可以创建一个经过校验的子目录。': 'The host lists directories at absolute paths, making this suitable for remote clients. Each level returns at most 1,000 entries by default, includes directories only in name order, and can create one validated child directory.',
+  '浏览范围不是沙箱': 'Browsing scope is not a sandbox',
+  '当前 Browse 后端没有限定根目录，工作区创建也接受任意已有目录；目录选择器只负责交互体验，真正的写入边界仍由权限和沙箱策略决定。': 'The current Browse backend has no constrained root, and workspace creation accepts any existing directory. The picker only controls the interaction; permissions and sandbox policy still define the real write boundary.',
+  'Web API 的传输与安全边界': 'Web API transport and security boundaries',
+  'Web API 使用 POST 请求和 SSE 推送承载同一套类型化 RPC。每个请求先校验信封，再按方法校验业务载荷；响应回显原 rpcId。业务错误留在 RPC 结果中，HTTP 状态只表达传输层结果。': 'The Web API carries one typed RPC protocol over POST requests and SSE pushes. Each request validates its envelope first and then its method-specific payload; responses echo the original rpcId. Domain errors stay in RPC results, while HTTP status represents transport outcomes only.',
+  '所有 API POST 必须声明 application/json，否则在分发前返回 415；跨站简单请求因此不能直接触发有副作用的方法。': 'Every API POST must declare application/json or receive 415 before dispatch, so a cross-origin simple request cannot directly trigger methods with side effects.',
+  '原生目录选择、设置、凭据和本地文档操作属于特权面，浏览器载体将它们限制在回环地址的同源请求；应用内目录浏览仍经过 Host 与 Origin 信任栅栏。': 'Native directory selection, settings, credentials, and local-document operations are privileged surfaces restricted to same-origin requests on loopback addresses; in-app directory browsing still passes the Host and Origin trust fence.',
+  '路径由宿主根据预设 ID 或无路径操作解析；浏览器载荷不能指定任意文件去打开。': 'The host resolves paths from preset IDs or pathless operations; browser payloads cannot choose arbitrary files to open.',
+  '不要把监听地址当成认证': 'Do not treat the listen address as authentication',
+  '底层 Web Server 本身不提供 TLS 或用户认证。需要远程访问时，应在可信反向代理后增加 HTTPS 和访问控制，并审查诊断错误是否适合向多用户公开。': 'The underlying Web Server provides neither TLS nor user authentication. For remote access, put it behind a trusted reverse proxy with HTTPS and access control, and review whether diagnostic errors are safe to expose to multiple users.'
 }
 
 export const normalizedEn = new Map(

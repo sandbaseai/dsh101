@@ -19,6 +19,7 @@ Last upstream review:
 | Install, Node compatibility, npm release, and license | `README.zh.md`, `package.json`, `apps/cli/package.json`, `LICENSE`, npm registry metadata |
 | Web UI quickstart | `docs/user/guide/index.zh.md` |
 | Workspace identity and lifecycle | `docs/subsystems/workspace.zh.md` |
+| Workspace directory picker and adaptive native/browse behavior | `packages/host/directory-picker/README.zh.md`, `packages/host/directory-picker-auto/README.zh.md`, `packages/host/directory-picker-native/README.zh.md`, `packages/host/directory-picker-browse/README.zh.md` |
 | Model providers and credentials | `docs/user/guide/providers.zh.md` |
 | Python SDK and security boundary | `docs/user/guide/python-sdk.zh.md` |
 | CLI and profiles | `apps/cli/README.zh.md` |
@@ -31,6 +32,7 @@ Last upstream review:
 | Web client module graph and bundle delivery | `docs/subsystems/client-modules.zh.md` |
 | Scoped registration layers and ownership | `docs/subsystems/scope.zh.md` |
 | Web server routing and exposure boundary | `docs/subsystems/web-server.zh.md` |
+| Browser RPC transport and privileged API boundary | `packages/host/apiproxy/README.zh.md`, `packages/client/connection/README.zh.md` |
 | Generated TypeRT remote-call boundary | `docs/subsystems/typert.zh.md` |
 | Services and dependency injection | `docs/user/develop/framework/service.zh.md` |
 | Event dispatch modes | `docs/user/develop/framework/events.zh.md` |

@@ -70,6 +70,7 @@
         <section>
           <h2>核心概念</h2>
           <a href="#workspace">工作区</a>
+          <a href="#directory-picker">工作区选择器</a>
           <a href="#session">会话与任务</a>
           <a href="#session-log">Session 事件日志</a>
           <a href="#agent-delivery">Agent 投递与取消</a>
@@ -94,6 +95,7 @@
           <a href="#client-modules">Web Client 模块</a>
           <a href="#scope-routing">Scope 路由</a>
           <a href="#web-server">Web Server</a>
+          <a href="#web-api-security">Web API 安全边界</a>
           <a href="#typert-remote">TypeRT Remote</a>
           <a href="#capability-seam">能力三层拆分</a>
           <a href="#llm-adapter">LLM 适配器</a>
@@ -216,6 +218,14 @@
         <h2 id="workspace">选择工作区<a href="#workspace" class="anchor">#</a></h2>
         <p>点击「选择工作区」，添加你启动 <code>dsh</code> 时所在的项目目录。工作区决定 Agent 能够读取和修改的文件范围。</p>
         <div class="warning"><strong>注意</strong><p>选择工作区前，会话输入框保持禁用。请勿将包含敏感凭证的目录设为工作区。</p></div>
+
+        <h2 id="directory-picker">工作区目录如何选择<a href="#directory-picker" class="anchor">#</a></h2>
+        <p>目录选择不是浏览器自行读取磁盘，而是由宿主提供稳定的能力。自适应后端只在启动时判定一次：本机回环访问、非 SSH 且存在可用桌面会话时使用原生系统对话框；远程、无显示或情况不明确时使用应用内浏览器。</p>
+        <div class="compare-grid">
+          <div><strong>Native</strong><p>在宿主屏幕打开系统选择器。macOS 使用 osascript，Linux 使用 Zenity 或 KDialog，Windows 使用 IFileOpenDialog；取消返回空结果，中止会终止原生进程。</p></div>
+          <div><strong>Browse</strong><p>由宿主列举绝对路径中的目录，适合远程客户端。每层默认最多 1000 项，只返回目录并按名称排序，也可以创建一个经过校验的子目录。</p></div>
+        </div>
+        <div class="warning"><strong>浏览范围不是沙箱</strong><p>当前 Browse 后端没有限定根目录，工作区创建也接受任意已有目录；目录选择器只负责交互体验，真正的写入边界仍由权限和沙箱策略决定。</p></div>
 
         <h2 id="session">运行第一个任务<a href="#session" class="anchor">#</a></h2>
         <p>新建一个会话，然后尝试发送一个目标明确、可以验证的任务：</p>
@@ -412,6 +422,17 @@ print(result.final_response)</code></pre>
           <div><code>port: 0</code><strong>系统分配端口</strong><span>操作系统选择空闲端口，服务公开最终监听值。</span></div>
         </div>
         <p>静态 SPA fallback 对路径穿越返回 403、非 GET/HEAD 返回 405，未知扩展资源不会伪装成 JavaScript。关闭时同时停止监听并强制关闭 SSE 等长连接，避免插件卸载永久挂起。</p>
+
+        <h2 id="web-api-security">Web API 的传输与安全边界<a href="#web-api-security" class="anchor">#</a></h2>
+        <p>Web API 使用 POST 请求和 SSE 推送承载同一套类型化 RPC。每个请求先校验信封，再按方法校验业务载荷；响应回显原 rpcId。业务错误留在 RPC 结果中，HTTP 状态只表达传输层结果。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>JSON gate</strong><p>所有 API POST 必须声明 application/json，否则在分发前返回 415；跨站简单请求因此不能直接触发有副作用的方法。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Origin gate</strong><p>原生目录选择、设置、凭据和本地文档操作属于特权面，浏览器载体将它们限制在回环地址的同源请求；应用内目录浏览仍经过 Host 与 Origin 信任栅栏。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Host gate</strong><p>路径由宿主根据预设 ID 或无路径操作解析；浏览器载荷不能指定任意文件去打开。</p></div>
+        </div>
+        <div class="warning"><strong>不要把监听地址当成认证</strong><p>底层 Web Server 本身不提供 TLS 或用户认证。需要远程访问时，应在可信反向代理后增加 HTTPS 和访问控制，并审查诊断错误是否适合向多用户公开。</p></div>
 
         <h2 id="typert-remote">TypeRT Remote 调用边界<a href="#typert-remote" class="anchor">#</a></h2>
         <p>TypeRT 把 Host 服务方法生成成可验证的远程调用描述符。请求只发送 namespace、method 和具名 args；取消信号走传输载体，在业务参数之后注入，绝不会混进 JSON 参数。</p>

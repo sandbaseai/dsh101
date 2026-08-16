@@ -215,6 +215,7 @@
           <a href="#message-actions">消息操作边界</a>
           <a href="#archive-convergence">归档跨标签页收敛</a>
           <a href="#persistence">会话持久化</a>
+          <a href="#persistence-providers">持久化后端选择</a>
           <a href="#checkpoint-policy">持久性检查点</a>
           <a href="#session-projection">会话投影</a>
           <a href="#chat-assembly">Chat 增量组装</a>
@@ -1699,6 +1700,22 @@ print(result.final_response)</code></pre>
         </div>
         <div class="warning"><strong>持久化意图不等于恰好一次</strong><p>工具调用可能已经产生外部副作用、但结果尚未落盘。恢复时 Harness 会写入 <code>TOOL_OUTCOME_UNKNOWN</code>，要求先验证状态；有副作用的 Provider 应尽量把 call id 用作幂等键。</p></div>
         <p>JSONL 后端为每个会话维护可选 Zstandard 压缩的追加日志；SQLite 后端则把每个事件存成一行。格式版本过新、过旧或遇到未知的必需事件时会明确拒绝恢复，而不是静默丢失语义。</p>
+
+        <h3 id="persistence-providers">JSONL 与 SQLite 会话后端怎么选<a href="#persistence-providers" class="anchor">#</a></h3>
+        <div class="permission-table">
+          <div><code>JSONL</code><strong>每会话独立工件</strong><span>默认写入带 checksum 的拼接 Zstandard frames，也可选择原始 JSONL；locate 与 readRaw 能暴露固定 transcript 路径和后端逐字内容。</span></div>
+          <div><code>SQLite</code><strong>共享事务数据库</strong><span>每个事件一行，批次在一个事务中提交；所有会话共享数据库，因此 locate 返回 undefined，也不提供逐会话原始工件。</span></div>
+          <div><code>Shared</code><strong>相同逻辑恢复约定</strong><span>两者都延迟到首批事件才实体化、要求连续 seq，并在冷 load 时保留有效工作、补入 interrupted closers。</span></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Append</strong><p>JSONL 对每批追加 frame 或文本并 fsync，失败时回滚到旧字节长度；SQLite 以 BEGIN/COMMIT 原子插入整批，任何行失败都会整体回滚。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Observe</strong><p>JSONL 的 readFrom 必须解析完整顺序工件再跳过前缀；SQLite 可用 WHERE seq ≥ ? 只读取所需后缀。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Repair</strong><p>inspect 只在内存中合成平衡视图；真正的冷 load 才截去撕裂尾部并持久追加修复事件，同时更新轻量 revision。</p></div>
+        </div>
+        <div class="detail-card"><strong>JSONL 更适合逐会话检查与搬运</strong><p>项目与会话目录便于定位单份日志，packChunks 可无损合并连续分片；但一个 root 只能使用一种压缩编码，切换 zstd 与 none 需要新根或显式迁移。</p></div>
+        <div class="warning"><strong>SQLite 不是自动获得的多进程协调</strong><p>DatabaseSync 会在事务期间阻塞 Node 事件循环，后端也不设置 busy timeout 或 locked-database 重试。JSONL 同样只协调本后端实例内的单会话 writer；两个进程不能同时写同一份 Session。</p></div>
 
         <h3 id="checkpoint-policy">副作用之前的持久性检查点<a href="#checkpoint-policy" class="anchor">#</a></h3>
         <p>持久化后端负责有界后台批处理，Checkpoint Policy 则独立决定何时必须完全排空。第一方运行时同时挂载两者；专用部署可以替换策略，但只装后端意味着崩溃仍可能丢失批处理窗口内的事件。</p>

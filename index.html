@@ -159,6 +159,7 @@
         <section>
           <h2>可观测性</h2>
           <a href="#token-meter">Token 计量</a>
+          <a href="#session-stats">会话统计条</a>
           <a href="#trajectory">Trajectory 调试视图</a>
           <a href="#telemetry">Session Telemetry</a>
           <a href="#anonymous-id">匿名身份</a>
@@ -1081,6 +1082,15 @@ print(result.final_response)</code></pre>
           <div><strong>surface delta</strong><p>相对匹配基线的有符号变化，可同时表示上下文增长与压缩后的缩减。</p></div>
         </div>
         <p>每个 surface node 记录事件 seq 和估算 token，但数组顺序才是模型表层的权威顺序；压缩替换节点的 seq 可能比排在它后面的旧节点更大。</p>
+        <h3 id="session-stats">会话统计条与逐轮耗时<a href="#session-stats" class="anchor">#</a></h3>
+        <p>Chat 统计条把两类权威组合在一起：token 账目读取通用 tokenUsage 投影；轮次、步骤、LLM 与工具墙钟时间、平均 TTFT 和解码吞吐读取 Host 从全日志计算的 sessionStats。计费输入是未缓存输入、cache read 与 cache write 之和。</p>
+        <div class="compare-grid">
+          <div><strong>全日志统计不随分页变化</strong><p>完整 sessionStats 独立于浏览器已加载窗口，因此加载更早历史或压缩移除可见 Assistant 节点，都不会改写总轮次、耗时和 token 分组。</p></div>
+          <div><strong>缺失样本不参与平均</strong><p>缺少 timing 边界或 usage 的步骤从 TTFT 与吞吐计算中退出；界面不会用零值或猜测填补并拉低平均数。</p></div>
+          <div><strong>逐轮 footer 只依赖窗口事实</strong><p>已结算轮次可在“用时”后显示首步骤 TTFT 与轮次聚合 tok/s，但只有该轮 timing 位于连续加载窗口内时才呈现，缺少的数字各自省略。</p></div>
+        </div>
+        <p>统计条过长时会省略，但只有内容真的被裁切，悬浮 tooltip 才承载完整文本；没有组合 token-meter 的部署会整组隐藏 token 分组，而不是显示零。</p>
+        <div class="warning"><strong>窗口回退不是全会话统计</strong><p>未组合 sessionStats 的应用只能从可见 Assistant timing 与工具 call/result 配对折算。更早未加载节点不计入，所以数字会随历史页加载而增长；不能把这条兼容回退当成持久总量。</p></div>
         <h3 id="context-meter">如何解读 Context Meter</h3>
         <p>输入框旁的占用圆环只在“预计下次请求 token”和当前模型容量都已知时出现。标题使用 <code>projectedTokens</code>：从最近一次 Provider 输入用量出发，再按此后 surface 的新增、替换或压缩做启发式增减。</p>
         <div class="compare-grid">

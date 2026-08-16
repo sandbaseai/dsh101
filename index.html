@@ -118,6 +118,7 @@
           <a href="#events">事件系统</a>
           <a href="#graph-atlas">架构图谱阅读</a>
           <a href="#lifecycle">插件生命周期</a>
+          <a href="#cordis-runtime-model">Cordis 三层模型</a>
           <a href="#defensive-patterns">防御性失败模式</a>
           <a href="#client-modules">Web Client 模块</a>
           <a href="#ui-slots">UI Slots</a>
@@ -805,6 +806,27 @@ print(result.final_response)</code></pre>
           <span>PENDING</span><i>→</i><span>LOADING</span><i>→</i><span class="active-state">ACTIVE</span><i>→</i><span>UNLOADING</span><i>→</i><span>DISPOSED</span>
         </div>
         <p><code>ctx.on()</code>、工具注册和 <code>ctx.effect()</code> 都由 Fiber 追踪，卸载时自动撤销。若多个清理步骤存在先后依赖，应放入同一个 effect 的 disposer 中串行执行。</p>
+
+        <h3 id="cordis-runtime-model">Context、Registry 与 Fiber 如何协作<a href="#cordis-runtime-model" class="anchor">#</a></h3>
+        <p>Cordis 的三个对象回答不同问题：Context 决定“这个位置能解析到哪些服务”，Registry 决定“插件何时可以创建或重跑”，Fiber 决定“这次插件实例拥有哪些状态与副作用”。它们不是三份容器；Registry 创建 Fiber，Fiber 持有扩展自父级的 Context，服务代理再按该 Context 的隔离标签解析实现。</p>
+        <div class="permission-table">
+          <div><code>Context</code><strong>作用域化服务视图</strong><span>普通属性通过服务解析器读取。extend 只增加子级元数据，isolate 为指定服务切换标签，intercept 为下游插件叠加服务配置；三者都不修改父 Context。</span></div>
+          <div><code>Registry</code><strong>插件入口与依赖调度</strong><span>plugin 先按 Config 校验参数，再创建 Fiber；inject 简写会等待所有必需服务，并在任一实现变化时卸载后重新运行回调。</span></div>
+          <div><code>Fiber</code><strong>一次加载的所有权单元</strong><span>保存已校验配置、必需服务实现快照、生命周期状态和 effect；await 等待当前转换并重新抛出启动错误，dispose 等待清理完全结算。</span></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>必需能力使用 inject</strong><p>声明依赖让插件在实现活跃后才启动，并在实现撤回时自动失活。加载顺序由能力可用性形成，不应靠配置行先后碰运气。</p></div>
+          <div><strong>可选探测使用 get</strong><p>ctx.get(name) 不要求 inject，默认只返回提供方 Fiber 当前活跃的实现；调用方必须处理 undefined，也不会因实现变化自动重跑。</p></div>
+          <div><strong>提供服务必须归属 Fiber</strong><p>ctx.provide 注册的实现只有在提供方活跃后才对同一隔离作用域可见；disposer 或 Fiber 卸载会撤销它并唤醒依赖方。</p></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Resolve</strong><p>缺服务先检查当前 Context 的隔离标签和插件 inject 元数据，不要只看根 Context 是否存在同名实现。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Inspect</strong><p>检查 Fiber state、store 与 await 错误，区分等待依赖、配置失败、启动失败和正在卸载。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Dispose</strong><p>残留监听器或资源泄漏时查看带标签的 effect 树，并验证清理是否按注册逆序完成。</p></div>
+        </div>
+        <div class="warning"><strong>能从根 Context 读到，不代表插件拥有依赖</strong><p>用 ctx.get 绕过 inject 会失去等待、依赖快照和实现替换时的自动重载，只适合语义上真正可选且每次都处理缺失的能力。测试也应通过真实 Registry 与 Fiber 拓扑加载插件，避免平铺 Context 掩盖作用域错误。</p></div>
 
         <h2 id="defensive-patterns">失败、并发与清理的防御性模式<a href="#defensive-patterns" class="anchor">#</a></h2>
         <p>这些不是抽象风格建议，而是 DeepSeek Harness 从已经发布或差点发布的缺陷类别中提炼出的实现规则。共同目标是让失败事实保持完整、资源真正停稳，并让不可信输入无法跨越边界。</p>

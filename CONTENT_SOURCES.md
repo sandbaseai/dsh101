@@ -42,6 +42,7 @@ Last upstream review:
 | Documentation graph selection, module peer-dependency edges, capability seams, event producer-consumer relationships, flow ownership, maintenance modes, and freshness gates | `docs/graph-atlas.zh.md`, `docs/module-graph.zh.md`, `docs/capability-seams.zh.md`, `docs/event-producer-consumer.zh.md`, `docs/agent-lifecycle.zh.md`, `docs/tool-execution-pipeline.zh.md`, `scripts/gen-doc-graphs.ts`, `scripts/gen-module-graph.ts` |
 | Bundles and publishing | `docs/user/develop/basic/publish.zh.md` |
 | Fiber lifecycle | `docs/user/develop/framework/index.zh.md` |
+| Cordis Context scoping, Registry dependency scheduling, Fiber ownership, strict service resolution, reversible effects, and generated core API reference | `docs/cordis-primer.zh.md`, `docs/cordis-api/context.zh.md`, `docs/cordis-api/fiber.zh.md`, `docs/cordis-api/registry.zh.md`, `scripts/gen-cordis-catalog.ts` |
 | Web client module graph and bundle delivery | `docs/subsystems/client-modules.zh.md` |
 | Browser UI slot declarations, chain selection, stores, and recursive lifecycle cleanup | `packages/client/ui-slots/README.zh.md` |
 | Slot declaration injection, epoch-bound effects, transactional registration, and teardown | `packages/client/runtime/README.zh.md` |

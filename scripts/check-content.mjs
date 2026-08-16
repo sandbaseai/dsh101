@@ -21,7 +21,7 @@ for (const marker of ['Sandbox modes', 'Python SDK quickstart', 'Configuration s
   if (!localeSource.includes(marker)) throw new Error(`English locale is missing: ${marker}`)
 }
 
-for (const asset of ['public/favicon.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml']) {
+for (const asset of ['public/favicon.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', 'docs/cloudflare-deploy.md', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml']) {
   if (!existsSync(new URL(`../${asset}`, import.meta.url))) throw new Error(`Required project asset is missing: ${asset}`)
 }
 

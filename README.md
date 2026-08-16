@@ -27,7 +27,9 @@ npm run build
 
 ## Cloudflare Pages
 
-推送到 `main` 后，GitHub Actions 会使用与 `sandbase-blog` 相同的组织级 `CLOUDFLARE_API_TOKEN`，把 `dist/` 部署到 Cloudflare Pages 项目 `dsh101`。也可以在 Actions 页面手动触发 **Deploy Cloudflare Pages**。
+完成一次性配置后，推送到 `main` 会通过 GitHub Actions 把 `dist/` 部署到 Cloudflare Pages 项目 `dsh101`。也可以在 Actions 页面手动触发 **Deploy Cloudflare Pages**；未配置凭据时仍会完成检查和构建，但会跳过部署。
+
+首次创建项目、配置 `CLOUDFLARE_API_TOKEN` 和验证线上地址的方法见 [`docs/cloudflare-deploy.md`](./docs/cloudflare-deploy.md)。部署结构参考了 `sandbase-blog`。
 
 提交内容更新前请同时运行：
 

@@ -42,7 +42,7 @@ const changed = execFileSync('git', [
   'packages/shell', 'packages/terminal', 'packages/lsp', 'packages/session-query',
   'docs/subsystems/shell.zh.md', 'docs/subsystems/terminal.zh.md',
   'docs/subsystems/lsp.zh.md', 'docs/subsystems/session-query.zh.md',
-  'packages/session', 'packages/storage', 'packages/spill',
+  'packages/session', 'packages/storage', 'packages/spill', 'packages/util/atomic-write',
   'docs/subsystems/persistence.zh.md', 'docs/subsystems/storage.zh.md',
   'docs/subsystems/spill.zh.md', 'docs/persistence-catalog.zh.md',
   'packages/hooks', 'packages/schedule', 'packages/workflow',

@@ -78,6 +78,7 @@ Last upstream review:
 | Session persistence and crash recovery | `docs/subsystems/persistence.zh.md`, `packages/session/session-checkpoint-policy/README.zh.md` |
 | Session projections and cold-read cache | `docs/subsystems/session-projection.zh.md` |
 | Domain storage | `docs/subsystems/storage.zh.md` |
+| Atomic Settings/Credentials replacement, cross-process locks, and durability limits | `packages/util/atomic-write/README.zh.md`, `packages/settings/settings-file/README.zh.md`, `packages/credentials/credentials-local/README.zh.md`, `packages/storage/storage-json/README.zh.md` |
 | Oversized tool result spill | `docs/subsystems/spill.zh.md` |
 | User slash commands | `docs/subsystems/commands.zh.md` |
 | Browser input triggers, command discovery, and keyboard arbitration | `packages/client/ui-input-trigger/README.zh.md`, `packages/client/ui-commands/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |

@@ -1085,6 +1085,16 @@ print(result.final_response)</code></pre>
         </div>
         <p>同一领域的写入按顺序排队。后端写入失败时内存保持不变，因此读取不会领先于介质；格式版本不匹配或已存记录不符合 schema 会在打开领域时立即失败。</p>
 
+        <h3 id="atomic-file-write">配置文件的原子替换与跨进程锁<a href="#atomic-file-write" class="anchor">#</a></h3>
+        <p>Settings 文件和本地 Credentials 使用共享的 <code>atomic-write</code> 原语：在目标同目录以 <code>wx</code> 独占创建随机临时文件，带着显式 mode 写完后再用 <code>rename</code> 替换目标。读取方因此只会看到旧内容或完整新内容。</p>
+        <div class="compare-grid">
+          <div><strong>抗临时路径劫持</strong><p>不可预测的同级文件加独占创建拒绝跟随预埋 symlink；rename 替换链接本身，不会写穿到链接目标。</p></div>
+          <div><strong>权限随新 inode 提交</strong><p>新文件从创建起就使用调用方声明的 mode，替换权限过宽旧文件时无需先暴露再 chmod；Settings 和 Credentials 使用 <code>0600</code>。</p></div>
+          <div><strong>读改写需要锁</strong><p><code>withFileLock</code> 以同级 <code>.lock</code> 文件跨进程串行化写入方，指数退避后超时失败；读取方不参与锁竞争。</p></div>
+        </div>
+        <p>写锁让不同 namespace 或不同凭据条目的并发编辑不会互相丢失，但两个写入者修改同一键仍是后写胜出。遗留锁不能按年龄自动删除，因为无法区分崩溃进程和暂停但仍存活的持锁者。</p>
+        <div class="warning"><strong>原子不等于崩溃持久</strong><p>这个共享原语不对文件或目录执行 <code>fsync</code>，断电或系统崩溃后 rename 仍可能回退；启动时提供方会重新读取并发布磁盘状态。领域 Storage 的 JSON 后端另有带 fsync 的提交路径，不能据此反推 Settings 或 Credentials。</p></div>
+
         <h2 id="spill-output">超大工具结果与 Spill<a href="#spill-output" class="anchor">#</a></h2>
         <p>当工具返回的纯文本超过内联预算时，Spill policy 保存完整 UTF-8 内容，并用首尾预览、不透明定位符、准确字节数和后端给出的检索提示替换模型结果。模型不会被迫为完整大结果支付上下文成本，但仍能按需读取。</p>
         <div class="stream-flow">

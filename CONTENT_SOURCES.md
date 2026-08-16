@@ -25,6 +25,7 @@ Last upstream review:
 | Model configuration | `docs/user/guide/providers.md`, `docs/user/guide/providers.zh.md` |
 | Python SDK quickstart | `docs/user/guide/python-sdk.md`, `docs/user/guide/python-sdk.zh.md` |
 | First Harness plugin | `docs/user/develop/basic/index.md`, `docs/user/develop/basic/index.zh.md` |
+| First model-callable tool | `docs/user/develop/basic/tool.md`, `docs/user/develop/basic/tool.zh.md` |
 | Public architecture vocabulary | `docs/architecture.md`, `docs/architecture.zh.md` |
 
 ## Visual system provenance

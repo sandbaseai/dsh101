@@ -5,6 +5,7 @@ const cordis = readFileSync(new URL('../cordis/index.html', import.meta.url), 'u
 const ecosystem = readFileSync(new URL('../ecosystem/index.html', import.meta.url), 'utf8')
 const quickstart = readFileSync(new URL('../quickstart/index.html', import.meta.url), 'utf8')
 const plugin = readFileSync(new URL('../plugin/index.html', import.meta.url), 'utf8')
+const tool = readFileSync(new URL('../tool/index.html', import.meta.url), 'utf8')
 const script = readFileSync(new URL('../landing.js', import.meta.url), 'utf8')
 const styles = readFileSync(new URL('../landing.css', import.meta.url), 'utf8')
 const manifest = readFileSync(new URL('../public/site.webmanifest', import.meta.url), 'utf8')
@@ -23,7 +24,7 @@ for (const [label, url] of Object.entries({
   plugins: 'https://github.com/topics/dsh-plugin',
   paper: 'https://github.com/cordiverse/paper',
 })) {
-  if (![html, cordis, ecosystem, quickstart, plugin].some(source => source.includes(url))) throw new Error(`Missing ${label} reference: ${url}`)
+  if (![html, cordis, ecosystem, quickstart, plugin, tool].some(source => source.includes(url))) throw new Error(`Missing ${label} reference: ${url}`)
 }
 
 for (const required of [
@@ -47,7 +48,9 @@ const quickstartLocalizedNodes = [...quickstart.matchAll(/<[^>]+\bdata-zh="([^"]
 if (quickstartLocalizedNodes.length < 30) throw new Error(`Quickstart locale coverage is unexpectedly small: ${quickstartLocalizedNodes.length}`)
 const pluginLocalizedNodes = [...plugin.matchAll(/<[^>]+\bdata-zh="([^"]*)"[^>]+\bdata-en="([^"]*)"[^>]*>/g)]
 if (pluginLocalizedNodes.length < 30) throw new Error(`Plugin guide locale coverage is unexpectedly small: ${pluginLocalizedNodes.length}`)
-for (const [, zh, en] of [...localizedNodes, ...cordisLocalizedNodes, ...ecosystemLocalizedNodes, ...quickstartLocalizedNodes, ...pluginLocalizedNodes]) {
+const toolLocalizedNodes = [...tool.matchAll(/<[^>]+\bdata-zh="([^"]*)"[^>]+\bdata-en="([^"]*)"[^>]*>/g)]
+if (toolLocalizedNodes.length < 35) throw new Error(`Tool guide locale coverage is unexpectedly small: ${toolLocalizedNodes.length}`)
+for (const [, zh, en] of [...localizedNodes, ...cordisLocalizedNodes, ...ecosystemLocalizedNodes, ...quickstartLocalizedNodes, ...pluginLocalizedNodes, ...toolLocalizedNodes]) {
   if (!zh.trim() || !en.trim()) throw new Error('Landing locale pair contains an empty value')
 }
 
@@ -56,7 +59,7 @@ for (const forbidden of ['TypeRT', 'DSH 101', '最后核对上游提交']) {
 }
 
 for (const forbidden of ['—', '–']) {
-  if ([html, cordis, ecosystem, quickstart, plugin].some(source => source.includes(forbidden))) throw new Error(`Taste preflight failed, forbidden dash remains: ${forbidden}`)
+  if ([html, cordis, ecosystem, quickstart, plugin, tool].some(source => source.includes(forbidden))) throw new Error(`Taste preflight failed, forbidden dash remains: ${forbidden}`)
 }
 if (!brandStyles.includes('--brand-green:#22bd7e')) throw new Error('Sandbase brand green token is missing')
 if (!html.includes('class="hero-product"') || !html.includes('feat-plugin.en.png')) throw new Error('Taste preflight failed, hero lacks a real product visual')
@@ -73,6 +76,7 @@ if (!html.includes('href="/cordis/"')) throw new Error('Landing page does not ro
 if (!html.includes('href="/ecosystem/"')) throw new Error('Landing page does not route to the ecosystem page')
 if (!html.includes('href="/quickstart/"')) throw new Error('Landing page does not route to the quickstart page')
 if (!html.includes('href="/plugin/"')) throw new Error('Landing page does not route to the first-plugin guide')
+if (!html.includes('href="/tool/"')) throw new Error('Landing page does not route to the tool guide')
 for (const navigation of ['id="primaryNav"', 'class="nav-group"', 'class="menu-toggle"', 'href="#approach"', 'href="#modes"']) {
   if (!html.includes(navigation)) throw new Error(`Landing navigation is missing: ${navigation}`)
 }
@@ -85,6 +89,10 @@ for (const required of ["export function apply(ctx: Context)", "export const inj
   if (!plugin.includes(required)) throw new Error(`First-plugin guide is missing verified material: ${required}`)
 }
 
+for (const required of ["import { defineTool } from '@deepseek-ai/dsh-tools'", "name: 'greet'", "description: 'Greet someone by name.'", "name: {", "schema: { type: 'string' }", 'render: (_args, value)', 'async execute(args)', 'Use the greet tool to greet Ada.', 'Hello, Ada!', 'pnpm dsh web --patch ./scratch-plugin/cordis.yml', '47f9438']) {
+  if (!tool.includes(required)) throw new Error(`Tool guide is missing verified material: ${required}`)
+}
+
 for (const concept of ['官方项目', '社区索引', '第三方项目', '不是 DeepSeek 官方商店或安全认证', '安装审查', '卸载与回滚']) {
   if (!ecosystem.includes(concept)) throw new Error(`Ecosystem guide is missing: ${concept}`)
 }
@@ -92,7 +100,7 @@ for (const repository of ['deepseek-ai/deepseek-harness', 'awesome-dsh-plugin/aw
   if (!ecosystem.includes(`https://github.com/${repository}`)) throw new Error(`Ecosystem guide is missing repository source: ${repository}`)
 }
 
-for (const asset of ['public/favicon.svg', 'public/wordmark.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', 'docs/cloudflare-deploy.md', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml', 'landing.js', 'landing.css', 'navigation.css', 'brand.css', 'redesign.css', 'subpage.js', 'subpage.css', 'ecosystem.css', 'quickstart.css', 'quickstart.js', 'plugin.css', 'plugin.js', 'cordis/index.html', 'ecosystem/index.html', 'quickstart/index.html', 'plugin/index.html', 'vite.config.js']) {
+for (const asset of ['public/favicon.svg', 'public/wordmark.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', 'docs/cloudflare-deploy.md', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml', 'landing.js', 'landing.css', 'navigation.css', 'brand.css', 'redesign.css', 'subpage.js', 'subpage.css', 'ecosystem.css', 'quickstart.css', 'quickstart.js', 'plugin.css', 'plugin.js', 'tool.css', 'cordis/index.html', 'ecosystem/index.html', 'quickstart/index.html', 'plugin/index.html', 'tool/index.html', 'vite.config.js']) {
   if (!existsSync(new URL(`../${asset}`, import.meta.url))) throw new Error(`Required project asset is missing: ${asset}`)
 }
 for (const metadata of ['rel="manifest"', 'rel="canonical"', 'property="og:title"', 'property="og:url"', 'name="twitter:card"', 'hreflang="zh-CN"', 'hreflang="en-US"']) {
@@ -101,4 +109,4 @@ for (const metadata of ['rel="manifest"', 'rel="canonical"', 'property="og:title
 if (!script.includes('navigator.clipboard.writeText')) throw new Error('Quick-start copy interaction is missing')
 if (!styles.includes('@media(max-width:600px)')) throw new Error('Mobile landing breakpoint is missing')
 
-console.log(`content check passed (${ids.size} ids, ${localizedNodes.length} landing + ${cordisLocalizedNodes.length} Cordis + ${ecosystemLocalizedNodes.length} ecosystem + ${quickstartLocalizedNodes.length} quickstart + ${pluginLocalizedNodes.length} plugin bilingual nodes)`)
+console.log(`content check passed (${ids.size} ids, ${localizedNodes.length} landing + ${cordisLocalizedNodes.length} Cordis + ${ecosystemLocalizedNodes.length} ecosystem + ${quickstartLocalizedNodes.length} quickstart + ${pluginLocalizedNodes.length} plugin + ${toolLocalizedNodes.length} tool bilingual nodes)`)

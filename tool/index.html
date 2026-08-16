@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A source-verified bilingual tutorial for adding a model-callable tool to DeepSeek Harness." />
+    <meta name="theme-color" content="#050907" />
+    <link rel="canonical" href="https://dsh101.com/tool/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://dsh101.com/tool/" />
+    <link rel="alternate" hreflang="en-US" href="https://dsh101.com/tool/?lang=en" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>开发一个工具 · DSH 101</title>
+    <link rel="stylesheet" href="/subpage.css" />
+    <link rel="stylesheet" href="/plugin.css" />
+    <link rel="stylesheet" href="/tool.css" />
+  </head>
+  <body>
+    <header class="sub-header">
+      <a class="sub-brand" href="/"><img src="https://www.deepseek.com/harness/images/dsh-logo.svg" alt="DeepSeek Harness" /><span>101</span></a>
+      <a href="/plugin/" data-zh="第一个插件" data-en="First plugin">第一个插件</a>
+      <a href="/" data-zh="返回首页" data-en="Back home">返回首页</a>
+      <a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/basic/tool" target="_blank" rel="noreferrer" data-zh="官方教程 ↗" data-en="Official tutorial ↗">官方教程 ↗</a>
+      <div class="locale-switch" role="group" aria-label="Language"><button type="button" data-locale="zh" class="active">中</button><button type="button" data-locale="en">EN</button></div>
+    </header>
+
+    <main class="sub-main plugin-main tool-main">
+      <section class="plugin-hero tool-hero">
+        <div class="plugin-intro">
+          <p class="sub-kicker" data-zh="从插件到模型能力" data-en="From plugin to model capability">从插件到模型能力</p>
+          <h1 data-zh="让模型调用你的第一个工具。" data-en="Let the model call your first tool.">让模型调用你的第一个工具。</h1>
+          <p class="sub-lead" data-zh="把 greet 注册到工具表，验证参数，执行逻辑，再把规范值渲染成模型可读结果。" data-en="Register greet, validate its arguments, execute the logic, then render the canonical value for the model.">把 greet 注册到工具表，验证参数，执行逻辑，再把规范值渲染成模型可读结果。</p>
+          <div class="plugin-prerequisite"><strong data-zh="前置条件" data-en="Prerequisite">前置条件</strong><span data-zh="先完成“第一个插件”，并保留 scratch-plugin 目录和 cordis.yml。" data-en="Complete First plugin and keep its scratch-plugin directory and cordis.yml.">先完成“第一个插件”，并保留 scratch-plugin 目录和 cordis.yml。</span></div>
+        </div>
+        <div class="code-stage tool-code-stage" aria-label="Official greet tool source code">
+          <div class="code-stage-head"><span>scratch-plugin/src/my-plugin.ts</span><button class="copy-code" type="button" data-copy-target="greet-tool" data-zh="复制" data-en="Copy">复制</button></div>
+          <pre><code id="greet-tool">import type { Context } from '@deepseek-ai/cordis'
+import { defineTool } from '@deepseek-ai/dsh-tools'
+
+export const name = 'greet-tool'
+export const inject = ['tools']
+
+export function apply(ctx: Context) {
+  ctx.tools.register(defineTool({
+    name: 'greet',
+    description: 'Greet someone by name.',
+    parameters: {
+      name: {
+        type: 'string',
+        required: true,
+        description: 'The name to greet',
+      },
+    },
+    output: {
+      schema: { type: 'string' },
+      render: (_args, value) => [
+        { type: 'text', text: value },
+      ],
+    },
+    async execute(args) {
+      return `Hello, ${args.name}!`
+    },
+  }))
+}</code></pre>
+        </div>
+      </section>
+
+      <aside class="source-note"><span data-zh="核对基线" data-en="Verified baseline">核对基线</span><p data-zh="官方提交 47f9438，2026-08-13。示例代码与运行行为来自 docs/user/develop/basic/tool.md 及其中文版本。" data-en="Official commit 47f9438, 2026-08-13. Example code and runtime behavior come from docs/user/develop/basic/tool.md and its Chinese counterpart.">官方提交 47f9438，2026-08-13。示例代码与运行行为来自 docs/user/develop/basic/tool.md 及其中文版本。</p></aside>
+
+      <nav class="chapter-nav" aria-label="Tutorial chapters">
+        <a href="#contract" data-zh="理解契约" data-en="Understand contract">理解契约</a>
+        <a href="#register" data-zh="注册工具" data-en="Register tool">注册工具</a>
+        <a href="#verify" data-zh="运行验证" data-en="Run and verify">运行验证</a>
+        <a href="#boundaries" data-zh="明确边界" data-en="Know boundaries">明确边界</a>
+      </nav>
+
+      <section id="contract" class="tool-contract">
+        <div class="tool-section-heading"><h2 data-zh="一次工具调用经过四段契约" data-en="A tool call crosses four contracts">一次工具调用经过四段契约</h2><p data-zh="参数、执行结果和模型消息不是同一个对象。把每层分开，工具更容易测试和演进。" data-en="Arguments, execution values, and model messages are different objects. Keeping each layer separate makes tools easier to test and evolve.">参数、执行结果和模型消息不是同一个对象。把每层分开，工具更容易测试和演进。</p></div>
+        <div class="contract-flow">
+          <article><code>parameters</code><h3 data-zh="描述并验证输入" data-en="Describe and validate input">描述并验证输入</h3><p data-zh="defineTool 从参数定义推导 args，并在执行前验证调用。" data-en="defineTool infers args from the parameter definition and validates calls before execution.">defineTool 从参数定义推导 args，并在执行前验证调用。</p></article>
+          <article><code>execute(args)</code><h3 data-zh="运行工具逻辑" data-en="Run tool logic">运行工具逻辑</h3><p data-zh="示例读取 name，并返回 Hello, Ada! 这样的规范值。" data-en="The example reads name and returns a canonical value such as Hello, Ada!.">示例读取 name，并返回 Hello, Ada! 这样的规范值。</p></article>
+          <article><code>output.schema</code><h3 data-zh="声明规范值" data-en="Declare the canonical value">声明规范值</h3><p data-zh="schema 约束 execute 的返回类型，本例是 string。" data-en="The schema constrains the value returned by execute. Here it is a string.">schema 约束 execute 的返回类型，本例是 string。</p></article>
+          <article><code>output.render</code><h3 data-zh="转换为模型内容" data-en="Render model-facing content">转换为模型内容</h3><p data-zh="render 接收规范值，并输出模型看到的 text 内容块。" data-en="render receives the canonical value and emits the text content block seen by the model.">render 接收规范值，并输出模型看到的 text 内容块。</p></article>
+        </div>
+      </section>
+
+      <section id="register" class="plugin-chapter">
+        <div class="chapter-copy"><h2 data-zh="替换插件文件并注册 greet" data-en="Replace the plugin file and register greet">替换插件文件并注册 greet</h2><p data-zh="把页面顶部的完整代码写入 scratch-plugin/src/my-plugin.ts。inject 声明 tools 依赖，Cordis 会等工具注册表就绪后再运行 apply。" data-en="Write the complete code above to scratch-plugin/src/my-plugin.ts. inject declares the tools dependency, so Cordis waits for the tool registry before running apply.">把页面顶部的完整代码写入 scratch-plugin/src/my-plugin.ts。inject 声明 tools 依赖，Cordis 会等工具注册表就绪后再运行 apply。</p></div>
+        <div class="chapter-work tool-facts"><div><code>inject = ['tools']</code><p data-zh="声明依赖，不靠加载顺序碰运气。" data-en="Declare the dependency instead of relying on accidental load order.">声明依赖，不靠加载顺序碰运气。</p></div><div><code>ctx.tools.register(...)</code><p data-zh="注册项跟随插件生命周期，卸载插件时由上下文清理。" data-en="The registration follows the plugin lifecycle and is cleaned up by the context on unload.">注册项跟随插件生命周期，卸载插件时由上下文清理。</p></div></div>
+      </section>
+
+      <section id="verify" class="plugin-chapter chapter-offset">
+        <div class="chapter-copy"><h2 data-zh="重启 Web UI，然后发起一次明确调用" data-en="Restart the Web UI, then request an explicit call">重启 Web UI，然后发起一次明确调用</h2><p data-zh="继续使用第一个插件教程创建的 overlay。打开 Web UI 后，用官方示例提示词验证工具是否进入模型可用能力。" data-en="Reuse the overlay created in the First plugin tutorial. After opening the Web UI, use the official prompt to verify that the tool is available to the model.">继续使用第一个插件教程创建的 overlay。打开 Web UI 后，用官方示例提示词验证工具是否进入模型可用能力。</p></div>
+        <div class="chapter-work">
+          <div class="code-block"><div><span>shell</span><button class="copy-code" type="button" data-copy-target="run-tool" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="run-tool">pnpm dsh web --patch ./scratch-plugin/cordis.yml</code></pre></div>
+          <div class="test-call"><span data-zh="在 127.0.0.1:3080 输入" data-en="Enter at 127.0.0.1:3080">在 127.0.0.1:3080 输入</span><strong>Use the greet tool to greet Ada.</strong><p data-zh="预期：模型调用 greet，并收到 Hello, Ada! 作为工具结果。" data-en="Expected: the model calls greet and receives Hello, Ada! as the tool result.">预期：模型调用 greet，并收到 Hello, Ada! 作为工具结果。</p></div>
+        </div>
+      </section>
+
+      <section id="boundaries" class="tool-boundaries">
+        <div class="tool-section-heading"><h2 data-zh="这个示例证明什么" data-en="What this example proves">这个示例证明什么</h2><p data-zh="最小示例只覆盖同步结果链。复杂工具需要继续查阅官方编写参考。" data-en="The minimal example covers the direct result path. Complex tools require the official authoring reference.">最小示例只覆盖同步结果链。复杂工具需要继续查阅官方编写参考。</p></div>
+        <div class="boundary-pair"><div><strong data-zh="已经覆盖" data-en="Covered here">已经覆盖</strong><p data-zh="参数 schema、类型推导、依赖注入、执行、规范值和文本渲染。" data-en="Parameter schema, type inference, dependency injection, execution, canonical values, and text rendering.">参数 schema、类型推导、依赖注入、执行、规范值和文本渲染。</p></div><div><strong data-zh="继续查阅" data-en="Read next">继续查阅</strong><p data-zh="嵌套 schema、后台工作、策略钩子、Code Mode 和 UI cards。" data-en="Nested schemas, background work, policy hooks, Code Mode, and UI cards.">嵌套 schema、后台工作、策略钩子、Code Mode 和 UI cards。</p></div></div>
+      </section>
+
+      <section class="plugin-next">
+        <div><h2 data-zh="下一步，让问候语可配置" data-en="Next, make the greeting configurable">下一步，让问候语可配置</h2></div>
+        <div class="next-links"><a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/basic/config" target="_blank" rel="noreferrer"><strong data-zh="插件配置" data-en="Plugin configuration">插件配置</strong><span data-zh="定义、验证并读取配置 ↗" data-en="Define, validate, and read config ↗">定义、验证并读取配置 ↗</span></a><a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/cookbook/adding-a-tool.md" target="_blank" rel="noreferrer"><strong data-zh="工具编写参考" data-en="Tool authoring reference">工具编写参考</strong><span data-zh="进入完整能力边界 ↗" data-en="Explore the full capability surface ↗">进入完整能力边界 ↗</span></a></div>
+      </section>
+    </main>
+
+    <footer class="sub-footer"><span>DSH 101 / Build a tool</span><span data-zh="非 DeepSeek 官方网站，代码以官方文档为准" data-en="Unofficial site. Official documentation remains authoritative.">非 DeepSeek 官方网站，代码以官方文档为准</span></footer>
+    <script type="module" src="/plugin.js"></script>
+  </body>
+</html>

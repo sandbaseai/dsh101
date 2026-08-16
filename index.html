@@ -124,6 +124,7 @@
           <a href="#graph-atlas">架构图谱阅读</a>
           <a href="#lifecycle">插件生命周期</a>
           <a href="#cordis-runtime-model">Cordis 三层模型</a>
+          <a href="#vendor-rescope">Vendored 包命名</a>
           <a href="#defensive-patterns">防御性失败模式</a>
           <a href="#client-modules">Web Client 模块</a>
           <a href="#web-styling">Web 样式系统</a>
@@ -894,6 +895,31 @@ print(result.final_response)</code></pre>
           <div><span>03</span><strong>Dispose</strong><p>残留监听器或资源泄漏时查看带标签的 effect 树，并验证清理是否按注册逆序完成。</p></div>
         </div>
         <div class="warning"><strong>能从根 Context 读到，不代表插件拥有依赖</strong><p>用 ctx.get 绕过 inject 会失去等待、依赖快照和实现替换时的自动重载，只适合语义上真正可选且每次都处理缺失的能力。测试也应通过真实 Registry 与 Fiber 拓扑加载插件，避免平铺 Context 掩盖作用域错误。</p></div>
+
+        <h3 id="vendor-rescope">Vendored Cordis 包的发布命名<a href="#vendor-rescope" class="anchor">#</a></h3>
+        <p>Harness 把 Cordis 框架及基础库以源码快照放在 vendor 目录，却不能用上游名字发布到公共 registry。发布面统一换到 @deepseek-ai scope；外部插件的 import、declaration merging、依赖键与 cordis.yml 包名都必须使用发布名。</p>
+        <div class="permission-table">
+          <div><code>cordis</code><strong>@deepseek-ai/cordis</strong><span>Context、Service、Fiber 与事件框架；Harness 包把它声明为 peer dependency。</span></div>
+          <div><code>cosmokit</code><strong>@deepseek-ai/cosmokit</strong><span>框架与 Schemastery 共用的基础工具，版本与 vendored 上游快照保持一致。</span></div>
+          <div><code>schemastery</code><strong>@deepseek-ai/schemastery</strong><span>插件 Config 使用的 Schema 实现；运行时 Symbol 标识不会随 npm 名字改写。</span></div>
+          <div><code>@cordisjs/plugin-loader</code><strong>@deepseek-ai/cordis-plugin-loader</strong><span>Loader 的 repository 等子路径保持原结构，只替换包名前缀。</span></div>
+          <div><code>@cordisjs/plugin-*</code><strong>@deepseek-ai/cordis-plugin-*</strong><span>include、group、timer、hmr 与 logger-console 使用同一规则，但各自目录、版本和依赖 range 不变。</span></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>模块与声明合并一起改</strong><p>import 与 declare module 必须指向同一个发布身份；只改运行时 import 会让事件和服务的 TypeScript 扩展落到另一模块。</p></div>
+          <div><strong>Manifest 与配置一起改</strong><p>package.json 依赖键和 cordis.yml 的 name 都使用 @deepseek-ai 发布名；保留原 semver range，让 workspace 仍解析到固定快照。</p></div>
+          <div><strong>协议词汇保持原样</strong><p>cordis:include、cordis:group 是 Loader 内建协议前缀，不是 npm 包名；cordis.yml 文件族、vendor 目录名与 Symbol.for 标识也不改。</p></div>
+        </div>
+        <div class="capability-flow four-step">
+          <div><span>01</span><strong>Report</strong><p>运行 rescope-vendor 先查看将变化的引用，不靠全仓手工替换。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Apply</strong><p>使用 --apply 同步改写源码、manifest、配置和 docs 范围内的示例。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Regenerate</strong><p>重新生成 lockfile、third-party notices 与被触及文档的双语配对元数据。</p></div>
+          <i>→</i>
+          <div><span>04</span><strong>Gate</strong><p>rescope-vendor:check 断言发布后状态；需要回到上游命名时用 --apply --reverse。</p></div>
+        </div>
+        <div class="warning"><strong>复制上游示例时先检查包身份</strong><p>裸 cordis 或 @cordisjs/* 可能在上游源码语境中正确，却不是 DeepSeek Harness 公共 npm 包的身份。不要通过安装另一份上游框架来“补齐”错误 import，否则插件会跨越不同的 Context、Service 与事件类型世界。</p></div>
 
         <h2 id="defensive-patterns">失败、并发与清理的防御性模式<a href="#defensive-patterns" class="anchor">#</a></h2>
         <p>这些不是抽象风格建议，而是 DeepSeek Harness 从已经发布或差点发布的缺陷类别中提炼出的实现规则。共同目标是让失败事实保持完整、资源真正停稳，并让不可信输入无法跨越边界。</p>

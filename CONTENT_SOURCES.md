@@ -24,6 +24,7 @@ Last upstream review:
 | First-run onboarding, provider readiness, and session model routing | `packages/client/ui-settings-models/README.zh.md`, `packages/client/ui-model-selection/README.zh.md`, `packages/host/apiproxy/README.zh.md`, `packages/llm/llm-deepseek/README.zh.md` |
 | Python SDK and security boundary | `docs/user/guide/python-sdk.zh.md` |
 | CLI and profiles | `apps/cli/README.zh.md` |
+| User profile patch layering, hot reload, and last-good HMR fallback | `packages/boot/app-boot/README.zh.md` |
 | Headless execution and configuration dumps | `apps/cli/reference/README.zh.md` |
 | First plugin | `docs/user/develop/basic/index.zh.md` |
 | Tool development | `docs/user/develop/basic/tool.zh.md`, `docs/subsystems/tools.zh.md` |

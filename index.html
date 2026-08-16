@@ -594,6 +594,15 @@ print(result.final_response)</code></pre>
         </div>
         <p>后应用的层按行胜出。一个 patch 会替换目标行的整个 <code>config</code>，而不是递归合并其中的字段。</p>
 
+        <h3 id="profile-hot-reload">用户 Patch 的热重载边界<a href="#profile-hot-reload" class="anchor">#</a></h3>
+        <p>Profile 启动后会持续监听 profile 与 home 两个 <code>cordis.patch.yml</code>。即使文件或它的直接父目录尚不存在，监视器也会守住确切路径；随后创建、修改或删除文件都会触发重新组合。</p>
+        <div class="compare-grid">
+          <div><strong>串行重组</strong><p>突发文件事件按顺序处理，每次都从组合包层向上重新应用用户 overlay，避免让半套配置进入运行树。</p></div>
+          <div><strong>成功才切换</strong><p>新树通过读取、YAML 解析与 Loader 接受后才由 HMR 接管；运行中的能力因此只看到完整候选。</p></div>
+          <div><strong>失败仍保活</strong><p>失败候选不会覆盖最后一个可用树；服务记录错误并广播 <code>hmr/config-update-failed(filename, Error)</code>。</p></div>
+        </div>
+        <div class="warning"><strong>Patch 不是深合并</strong><p>按 id 命中的 patch 会替换整个 <code>config</code>，需要重述所有保留字段；找不到 id 会写入 stderr。空文件或纯注释不是“禁用”，请写成 <code>[]</code>。<code>--patch</code> 是临时最高层，不要把它当作这两个持久用户文件。</p></div>
+
         <div class="chapter-break"><span>04</span><div><small>Agent 配置</small><strong>设置、凭据与组装</strong></div></div>
 
         <h2 id="settings-system">Settings 的三层解析<a href="#settings-system" class="anchor">#</a></h2>

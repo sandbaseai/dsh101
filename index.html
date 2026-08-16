@@ -80,6 +80,7 @@
           <a href="#session-log">Session 事件日志</a>
           <a href="#agent-delivery">Agent 投递与取消</a>
           <a href="#session-queue">实时消息队列</a>
+          <a href="#queue-operations">Queue 编辑与插话</a>
           <a href="#permissions">权限与审批</a>
           <a href="#permission-presets">权限预设</a>
           <a href="#approval-flow">审批链路</a>
@@ -341,6 +342,16 @@
           <div><strong>Context</strong><p>审批通知、任务完成和附件快照等注入上下文在领取前不向用户界面展示。</p></div>
         </div>
         <p>队列只有一项时直接显示，多项时默认折叠并可逐项编辑、删除或严格 steer。若 Agent 已经领取目标项，操作会收敛为“已开始投递”，客户端不会靠轮次状态擅自移除或重发消息。</p>
+
+        <h3 id="queue-operations">Queue 编辑与严格插话<a href="#queue-operations" class="anchor">#</a></h3>
+        <p>QueueDock 中每个普通会话条目都是一行预览，但预览文本不等于完整消息。内联编辑器只能无损处理纯文本，因此包含图片或其他非文本块的条目仍可查看、删除和严格 steer，却会禁用编辑按钮。</p>
+        <div class="compare-grid">
+          <div><strong>纯文本编辑是事务</strong><p>进入编辑后，删除与严格 steer 按钮替换为保存和取消；Enter 保存，Escape 取消。编辑进行中列表保持展开，不会把操作目标折叠掉。</p></div>
+          <div><strong>严格 steer 转移原消息</strong><p>Agent 运行时，这项操作把稳定 MessageId 指向的不可变完整消息原子转移到当前 next-step 窗口，而不是重新发送扁平化文本预览。</p></div>
+          <div><strong>Subagent 行保持只读</strong><p>已寻址 subagent 的继续执行传输不支持 Queue 变更，所以可见行不提供编辑、删除或严格插话，不伪造宿主无法兑现的操作。</p></div>
+        </div>
+        <p>待处理 steering 从 QueueDock 隐藏后，会立即在 Chat 尾部显示为用户样式气泡；Host 等对应的持久 user/message 进入 mux 流才退役临时项。交接因此没有空档或重复，并能从同一权威在重连和回放后恢复。</p>
+        <div class="warning"><strong>已关闭窗口不是发送失败</strong><p>如果严格 steer 输给已经关闭的 next-step 窗口，原条目留在 Queue 中正常投递；如果驱动器已经认领它，投递已经开始。这两种已收敛竞态不显示错误，只有传输或未知故障才会报告失败。</p></div>
 
         <h2 id="permissions">权限与审批<a href="#permissions" class="anchor">#</a></h2>
         <p>Harness 把沙箱模式和审批策略作为两项独立机制。权限预设只是在产品层把两者组合成一个选择器；执行时仍由各自服务单独强制。</p>

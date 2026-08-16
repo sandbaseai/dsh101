@@ -162,6 +162,7 @@
           <a href="#shell-providers">Shell Provider 选择</a>
           <a href="#terminal-provider">Terminal Provider 生命周期</a>
           <a href="#subprocess-seam">子进程运行时</a>
+          <a href="#subprocess-provider">本地 Subprocess Provider</a>
           <a href="#lsp-navigation">LSP 代码导航</a>
           <a href="#lsp-provider-lifecycle">LSP Provider 生命周期</a>
         </section>
@@ -1253,6 +1254,23 @@ print(result.final_response)</code></pre>
           <div><code>collect</code><strong>有界收集</strong><span>内存只保留尾部，可选 spill 保存有上限的完整流。</span></div>
         </div>
         <p>收集读取使用全流字节 offset，多个读取者不会抢走彼此的数据。终止以整棵进程树为范围：POSIX 先发 SIGTERM，等待 grace period 后升级 SIGKILL；Windows 使用 tree termination。最终 outcome 只报告退出码和信号，超时或取消原因由拥有 deadline 的调用方分类。</p>
+
+        <h3 id="subprocess-provider">本地进程的环境、输出与完全停稳<a href="#subprocess-provider" class="anchor">#</a></h3>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Scrub</strong><p>以父进程环境为基底，先移除名称含 KEY、PASSWORD、SECRET、TOKEN 的变量和全部旧 DSH_*，再合并调用方显式 env。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Capture</strong><p>collect 为每条流保留有界尾部；可选 spill 另存完整流，偏移读取不消费共享状态，进程退出后仍可读取。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Quiesce</strong><p>dispose 先终止所有存活句柄，再等待整棵可观察进程树退出；句柄只有完全停稳或 spawn 失败后才离开活跃集合。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>普通 spawn</strong><p>POSIX 使用 detached 进程组执行 TERM → grace → KILL；Windows 调用 taskkill /T /F。退出后的管道排空也受 grace 限制，后代持有描述符不能无限拖住结果。</p></div>
+          <div><strong>PTY spawn</strong><p>除顶层 shell 外还跟踪前台进程组和可观察会话成员；Linux/macOS 可检查终端成员，普通 pipe 无法重建控制终端语义。</p></div>
+          <div><strong>同步 Host exit</strong><p>Node exit 回调会对仍活跃目标做无 Promise、无计时器的强制清理，但只能覆盖仍能执行 JavaScript 的退出路径。</p></div>
+        </div>
+        <div class="detail-card"><strong>完整输出 Spill 也有完整性门槛</strong><p>文件位于权限 0700 的每进程临时目录，随机文件本身为 0600。若某条流超过 spill 上限，Provider 会丢弃已经不完整的文件，只返回截断尾部；已完成的 spill 不会自动删除。</p></div>
+        <div class="warning"><strong>环境清理不是秘密泄露防线</strong><p>规则只匹配变量名，PASSPHRASE 等未命名模式仍会继承；显式 env 还可以有意重新加入凭据。SIGKILL、native crash、断电等无法运行 JavaScript 的故障也必须由 supervisor、容器 init 或操作系统负责清理。</p></div>
+        <div class="warning"><strong>Windows 进程树终止是尽力而为</strong><p>taskkill 的缺失、竞态或目标已消失都会被吸收，存活探测退回直接子进程边界。Terminal 精确成员检查仅支持 Linux 与 macOS；setsid 或过早脱离父链的守护进程仍可能逃出可观察范围。</p></div>
 
         <h2 id="lsp-navigation">LSP 精确代码导航<a href="#lsp-navigation" class="anchor">#</a></h2>
         <p>文本搜索适合普通浏览；当同名符号含义不清，或修改前必须确认精确定义、实现和引用时，使用只读 <code>lsp</code> 工具。它只公开四种闭合操作：</p>

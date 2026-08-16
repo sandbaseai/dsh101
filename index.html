@@ -642,6 +642,14 @@ print(result.final_response)</code></pre>
         </div>
         <p>Web UI 把连续尝试折叠为一条稳定状态行，显示倒计时、当前次数与有限上限或 <code>∞</code>。每个调度事件仍持久保留；失败步骤未完成的流式尾部会被移除，终态失败则留在轮次边界供排查。</p>
         <div class="warning"><strong>重试可能重复计费</strong><p>每次重试都是新的 Provider 请求，可能再次计费输入 token。模型不会看到失败分片、延迟或 Provider 错误；认证错误的界面文案也不会回显提供方返回的凭据片段。</p></div>
+        <h4 id="retry-projection">持久重试提示的状态转换<a href="#retry-projection" class="anchor">#</a></h4>
+        <p>相邻尝试的 retry 事件在 Chat 中合并为一条稳定弱化行，并用最新尝试更新；底层运行时快照与 Session 日志仍保留每个事件。后续尝试成功后，这条恢复历史也不会消失。</p>
+        <div class="compare-grid">
+          <div><strong>scheduled</strong><p>收到 retry 后、匹配的 retry-started 到达前显示计划状态。倒计时从浏览器收到事件的时刻起算，向上取整且至少显示 1 秒，避免 Host 时钟偏差。</p></div>
+          <div><strong>started / cancelled</strong><p>后续 started 事实把提示推进为已开始；若所属 Step 或 Turn 先关闭，则成为已取消。Host running 位只控制实时动画，不改写持久事实。</p></div>
+          <div><strong>terminal error</strong><p>未进入重试的 turn/end 错误生成持久内联节点；尚未定稿但可见的 Assistant 输出会冻结在旁边，而不是被当作完整回答。</p></div>
+        </div>
+        <div class="warning"><strong>AUTH 只脱敏显示副本</strong><p>可能包含凭据片段的 Provider 文案在界面中统一替换为 <code>API key is invalid</code>，原始诊断仍保留在会话日志供本地排查。刷新、分页与恢复使用同一组 Definition，不会让已移除的失败分片重新出现。</p></div>
         <h3 id="max-tokens">输出达到 max-tokens 时</h3>
         <p><code>max-tokens</code> 是独立的轮次结束原因，不等于正常完成、错误或取消。只要本轮任一步骤达到输出上限，即使插件随后继续执行并正常结束，整个轮次仍保留截断标记。</p>
         <div class="compare-grid">

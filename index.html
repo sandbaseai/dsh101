@@ -80,6 +80,7 @@
           <a href="#session-row-status">会话行状态</a>
           <a href="#session-log">Session 事件日志</a>
           <a href="#persistence-catalog">持久事件目录</a>
+          <a href="#request-journey">端到端请求旅程</a>
           <a href="#agent-delivery">Agent 投递与取消</a>
           <a href="#session-queue">实时消息队列</a>
           <a href="#queue-operations">Queue 编辑与插话</a>
@@ -415,6 +416,30 @@
           <div><span>03</span><strong>Gate</strong><p>事件词汇变化后重新生成目录与已知类型集合，并运行 freshness 和双语配对门禁。</p></div>
         </div>
         <div class="warning"><strong>可扩展不等于任意事件都可安全恢复</strong><p>下游插件可以继续合并 SessionEventMap，但上游生成目录只覆盖本仓库包。自定义事件必须定义自己的回放语义与兼容策略；若它会改变重建结果，就不能为了绕过旧读者而标成 ignorable。</p></div>
+
+        <h2 id="request-journey">端到端请求旅程：控制、执行与投影<a href="#request-journey" class="anchor">#</a></h2>
+        <p>一次输入不会从 Web 直接变成一条模型消息。Host 或 SDK 先通过 Agent handle 把输入交给持久 Inbox，默认 driver 领取后打开 Turn；每个获准 Step 从 Session 日志派生历史，组装系统提示词与工具 Schema，再调用 LLM 和工具流水线。可回放结果写回同一条日志，Web 与 SDK 只从事件流建立各自投影。</p>
+        <div class="capability-flow four-step">
+          <div><span>01</span><strong>Ingress</strong><p>Host 校验目标 Session，通过 followup、steer 或 inject 改变 Inbox；稳定 MessageId 让后续认领与竞态收敛到同一输入。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Admit</strong><p>Agent loop 唤醒并打开 turn/start，领取输入后进入 agent/pre-step；插件仍可放行、改写或拒绝本步骤。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Execute</strong><p>获准后记录 step/start 与 user/message，组装 request，消费 llm/stream，并把 Assistant 与工具执行结果写入日志。</p></div>
+          <i>→</i>
+          <div><span>04</span><strong>Project</strong><p>每条持久事实经 session/event 广播；Chat、Trajectory 与 SDK transcript 都从日志重建，turn/end 后状态回到 idle。</p></div>
+        </div>
+        <div class="permission-table">
+          <div><code>SessionEvent</code><strong>持久事实域</strong><span>仅追加日志保存输入、边界、模型输出、工具结果和领域状态；需要跨重载、恢复或 fork 存活的事实必须落在这里。</span></div>
+          <div><code>agent/*</code><strong>实时控制域</strong><span>负责 Inbox、状态、pre-step、请求、steering、校验和继续执行等进程内协调；它不是 transcript，也不提供历史回放。</span></div>
+          <div><code>capability/*</code><strong>能力策略域</strong><span>fs/*、tools/* 与 telemetry/* 等接缝让插件施加策略或适配能力，而无需导入或拥有 Agent loop。</span></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>消息没有进入执行</strong><p>先核对 Host 投递结果、Inbox 变更与 Agent 状态，再沿 turn/start、agent/pre-step 和 step/start 判断它是未领取、被拒绝，还是已进入模型步骤。</p></div>
+          <div><strong>模型看到了错误上下文</strong><p>检查持久 request header、已进入表层的 user/message、系统提示词与工具 Schema；不要从 Chat 的视觉排列反推真实请求。</p></div>
+          <div><strong>界面与运行结果不一致</strong><p>比较 Session baseline、连续 seq、session/event 增量与重连后的投影。修复投影或缺口恢复，不要让 UI 另建一份可写真源。</p></div>
+        </div>
+        <div class="detail-card"><strong>Turn 与 Step 不是同一层</strong><p>Turn 表示从领取输入到不再欠工作的一次责任区间，可以包含零个或多个 Step；Step 才是一次模型请求及其工具调用。首批输入被 pre-step 拒绝或改写为空时，仍可能留下完整的 turn/start 与 turn/end，而没有 step/start。</p></div>
+        <div class="warning"><strong>模型可见内容必须已经记录</strong><p>任何进入模型请求的内容都应能从 Session 日志重建。若新的上下文只存在于实时事件或内存变量，刷新、恢复和 fork 会生成不同请求；应先定义持久事件及其投影，再把它加入提示词。</p></div>
 
         <h2 id="agent-delivery">Agent 投递、空闲与取消<a href="#agent-delivery" class="anchor">#</a></h2>
         <p>Agent 的公开句柄把所有输入路由到持久 Inbox。next-turn 保存普通后续轮次，next-step 保存最近步骤要消费的 steering 或注入上下文；每条消息拥有稳定 MessageId，并记录插入、认领或丢弃事实。</p>

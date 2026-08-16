@@ -74,6 +74,7 @@
           <a href="#workspace-list">工作区列表收敛</a>
           <a href="#directory-picker">工作区选择器</a>
           <a href="#session">会话与任务</a>
+          <a href="#new-session">New Session 复用</a>
           <a href="#session-log">Session 事件日志</a>
           <a href="#agent-delivery">Agent 投递与取消</a>
           <a href="#session-queue">实时消息队列</a>
@@ -272,6 +273,15 @@
         <p>新建一个会话，然后尝试发送一个目标明确、可以验证的任务：</p>
         <blockquote>总结这个仓库，列出它的主要模块，并解释各模块之间的关系。</blockquote>
         <p>Agent 可以读取文件、执行命令并维护计划。当某项操作超出当前权限策略时，Web UI 会先请求你的批准。</p>
+
+        <h3 id="new-session">New Session 与空白会话复用<a href="#new-session" class="anchor">#</a></h3>
+        <p>进入某个 Workspace 的 New Session 时，客户端先寻找该 Workspace 记账中的既有空白会话；只有同时满足 blank、cwd 等于 Workspace 路径、且 id 属于其 sessionIds 才复用，否则由 Host 创建新的 Session、Agent 与 cwd。</p>
+        <div class="compare-grid">
+          <div><strong>目标有明确优先级</strong><p>新会话优先使用显式选择的 Workspace，其次是当前 Session 所属 Workspace，再其次是最近活跃 Workspace；完全没有 Workspace 时进入未选择的空白页面。</p></div>
+          <div><strong>Host 接受才算使用</strong><p>首条 prompt 的 RPC 成功意味着消息已进入 Host 日志，此时 blank 单向变为 false。首讯被拒时保持 blank，之后仍可安全复用。</p></div>
+          <div><strong>占位行不是历史</strong><p>空白 Session 保留在运行时 store，但普通列表隐藏它；临时“新会话”行没有时间、菜单或可复制标题，首条提示落地后才开放重命名、fork 与归档。</p></div>
+        </div>
+        <div class="warning"><strong>只匹配 cwd 不足以复用</strong><p>路径相同但不在目标 Workspace 记账中的空白 Session 不会被接管。成员关系与 blank 位都来自 Host 投影，避免不同工作区意外共享同一会话。</p></div>
 
         <h2 id="session-log">Session 的仅追加事件日志<a href="#session-log" class="anchor">#</a></h2>
         <p>SessionEvent 日志是一次 Agent 交互的唯一真源；模型消息历史、UI 状态和回放结果都从同一序列派生，不存在另一份单独维护的 transcript。每条事件都有连续 seq 和毫秒时间戳，payload 必须是无损 JSON。</p>

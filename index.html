@@ -115,6 +115,7 @@
           <a href="#config-catalog">配置目录阅读</a>
           <a href="#config-expression-postmortem">配置静默禁用复盘</a>
           <a href="#events">事件系统</a>
+          <a href="#graph-atlas">架构图谱阅读</a>
           <a href="#lifecycle">插件生命周期</a>
           <a href="#defensive-patterns">防御性失败模式</a>
           <a href="#client-modules">Web Client 模块</a>
@@ -752,6 +753,28 @@ print(result.final_response)</code></pre>
         </div>
         <div class="warning"><strong>Waterfall 的关键规则</strong><p>监听器必须调用 <code>next()</code> 才会继续下游；不调用会有意短路整条流水线，适合拦截器和网关。</p></div>
         <p>Cordis 事件通常采用 <code>namespace/action</code> 命名。持久化的 <code>turn/*</code>、<code>step/*</code> 和 <code>tool/*</code> 是会话事件类型；观察它们时应监听 <code>session/event</code> 并检查 event type。</p>
+
+        <h2 id="graph-atlas">如何阅读 Graph Atlas<a href="#graph-atlas" class="anchor">#</a></h2>
+        <p>Graph Atlas 不是一张包罗万象的架构图，而是一组针对不同问题的关系投影。先确定要追踪的是包依赖、运行时服务、事件传播、应用组合还是一次请求的时序，再选择对应图；把不同语义的边混在一起，会让“代码依赖了谁”和“运行时由谁提供能力”看起来像同一件事。</p>
+        <div class="permission-table">
+          <div><code>module</code><strong>包依赖边</strong><span>由各包的 peerDependencies 生成；a → b 只表示包 a 把包 b 作为规范运行时依赖，不证明服务已经装载或事件一定发生。</span></div>
+          <div><code>seam</code><strong>能力服务边</strong><span>连接服务声明方、已知实现方与直接消费方；用它判断一个能力能否替换，以及组合包还需要装配哪些实现。</span></div>
+          <div><code>event</code><strong>生产与消费边</strong><span>TypeScript Program 解析事件声明、派发方和监听方。多对多关系使用矩阵呈现，事件模式仍决定广播、短路或包装语义。</span></div>
+          <div><code>flow</code><strong>时序与所有权边</strong><span>Agent 生命周期和 Tool 执行流水线解释顺序、持久事实与实时控制；它们是经评审的流程图，不是从调用图自动推导的完整执行轨迹。</span></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Locate</strong><p>从故障现象选择图：缺包看 module，缺能力看 seam，副作用链看 event，顺序与清理看 flow。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Verify</strong><p>沿边定位拥有者后，回到子系统页、Cordis surface、工具目录或源码确认精确签名与类型。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Refresh</strong><p>生成图变更时重新运行生成器与 freshness 门禁；混合图还需评审人工清单，中文对侧需更新双语配对。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>Generated</strong><p>可枚举事实完全来自仓库，例如 peerDependencies、工具 Schema 和事件关系；不要手改英文产物，应修改源或生成器。</p></div>
+          <div><strong>Hybrid generated</strong><p>源码可推导的边叠加人工策略清单，适合能力 seam 与应用组合；生成通过不代表人工角色说明仍然正确。</p></div>
+          <div><strong>Curated</strong><p>用于解释控制流、策略和所有权。它帮助建立心智模型，但精确 API、事件签名和当前包清单仍以生成目录与源码为准。</p></div>
+        </div>
+        <div class="warning"><strong>图是索引，不是最终证据</strong><p>模块图不会包含 devDependencies 或偶然 import，事件矩阵也不替代事件的返回规则。排障时至少交叉核对一张关系图和它指向的规范页面；若图与源码冲突，应先运行 verify-doc-graphs 判断生成产物是否过期。</p></div>
 
         <h2 id="lifecycle">插件生命周期<a href="#lifecycle" class="anchor">#</a></h2>
         <p>每个插件运行在独立 Fiber 中。依赖未就绪时等待，加载成功后进入 ACTIVE；必需服务消失时自动卸载，服务恢复后重新加载。</p>

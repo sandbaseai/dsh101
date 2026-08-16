@@ -49,13 +49,14 @@ requiredSections.push('config-expression-postmortem')
 requiredSections.push('landlock-diagnostics')
 requiredSections.push('web-validation-loop')
 requiredSections.push('acp-loader-postmortem')
+requiredSections.push('graph-atlas')
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)
 }
 
 const localeSource = readFileSync(new URL('../locales.js', import.meta.url), 'utf8')
-for (const marker of ['Sandbox modes', 'Approval lifecycle', 'Python SDK quickstart', 'Configuration schema', 'Event system', 'Web client modules', 'Scope routing', 'Web server boundaries', 'TypeRT remote boundaries', 'Capability roles', 'LLM adapters', 'Streaming and retries', 'Dynamic runtime extensions', 'Connect an MCP server', 'Skill discovery and loading', 'Layered settings', 'Credential references', 'Agent presets', 'Persona and prompt assembly', 'Web search and fetch', 'Image attachments', 'Ask the user', 'Filesystem semantics', 'Shell and persistent terminals', 'Subprocess runtime', 'Precise LSP code navigation', 'Slash commands', 'Codex and Claude Code hooks', 'Session-local reminders', 'Workflows and Ralph', 'Token metering', 'Session telemetry', 'Runtime invariants', 'Message feedback', 'Subagent delegation', 'Persistent goals', 'Context compaction', 'Tool guardrails', 'Background jobs', 'Session search and log export', 'Cross-session references', 'Durable session titles', 'Session persistence and recovery', 'Session projections and cold reads', 'Domain storage for non-session data', 'Oversized tool results and spill', 'Content provenance']) {
+for (const marker of ['Sandbox modes', 'Approval lifecycle', 'Python SDK quickstart', 'Configuration schema', 'Event system', 'Reading the Graph Atlas', 'Web client modules', 'Scope routing', 'Web server boundaries', 'TypeRT remote boundaries', 'Capability roles', 'LLM adapters', 'Streaming and retries', 'Dynamic runtime extensions', 'Connect an MCP server', 'Skill discovery and loading', 'Layered settings', 'Credential references', 'Agent presets', 'Persona and prompt assembly', 'Web search and fetch', 'Image attachments', 'Ask the user', 'Filesystem semantics', 'Shell and persistent terminals', 'Subprocess runtime', 'Precise LSP code navigation', 'Slash commands', 'Codex and Claude Code hooks', 'Session-local reminders', 'Workflows and Ralph', 'Token metering', 'Session telemetry', 'Runtime invariants', 'Message feedback', 'Subagent delegation', 'Persistent goals', 'Context compaction', 'Tool guardrails', 'Background jobs', 'Session search and log export', 'Cross-session references', 'Durable session titles', 'Session persistence and recovery', 'Session projections and cold reads', 'Domain storage for non-session data', 'Oversized tool results and spill', 'Content provenance']) {
   if (!localeSource.includes(marker)) throw new Error(`English locale is missing: ${marker}`)
 }
 

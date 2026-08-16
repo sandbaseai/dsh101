@@ -41,7 +41,7 @@ npx wrangler pages project create dsh101 --production-branch=main
 - 推送到 `main`：自动检查内容、构建并部署生产版本。
 - 手动部署：在 GitHub 的 **Actions** 页面运行 **Deploy Cloudflare Pages**。
 - Secret 缺失：检查和构建照常执行，部署步骤会跳过并显示 warning。
-- 部署成功：访问 Cloudflare 返回的地址，通常为 `https://dsh101.pages.dev`；首次部署后也可绑定自定义域名。
+- 部署成功：Pages 生产回退地址为 `https://dsh101-50l.pages.dev`，正式自定义域名为 `https://dsh101.sandbase.ai`；Cloudflare 还会为每次版本返回唯一预览地址。
 
 部署日志必须出现 Wrangler 的成功输出，才能视为已经上线。单纯看到 workflow 绿色并不够，因为缺少 Secret 时 workflow 会有意跳过部署。
 

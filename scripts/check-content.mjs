@@ -85,7 +85,7 @@ for (const asset of ['public/favicon.svg', 'public/social-card.svg', 'public/sit
   if (!existsSync(new URL(`../${asset}`, import.meta.url))) throw new Error(`Required project asset is missing: ${asset}`)
 }
 
-for (const metadata of ['rel="manifest"', 'property="og:title"', 'name="twitter:card"']) {
+for (const metadata of ['rel="manifest"', 'rel="canonical"', 'property="og:title"', 'property="og:url"', 'name="twitter:card"']) {
   if (!html.includes(metadata)) throw new Error(`Required page metadata is missing: ${metadata}`)
 }
 

@@ -19,6 +19,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: 244d49f84a987ecfa2cf9480ed9d8628
+      CLOUDFLARE_CUSTOM_DOMAIN: dsh101.sandbase.ai
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -61,6 +62,29 @@ jobs:
           else
             jq '{success, errors, messages}' /tmp/dsh101-project.json
             exit 1
+          fi
+
+      - name: Ensure custom domain is attached
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        shell: bash
+        run: |
+          domains_url="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/dsh101/domains"
+          curl --fail-with-body --silent --show-error \
+            --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            "${domains_url}" > /tmp/dsh101-domains.json
+
+          if jq --exit-status --arg name "${CLOUDFLARE_CUSTOM_DOMAIN}" \
+            '.result[]? | select(.name == $name)' /tmp/dsh101-domains.json >/dev/null; then
+            echo "Custom domain ${CLOUDFLARE_CUSTOM_DOMAIN} is already attached."
+          else
+            curl --fail-with-body --silent --show-error \
+              --request POST \
+              --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              --header 'Content-Type: application/json' \
+              --data "{\"name\":\"${CLOUDFLARE_CUSTOM_DOMAIN}\"}" \
+              "${domains_url}" \
+              | jq --exit-status '.success == true' >/dev/null
+            echo "Attached custom domain ${CLOUDFLARE_CUSTOM_DOMAIN}."
           fi
 
       - name: Deploy to Cloudflare Pages

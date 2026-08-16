@@ -160,6 +160,7 @@
           <a href="#file-search">Glob 与 Grep</a>
           <a href="#shell-terminal">Shell 与 Terminal</a>
           <a href="#shell-providers">Shell Provider 选择</a>
+          <a href="#terminal-provider">Terminal Provider 生命周期</a>
           <a href="#subprocess-seam">子进程运行时</a>
           <a href="#lsp-navigation">LSP 代码导航</a>
           <a href="#lsp-provider-lifecycle">LSP Provider 生命周期</a>
@@ -1226,6 +1227,23 @@ print(result.final_response)</code></pre>
         </div>
         <div class="detail-card"><strong>持久 Bash 不是后台 Job 的替代品</strong><p>一次性 Bash 的 run_in_background 会把独立进程句柄交给通用 Jobs；持久 Bash 则只让 shell 自己保留后台任务状态，不提供 Job 所有权、完成通知或独立收集接口。长期服务应选择受管 Job。</p></div>
         <div class="warning"><strong>Windows 目前没有持久 PTY shell</strong><p>pwsh 每次调用都会新建进程；其 UTF-8 输出 preamble 还会占据脚本最前位置，因此以 param、using 或 #requires 开头的内联脚本可能需要改为脚本块或文件。Windows 强制终止通常只报告退出码 1，而非 POSIX signal。</p></div>
+
+        <h3 id="terminal-provider">PTY 会话如何就绪、取消与关闭<a href="#terminal-provider" class="anchor">#</a></h3>
+        <p>Terminal seam 为每个成功打开的终端签发不透明 id，但权限主体是发起操作的确切 Agent。即使另一个 Agent 获知 id，也不能读取、发送信号或关闭该终端；Agent 或服务销毁时必须等待后端进程树和未发布的 spawn 完全停稳。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Open</strong><p>后端先在未发布状态分配 PTY、应用同一 Session 的沙箱策略并确认初始就绪；取消或失败必须清理部分资源，清理失败会显式保留。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Send</strong><p>同一会话最多一个活跃 send。Provider 结合私有提示符、前台 stdin 等待、静默回退和绝对超时判断何时返回。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Close</strong><p>关闭停止新信号和就绪轮询，等待完整会话终止，再把活跃 send 结算为 session_exit；失败不会假装已经清理完成。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>等待原因不是进程状态</strong><p>inferred_idle 只表示观察到就绪证据，timeout 只表示等待预算耗尽；两者都不能证明顶层 PTY 或前台命令已经退出。</p></div>
+          <div><strong>取消发送真实 SIGINT</strong><p>系统先取消排队输入，再向当前前台进程组发信号，不用写入字节 0x03 模拟 Ctrl-C；后续 send 等它完全结算，避免收到迟到字节。</p></div>
+          <div><strong>后台发送仍有独占席位</strong><p>terminal_send 的后台模式会在返回 Job id 前同时预留 Job 和该终端的唯一 send；job_kill 向前台进程组发送 SIGINT。</p></div>
+        </div>
+        <div class="warning"><strong>打开终端后不能偷偷切换有效沙箱模式</strong><p>同一 Owner 存在开放 PTY 或正在 spawn 时，若配置变更会产生不同的实际模式，sandbox/mode 事件会在提交前被拒绝。先关闭终端再切换权限，防止旧进程继续持有更宽访问。</p></div>
+        <div class="detail-card"><strong>Terminal 是进程本地、逐行的能力</strong><p>Harness 重启后不会恢复会话，也不支持全屏备用缓冲区 TUI、调整大小或跨 Agent 共享。输出只有在工具返回有界 MOTD、增量或 scrollback 页时才进入模型历史。</p></div>
 
         <h2 id="subprocess-seam">子进程、流与进程树终止<a href="#subprocess-seam" class="anchor">#</a></h2>
         <p>Subprocess seam 为 Bash、LSP、PTY 和 ACP 提供同一个底层进程世界。Spawn spec 没有隐藏默认值：argv、cwd、三条 stdio、环境、宽限期和取消信号都由调用方明确给出，argv 永远不经过 shell 解释。</p>

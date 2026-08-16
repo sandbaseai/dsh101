@@ -164,6 +164,7 @@
           <a href="#schedule">定时提醒</a>
           <a href="#schedule-lifecycle">提醒生命周期</a>
           <a href="#workflows">Workflow 与 Ralph</a>
+          <a href="#workflow-lifecycle">Workflow 生命周期</a>
         </section>
         <section>
           <h2>可观测性</h2>
@@ -1184,6 +1185,16 @@ print(result.final_response)</code></pre>
           <div><strong>Goal</strong><p>同一 Agent、同一 Session 内跨轮持续推进，适合普通长期目标，不等同于 Ralph。</p></div>
         </div>
         <div class="detail-card"><strong>完成声明仍需验证</strong><p>Ralph 的 <code>complete</code> 或 <code>blocked</code> 来自 worker 报告，没有独立评估器。普通 child 失败会终止运行而不会自动重试；取消后局部输出也不会伪装成成功。</p></div>
+
+        <h3 id="workflow-lifecycle">结果结算之后还要等待完全停稳<a href="#workflow-lifecycle" class="anchor">#</a></h3>
+        <p>Workflow 启动前会把 meta 与 args 当作普通 JSON 数据校验，不通过执行脚本文本来获取身份。每个 agent 调用都归属于必填 parent，并沿 Subagent seam 继承 cwd、谱系和深度。</p>
+        <div class="compare-grid">
+          <div><strong>Result 永远兑现而不 reject</strong><p>脚本完成、取消和错误都解析为封闭 stopReason；只有 completed 的 value 可当作成功。消费工具把其他终态映射为 isError，绝不把局部返回值包装成成功。</p></div>
+          <div><strong>Fatal 错误不能被组合器吞掉</strong><p>无效 agent 选项、Schema、上限、启动失败或取消会产生 fatal WorkflowError，parallel 与 pipeline 必须重新抛出。只有普通 child 失败或阶段内脚本错误可成为逐项 null。</p></div>
+          <div><strong>Dispose 拥有最终清理责任</strong><p>消费方在 finally 中调用 dispose：必要时取消脚本，在有界宽限期后强制结算，并等待 worker 与所有 child 完全停稳，因此卡死脚本不会让父级永久挂起。</p></div>
+        </div>
+        <div class="detail-card"><strong>Chat 记录只投影顶层运行</strong><p>根调用写 run-start 和配对的成员事件；只有取得 result 且 dispose 完成后才写 run-end。嵌套 transport 不写记录，append 失败则停止后续记账，留下空日志或合法连续前缀。</p></div>
+        <div class="warning"><strong>Ralph 的长期记忆只在工作区与有界交接</strong><p>每轮是无父对话 seed 的全新 Agent，上一份结构化报告必须满足状态语义与字符上限，否则整次运行失败而非截断。Round 上限控制数量，不限制 token、费用或墙钟时间。</p></div>
 
         <div class="chapter-break"><span>07</span><div><small>可观测性</small><strong>成本、遥测与质量反馈</strong></div></div>
 

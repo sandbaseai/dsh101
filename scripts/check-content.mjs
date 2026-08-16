@@ -20,6 +20,7 @@ requiredSections.push('tool-visibility')
 requiredSections.push('code-mode-entry')
 requiredSections.push('hook-protocol')
 requiredSections.push('schedule-lifecycle')
+requiredSections.push('workflow-lifecycle')
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)

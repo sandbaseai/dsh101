@@ -150,6 +150,7 @@
           <h2>Agent 工作流</h2>
           <a href="#mcp">连接 MCP</a>
           <a href="#skills">Skills</a>
+          <a href="#skill-provider">Skill Provider 发现</a>
           <a href="#plan-mode">Plan Mode</a>
           <a href="#web-tools">Web 工具</a>
           <a href="#web-providers">Web Provider 选择</a>
@@ -1107,6 +1108,24 @@ print(result.final_response)</code></pre>
           <div><small>04</small><strong>Loader</strong><span>按需读取正文</span></div>
         </div>
         <p>目录与正文采用渐进式加载，避免把所有 Skill 内容塞进每次请求。每个 Skill 都声明 <code>modelInvocable</code> 与 <code>userInvocable</code>，模型入口和用户入口必须分别检查自己的调用策略。</p>
+
+        <h3 id="skill-provider">本地 Skill 从哪里发现、谁会胜出<a href="#skill-provider" class="anchor">#</a></h3>
+        <p>注册表先合并 global 与当前 Agent 的 scope 父链：最近层的同名 Skill 直接胜出。只有候选位于同一层时，才按较低 rank、Provider 注册顺序和本地发现顺序裁决。</p>
+        <div class="permission-table">
+          <div><code>100 / 200</code><strong>项目目录优先</strong><span>依次扫描 projectRoot/.dsh/skills 与 .agents/skills；projectRoot 是 cwd 向上最近含 .git 的祖先，没有时就是 cwd。</span></div>
+          <div><code>300</code><strong>自定义目录</strong><span>Config.customSkillDirs 位于项目与用户目录之间，适合部署方提供共享但可被项目覆盖的 Skill。</span></div>
+          <div><code>400 / 500 / 600</code><strong>用户与随包目录</strong><span>依次使用 DSH home、Agents home 和显式 bundled 根；用户 DSH 的 .system 子目录会被跳过，Bundled 不会被自动合成。</span></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Discover</strong><p>只接受 name/SKILL.md 目录包或 name.md 平铺文件，名称必须为 kebab-case；不会递归搜索任意深度的 SKILL.md。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Catalog</strong><p>会话只收到名称与长度受限的描述，不含正文、绝对路径、来源或 Provider；完整目录变化时追加全量替换。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Load</strong><p>skill 工具按当前 cwd 重新读取胜出候选和正文，再次检查 modelInvocable，并只为明确引用的资源提供基址指引。</p></div>
+        </div>
+        <div class="detail-card"><strong>目录缓存与正文缓存刻意分开</strong><p>完整且稳定的发现结果可以缓存；Watcher、工具写入或 Provider invalidate 会清除目录。不完整观测不会缓存，并保留上一份可用模型视图；完整正文从不缓存。</p></div>
+        <div class="warning"><strong>修改正文不会通知已经看过目录的模型</strong><p>只改 SKILL.md 正文不会改变名称或描述 digest，也不会追加目录消息；下一次 skill 调用会读取新正文，但历史中已经加载的旧工具结果仍保持原样。</p></div>
+        <div class="detail-card"><strong>随包 Badge 默认不启用</strong><p>dsh-skill-badge 只贡献可选的 dsh-badge 与本地 PNG 资源；CLI 组合默认将它标记为 disabled，必须显式启用才会进入目录。</p></div>
 
         <h2 id="plan-mode">Plan Mode<a href="#plan-mode" class="anchor">#</a></h2>
         <p>Plan Mode 是按 Agent 记录在会话日志中的协作状态。<code>/plan</code> 进入，<code>/plan off</code> 直接退出；模型调用 <code>exit_plan_mode</code> 时必须经过用户明确评审。</p>

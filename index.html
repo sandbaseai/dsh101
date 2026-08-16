@@ -112,6 +112,7 @@
           <a href="#tool-details-boundary">工具详情边界</a>
           <a href="#config-schema">配置 Schema</a>
           <a href="#config-catalog">配置目录阅读</a>
+          <a href="#config-expression-postmortem">配置静默禁用复盘</a>
           <a href="#events">事件系统</a>
           <a href="#lifecycle">插件生命周期</a>
           <a href="#defensive-patterns">防御性失败模式</a>
@@ -694,6 +695,27 @@ print(result.final_response)</code></pre>
           <div><span>03</span><strong>Expose</strong><p>工具目录回答模型最终看见哪些工具 Schema。</p></div>
         </div>
         <div class="detail-card"><strong>目录是生成产物，不是手写清单</strong><p>英文页由源码生成，verify-config-catalog 会检查新鲜度并交叉核对类型与 Schema；中文页作为经评审的双语对侧维护。范围只覆盖 packages 下的 Harness 层，hmr、console logger 等 vendored Cordis 插件不在目录内。</p></div>
+
+        <h3 id="config-expression-postmortem">事故复盘：语法合法的表达式为何让工具永久消失<a href="#config-expression-postmortem" class="anchor">#</a></h3>
+        <p>ACP 快照场景曾把 <code>disabled: !!js ...</code> 写在 Cordis 配置项元数据中，希望按模式启用文件系统插件。Loader 只对插件内部的 <code>config</code> 递归插值；<code>disabled</code> 被直接读取，因此这里留下的是一个 truthy 表达式对象，所有模式中的文件系统 Fiber 都没有创建。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Parse</strong><p>YAML 标签合法，Include 把标量解析成表达式对象，不产生诊断。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Disable</strong><p>Loader 元数据不经过 _resolveConfig，对象按 truthy 直接禁用插件。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Freeze</strong><p>刷新后的 fixture 接受 UNKNOWN_TOOL 与通用失败卡片，把确定性错误固化成预期输出。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>症状</strong><p>七个文件系统场景和一个混合编辑场景调用了未注册工具；结构化日志明确记录 ToolNotFoundError 和 UNKNOWN_TOOL。</p></div>
+          <div><strong>测试为何仍绿</strong><p>快照只证明 transcript 可重复；共享的 request-header pin 也没有独立证明这些特定场景需要的 read、write、edit 已注册。</p></div>
+          <div><strong>安全边界没有被削弱</strong><p>受限默认模式仍未获得文件系统访问。直接让表达式生效反而危险，因为运行时 bash 权限预设不能挂载、卸载或约束进程内文件系统栈。</p></div>
+        </div>
+        <div class="permission-table">
+          <div><code>overlay</code><strong>显式组合能力</strong><span>文件系统场景改用固定全权限 fs.cordis.yml overlay，并使用独立的回放配置和 request-header 类。</span></div>
+          <div><code>static</code><strong>拒绝错误表达式位置</strong><span>verify-cordis-config 拒绝 Loader 配置项元数据、include patch 与插入项中的表达式节点。</span></div>
+          <div><code>semantic</code><strong>拒绝不可能的快照</strong><span>dsh-acp-snapshot 在全新运行和已提交 fixture 中都拒绝结构化 UNKNOWN_TOOL，不能再把缺失工具刷新成正确结果。</span></div>
+        </div>
+        <div class="warning"><strong>快照刷新是 fixture 生产，不是正确性证明</strong><p>语法被接受只说明解析器认识这个值，不说明当前位置会求值。工具是否存在、错误码是否可能和权限是否由对应能力栈管辖，都需要独立的语义断言。</p></div>
 
         <h2 id="events">事件系统<a href="#events" class="anchor">#</a></h2>
         <p>事件是插件间松耦合通信的核心机制。Cordis 提供四种模式，它们的执行与返回规则不同：</p>

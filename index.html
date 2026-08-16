@@ -803,6 +803,15 @@ print(result.final_response)</code></pre>
           <div><strong>surface delta</strong><p>相对匹配基线的有符号变化，可同时表示上下文增长与压缩后的缩减。</p></div>
         </div>
         <p>每个 surface node 记录事件 seq 和估算 token，但数组顺序才是模型表层的权威顺序；压缩替换节点的 seq 可能比排在它后面的旧节点更大。</p>
+        <h3 id="context-meter">如何解读 Context Meter</h3>
+        <p>输入框旁的占用圆环只在“预计下次请求 token”和当前模型容量都已知时出现。标题使用 <code>projectedTokens</code>：从最近一次 Provider 输入用量出发，再按此后 surface 的新增、替换或压缩做启发式增减。</p>
+        <div class="compare-grid">
+          <div><strong>pressureTokens</strong><p>最近一次已完成请求的输入压力，等于未缓存输入、cache read 与 cache write 之和；流式输出期间不会变化。</p></div>
+          <div><strong>projectedTokens</strong><p>预计下一次提示词规模。压缩一落地就会下降，无需等待新一轮 Provider usage。</p></div>
+          <div><strong>contextBreakdown</strong><p>按系统提示词、工具和消息给出约略组成，固定使用“4 字符约 1 token”加结构开销。</p></div>
+        </div>
+        <div class="warning"><strong>百分比不是账单，也不是准入闸门</strong><p>预计 token、模型容量和组成明细来自独立的后写覆盖投影，并非同一次请求的原子快照。CJK 文本和大型 JSON Schema 可能被明显低估，明细相加也不保证等于标题数字。</p></div>
+        <p>统计栏的计费输入为未缓存输入、cache read 和 cache write 三项之和，缓存命中率用 cache read 除以该总量；reasoning token 已包含在输出中，不能重复相加。缺少完整 timing 或 usage 的步骤会从 TTFT 和吞吐计算中退出，而不是用猜测值补齐。</p>
 
         <h2 id="telemetry">Session Telemetry<a href="#telemetry" class="anchor">#</a></h2>
         <p>Telemetry 把会话 ledger 事件和无日志归宿的 ops 信号投影成外发记录，再交给 OpenTelemetry 等 Provider。它完全位于模型请求之外，不会改变 Agent loop。</p>

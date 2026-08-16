@@ -774,7 +774,16 @@ export const en = {
   'Web UI 在该轮位置显示持久警告，保留已经生成的可见输出，并建议发送“继续”开启新轮次。事件不携带具体 token 数字，因此提示不会猜测上限；刷新、历史分页和恢复后仍能重建相同状态。': 'The Web UI shows a durable warning at that turn, preserves visible output already generated, and suggests sending “Continue” to open a new turn. The event carries no specific token count, so the notice does not guess the limit; refresh, history paging, and recovery rebuild the same state.',
   '不要把“继续”当成同一次请求': 'Do not treat “Continue” as the same request',
   '继续是一条新的用户消息和新的 Provider 调用，会使用当前模型配置并产生新的用量。若经常截断，应调整模型或 Agent 的 ': 'Continue is a new user message and Provider call, using the current model configuration and producing new usage. If truncation is frequent, adjust the model or Agent ',
-  '，同时确保不超过提供方实际输出容量。': ' while staying within the provider’s actual output capacity.'
+  '，同时确保不超过提供方实际输出容量。': ' while staying within the provider’s actual output capacity.',
+  '如何解读 Context Meter': 'How to read the Context Meter',
+  '输入框旁的占用圆环只在“预计下次请求 token”和当前模型容量都已知时出现。标题使用 ': 'The usage ring beside the composer appears only when both the projected next-request tokens and current model capacity are known. Its headline uses ',
+  '：从最近一次 Provider 输入用量出发，再按此后 surface 的新增、替换或压缩做启发式增减。': ': it starts from the latest Provider input usage and heuristically adjusts for later surface additions, replacements, or compaction.',
+  '最近一次已完成请求的输入压力，等于未缓存输入、cache read 与 cache write 之和；流式输出期间不会变化。': 'Input pressure from the latest completed request, equal to uncached input plus cache read and cache write; it does not change during streaming output.',
+  '预计下一次提示词规模。压缩一落地就会下降，无需等待新一轮 Provider usage。': 'The projected size of the next prompt. It drops as soon as compaction lands, without waiting for another round of Provider usage.',
+  '按系统提示词、工具和消息给出约略组成，固定使用“4 字符约 1 token”加结构开销。': 'An approximate composition across system prompts, tools, and messages, using a fixed “about four characters per token” heuristic plus structural overhead.',
+  '百分比不是账单，也不是准入闸门': 'The percentage is neither a bill nor an admission gate',
+  '预计 token、模型容量和组成明细来自独立的后写覆盖投影，并非同一次请求的原子快照。CJK 文本和大型 JSON Schema 可能被明显低估，明细相加也不保证等于标题数字。': 'Projected tokens, model capacity, and composition details come from independent last-write-wins projections, not one atomic request snapshot. CJK text and large JSON schemas may be materially underestimated, and the detail rows are not guaranteed to sum to the headline.',
+  '统计栏的计费输入为未缓存输入、cache read 和 cache write 三项之和，缓存命中率用 cache read 除以该总量；reasoning token 已包含在输出中，不能重复相加。缺少完整 timing 或 usage 的步骤会从 TTFT 和吞吐计算中退出，而不是用猜测值补齐。': 'The statistics bar defines billed input as uncached input plus cache read and cache write, and computes cache hit rate as cache read divided by that total. Reasoning tokens are already included in output and must not be added again. Steps without complete timing or usage are omitted from TTFT and throughput calculations instead of being filled with guesses.'
 }
 
 export const normalizedEn = new Map(

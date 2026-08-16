@@ -120,6 +120,7 @@
           <a href="#connection-recovery">连接恢复</a>
           <a href="#typert-remote">TypeRT Remote</a>
           <a href="#api-gateway-lifecycle">Gateway 调用生命周期</a>
+          <a href="#remote-event-forwarding">Host 事件转发</a>
           <a href="#capability-seam">能力三层拆分</a>
           <a href="#llm-adapter">LLM 适配器</a>
           <a href="#llm-streaming">流式协议与重试</a>
@@ -753,6 +754,22 @@ print(result.final_response)</code></pre>
           <div><strong>严格约定不能静默降级</strong><p>Host 曾注册的严格 endpoint 被撤回后直接失败，不回退到较弱的源码参数推断，避免热卸载悄悄降低校验强度。</p></div>
         </div>
         <div class="warning"><strong>Remote 不是通用流协议</strong><p>Remote 只表达单请求、单结果的方法。会话事件、增量数据、分页与实体子流可以复用 Connection，但应使用各自的协议；未被 Gateway 认领的 <code>/api</code> endpoint 才回退给既有 API Proxy。</p></div>
+
+        <h4 id="remote-event-forwarding">Host 事件如何进入 Client<a href="#remote-event-forwarding" class="anchor">#</a></h4>
+        <p>API Remotes 用一份显式 allowlist 选择可转发事件；同一个值同时派生 Host 转发循环和 <code>ctx.remote.$on()</code> 的合法 TypeScript 键面。事件签名仍由原始 owner 包的 Cordis Events 声明拥有，不在网关重写第二份可能漂移的类型。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Select</strong><p>Host 构建拒绝未声明、绑定 AgentScope 或并非单向形状的事件；加入名单意味着 payload 将原样跨边界。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Forward</strong><p>Connection 的 Host 下行流承载事件帧，Client Runtime 解码后交给 <code>ctx.remote.$dispatch()</code>；业务消费方只调用 <code>$on()</code>。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Fan out</strong><p>监听器按注册顺序调用；一个同步抛错或异步拒绝只被记录，不会阻断其他监听器或事件帧泵。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>订阅属于 Fiber</strong><p>每个订阅归创建它的 Cordis fiber 所有，fiber 卸载即自动释放；同一函数可以独立订阅多次，并分别撤回。</p></div>
+          <div><strong>没有订阅就丢弃</strong><p><code>$dispatch()</code> 收到合法但无人监听的事件会直接丢弃。Client 不维护事件积压，也不把它转成可供后来订阅者读取的状态。</p></div>
+          <div><strong>重连不会重放</strong><p>转发事件没有 payload 投影、脱敏、Scope 化订阅或重放保证。需要恢复一致性的 UI 必须在订阅前读取权威基线，并把事件仅当作失效或刷新信号。</p></div>
+        </div>
+        <div class="warning"><strong>Allowlist 是数据披露边界</strong><p>事件名与参数数组原样进入浏览器。新增转发项前应审查 owner 的全部参数是否适合暴露；需要裁剪、脱敏或耐久重放的数据，应建立独立协议，而不是直接加入名单。</p></div>
 
         <h2 id="capability-seam">能力的三种角色<a href="#capability-seam" class="anchor">#</a></h2>
         <p>当能力需要可替换提供方时，Harness 将它拆成三个角色。只有完整组合才构成一个 capability seam；单独一个角色并不完整。</p>

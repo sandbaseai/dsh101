@@ -24,6 +24,7 @@ requiredSections.push('workflow-lifecycle')
 requiredSections.push('fs-observation-policy')
 requiredSections.push('lsp-provider-lifecycle')
 requiredSections.push('api-gateway-lifecycle')
+requiredSections.push('remote-event-forwarding')
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)

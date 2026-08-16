@@ -32,6 +32,7 @@ Last upstream review:
 | Headless execution and configuration dumps | `apps/cli/reference/README.zh.md` |
 | First plugin | `docs/user/develop/basic/index.zh.md` |
 | Tool development | `docs/user/develop/basic/tool.zh.md`, `docs/subsystems/tools.zh.md` |
+| Code Mode nested tool-call topology, incremental keyed updates, malformed-edge limits, and UI ownership | `packages/client/runtime/README.zh.md`, `packages/client/ui-tool/README.zh.md` |
 | Plugin configuration | `docs/user/develop/basic/config.zh.md` |
 | Bundles and publishing | `docs/user/develop/basic/publish.zh.md` |
 | Fiber lifecycle | `docs/user/develop/framework/index.zh.md` |

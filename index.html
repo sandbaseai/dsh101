@@ -95,6 +95,7 @@
           <h2>进阶</h2>
           <a href="#plugins">第一个插件</a>
           <a href="#tools">开发 Tool</a>
+          <a href="#tool-call-tree">Code Mode 调用树</a>
           <a href="#config-schema">配置 Schema</a>
           <a href="#events">事件系统</a>
           <a href="#lifecycle">插件生命周期</a>
@@ -440,6 +441,16 @@ print(result.final_response)</code></pre>
           <div><span>02</span><strong>返回规范值</strong><p>execute 返回由 output schema 约束的数据。</p></div>
           <div><span>03</span><strong>渲染模型内容</strong><p>render 将规范值转换为模型真正看到的结果。</p></div>
         </div>
+
+        <h3 id="tool-call-tree">Code Mode 的嵌套工具调用树<a href="#tool-call-tree" class="anchor">#</a></h3>
+        <p>Chat 按 call id 配对根工具调用与结果，再把 Code Dispatch 的 start 与 settlement 折叠进该根 Context。每个 ToolCallBlock 通过 <code>subCalls</code> 按启动顺序递归拥有 child；child 不会成为独立 Chat 根记录。</p>
+        <div class="compare-grid">
+          <div><strong>缺少开始事件仍可呈现</strong><p>如果 start 位于尚未加载的更早历史，已到达的 settlement 仍会显示，只把 callTime 留为 null，不伪造启动时刻。</p></div>
+          <div><strong>更新保持兄弟身份</strong><p>一次 child 更新只复制从该节点到根的祖先链；未变化 sibling 保持对象身份，避免整棵调用树无谓重绘。</p></div>
+          <div><strong>异常边不污染树</strong><p>会形成环或超过固定 256 层上限的 parent-child 边会被消费，但不会修改投影，阻止恶意或损坏日志制造无限递归。</p></div>
+        </div>
+        <p>UI 从 root 递归遍历同一份标准调用块，每个原子调用都走同一个 keyed tool view slot；没有专用视图的工具使用通用卡片。Trajectory 为自身 target 独立组装同一种嵌套契约，不读取 Chat 的树。</p>
+        <div class="warning"><strong>业务 UI 不拥有调用拓扑</strong><p>工具插件只注册 wire 名称与原子视图，不应自行配对事件或重建 transcript。Runtime 决定 root/subcall 关系与生命周期，Conversation view 决定它在聊天流中的位置。</p></div>
 
         <h2 id="config-schema">配置 Schema<a href="#config-schema" class="anchor">#</a></h2>
         <p>插件通过同名的 TypeScript <code>Config</code> 类型和 Schemastery schema 接受配置。默认值属于 schema；无效配置应在插件加载时立即失败，而不是运行到一半才降级。</p>

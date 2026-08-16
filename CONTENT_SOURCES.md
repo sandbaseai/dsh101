@@ -48,6 +48,10 @@ Last upstream review:
 | Session persistence and crash recovery | `docs/subsystems/persistence.zh.md`, `packages/session/session-checkpoint-policy/README.zh.md` |
 | Domain storage | `docs/subsystems/storage.zh.md` |
 | Oversized tool result spill | `docs/subsystems/spill.zh.md` |
+| User slash commands | `docs/subsystems/commands.zh.md` |
+| Codex and Claude Code hook bridges | `packages/hooks/hooks-codex/README.zh.md`, `packages/hooks/hooks-claude-code/README.zh.md` |
+| Session-local schedules | `docs/subsystems/schedule.zh.md` |
+| Dynamic workflows and Ralph | `docs/subsystems/workflow.zh.md`, `packages/workflow/tool-workflow/README.zh.md`, `packages/workflow/tool-ralph/README.zh.md` |
 
 ## Refresh checklist
 

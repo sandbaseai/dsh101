@@ -100,6 +100,13 @@
           <a href="#lsp-navigation">LSP 代码导航</a>
         </section>
         <section>
+          <h2>自动化</h2>
+          <a href="#commands">斜杠命令</a>
+          <a href="#hooks">Hooks 桥接</a>
+          <a href="#schedule">定时提醒</a>
+          <a href="#workflows">Workflow 与 Ralph</a>
+        </section>
+        <section>
           <h2>持续执行</h2>
           <a href="#subagents">Subagents</a>
           <a href="#todos">Todo 列表</a>
@@ -392,7 +399,46 @@ print(result.final_response)</code></pre>
         </div>
         <p>模型输入使用从 1 开始的 UTF-16 行列坐标；没有对准符号可能得到空结果。Provider 按文件扩展名确定性选择，没有匹配项时返回 <code>LSP_UNAVAILABLE</code>。LSP 是可选能力，不属于 Agent loop 主干。</p>
 
-        <div class="chapter-break"><span>05</span><div><small>持续执行</small><strong>委派、计划与长上下文</strong></div></div>
+        <div class="chapter-break"><span>05</span><div><small>自动化</small><strong>命令、钩子与编排</strong></div></div>
+
+        <h2 id="commands">斜杠命令<a href="#commands" class="anchor">#</a></h2>
+        <p>用户命令由插件注册，交互式客户端负责发现并针对确切 Agent 执行。输入形如 <code>/plan</code>、<code>/export</code>；处理器直接返回 UI 结果，不创建用户消息、不启动模型轮次，也不产生工具结果。</p>
+        <div class="compare-grid">
+          <div><strong>发现</strong><p>UI 获取名称、说明和可选输入提示，不接触处理器函数。</p></div>
+          <div><strong>执行</strong><p>注册表解析名称并保留命令后的原始输入，同时传入取消信号。</p></div>
+          <div><strong>审计</strong><p>已接纳命令写入配对的 <code>command/run</code> 与 <code>command/done</code> 日志事件。</p></div>
+        </div>
+        <p>语法错误或未知命令不会写日志。Agent scope 中的同名定义会遮蔽全局命令；插件卸载时注册自动撤销。</p>
+
+        <h2 id="hooks">Codex 与 Claude Code Hooks<a href="#hooks" class="anchor">#</a></h2>
+        <p>Hooks 桥接器把现有 Codex 或 Claude Code command hook 配置映射到 Harness 的类型化拦截点。它们是兼容层；需要完整类型、更多控制或稳定扩展时，应直接编写 Cordis 插件。</p>
+        <div class="event-grid">
+          <div><code>SessionStart</code><strong>注入上下文</strong><p>会话开始时运行；当前实现是脱离执行，可能错过首个请求。</p></div>
+          <div><code>UserPromptSubmit</code><strong>提示词门禁</strong><p>可以拒绝输入，或给已接受输入追加带来源的上下文。</p></div>
+          <div><code>PreToolUse</code><strong>工具前决策</strong><p>Codex 子集支持阻塞；Claude Code 子集还可返回 ask。</p></div>
+          <div><code>PostToolUse / Stop</code><strong>反馈与续行</strong><p>工具后可阻塞或追加反馈；Stop 阻塞会 steer 下一步。</p></div>
+        </div>
+        <div class="warning"><strong>不是完整协议复刻</strong><p>桥接器只运行同步 command hook，且各自只支持官方协议的一个子集。配置在进程加载时读取一次；不支持的事件或字段不会自动获得原产品语义。</p></div>
+
+        <h2 id="schedule">Session 内定时提醒<a href="#schedule" class="anchor">#</a></h2>
+        <p><code>schedule_create</code> 支持延时一次、绝对时间一次和固定速率重复三种规则。记录持久在原 Session 中，到期后排队一个普通 follow-up；不会发送外部通知，也不会唤醒 cold Session。</p>
+        <div class="permission-table">
+          <div><code>after_seconds</code><strong>延时一次</strong><span>接受正整数秒数，创建时换算为 UTC 目标。</span></div>
+          <div class="recommended"><code>at</code><strong>绝对时间</strong><span>必须显式提供 RFC 3339 偏移量或 IANA 时区。</span></div>
+          <div><code>every_seconds</code><strong>固定速率</strong><span>至少 300 秒；跳过的周期只补发最新一次。</span></div>
+        </div>
+        <p>提醒只在拥有它的 Agent live 且完全 idle 时交付，从不打断当前轮次。一次性提醒优先；多个到期的重复提醒会合并进同一个 follow-up。交付是尽力而为的至少一次，不是恰好一次。</p>
+
+        <h2 id="workflows">Workflow 与 Ralph<a href="#workflows" class="anchor">#</a></h2>
+        <p><code>workflow</code> 让模型编写 JavaScript 编排脚本，按阶段启动多个 Subagent 并返回结构化 JSON。它适合用户明确要求的大型多 Agent 编排；一两个委派仍应使用普通 Subagent。</p>
+        <div class="compare-grid">
+          <div><strong>Dynamic Workflow</strong><p>脚本可使用并行与流水线组合器扇出任务；父级同步等待，并在所有路径上清理 worker 与 child。</p></div>
+          <div><strong>Ralph</strong><p>固定前台循环，每轮启动一个没有对话 seed 的全新 Agent，以共享工作区和有界报告交接状态。</p></div>
+          <div><strong>Goal</strong><p>同一 Agent、同一 Session 内跨轮持续推进，适合普通长期目标，不等同于 Ralph。</p></div>
+        </div>
+        <div class="detail-card"><strong>完成声明仍需验证</strong><p>Ralph 的 <code>complete</code> 或 <code>blocked</code> 来自 worker 报告，没有独立评估器。普通 child 失败会终止运行而不会自动重试；取消后局部输出也不会伪装成成功。</p></div>
+
+        <div class="chapter-break"><span>06</span><div><small>持续执行</small><strong>委派、计划与长上下文</strong></div></div>
 
         <h2 id="subagents">Subagent 委派<a href="#subagents" class="anchor">#</a></h2>
         <p>Subagent seam 让父 Agent 通过具名 Provider 委派工作。Provider 可以在同一进程、独立进程、ACP、Codex 或 Claude Code 中运行，但父级看到的启动与结果约定保持一致。</p>

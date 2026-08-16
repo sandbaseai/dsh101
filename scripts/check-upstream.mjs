@@ -33,6 +33,9 @@ const changed = execFileSync('git', [
   'packages/session', 'packages/storage', 'packages/spill',
   'docs/subsystems/persistence.zh.md', 'docs/subsystems/storage.zh.md',
   'docs/subsystems/spill.zh.md', 'docs/persistence-catalog.zh.md',
+  'packages/hooks', 'packages/schedule', 'packages/workflow',
+  'docs/subsystems/commands.zh.md', 'docs/subsystems/schedule.zh.md',
+  'docs/subsystems/workflow.zh.md',
 ], { encoding: 'utf8' }).trim()
 
 console.log(`upstream moved: ${recorded.slice(0, 8)} -> ${revision.slice(0, 8)} (${date})`)

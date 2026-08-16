@@ -39,6 +39,10 @@ const changed = execFileSync('git', [
   'packages/settings', 'packages/credentials', 'packages/preset',
   'docs/subsystems/settings.zh.md', 'docs/subsystems/credentials.zh.md',
   'docs/subsystems/system-prompt.zh.md',
+  'packages/llm/token-meter', 'packages/session/session-telemetry',
+  'packages/runtime-diagnostics/invariants', 'packages/feedback',
+  'docs/subsystems/token-meter.zh.md', 'docs/subsystems/session-telemetry.zh.md',
+  'docs/subsystems/invariants.zh.md', 'docs/subsystems/feedback.zh.md',
 ], { encoding: 'utf8' }).trim()
 
 console.log(`upstream moved: ${recorded.slice(0, 8)} -> ${revision.slice(0, 8)} (${date})`)

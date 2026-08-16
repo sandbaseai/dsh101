@@ -56,6 +56,10 @@ Last upstream review:
 | Credential references and rotation | `docs/subsystems/credentials.zh.md` |
 | Agent preset composition | `packages/preset/agent-presets/README.zh.md` |
 | Persona and system prompt assembly | `packages/preset/persona/README.zh.md`, `docs/subsystems/system-prompt.zh.md` |
+| Token metering | `docs/subsystems/token-meter.zh.md` |
+| Session telemetry and redaction | `docs/subsystems/session-telemetry.zh.md` |
+| Package-owned runtime invariants | `docs/subsystems/invariants.zh.md` |
+| Per-message feedback | `docs/subsystems/feedback.zh.md` |
 
 ## Refresh checklist
 

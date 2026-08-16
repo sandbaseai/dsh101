@@ -114,6 +114,13 @@
           <a href="#workflows">Workflow 与 Ralph</a>
         </section>
         <section>
+          <h2>可观测性</h2>
+          <a href="#token-meter">Token 计量</a>
+          <a href="#telemetry">Session Telemetry</a>
+          <a href="#invariants">运行时 Invariants</a>
+          <a href="#feedback">消息反馈</a>
+        </section>
+        <section>
           <h2>持续执行</h2>
           <a href="#subagents">Subagents</a>
           <a href="#todos">Todo 列表</a>
@@ -486,7 +493,43 @@ print(result.final_response)</code></pre>
         </div>
         <div class="detail-card"><strong>完成声明仍需验证</strong><p>Ralph 的 <code>complete</code> 或 <code>blocked</code> 来自 worker 报告，没有独立评估器。普通 child 失败会终止运行而不会自动重试；取消后局部输出也不会伪装成成功。</p></div>
 
-        <div class="chapter-break"><span>07</span><div><small>持续执行</small><strong>委派、计划与长上下文</strong></div></div>
+        <div class="chapter-break"><span>07</span><div><small>可观测性</small><strong>成本、遥测与质量反馈</strong></div></div>
+
+        <h2 id="token-meter">Token 计量<a href="#token-meter" class="anchor">#</a></h2>
+        <p>Token Meter 回放当前会话的耐久日志，生成一次不可变的请求压力与 surface 定价快照。它区分完整请求/响应压力 <code>totalTokens</code> 和仅当前模型表层的启发式总量 <code>surfaceTokens</code>。</p>
+        <div class="compare-grid">
+          <div><strong>usage baseline</strong><p>最近成功请求具有相同规范 envelope，且 Provider usage 足够覆盖启发式锚点。</p></div>
+          <div><strong>estimated baseline</strong><p>没有可安全复用的 usage 时，用固定启发式重新估算完整 envelope 与 surface。</p></div>
+          <div><strong>surface delta</strong><p>相对匹配基线的有符号变化，可同时表示上下文增长与压缩后的缩减。</p></div>
+        </div>
+        <p>每个 surface node 记录事件 seq 和估算 token，但数组顺序才是模型表层的权威顺序；压缩替换节点的 seq 可能比排在它后面的旧节点更大。</p>
+
+        <h2 id="telemetry">Session Telemetry<a href="#telemetry" class="anchor">#</a></h2>
+        <p>Telemetry 把会话 ledger 事件和无日志归宿的 ops 信号投影成外发记录，再交给 OpenTelemetry 等 Provider。它完全位于模型请求之外，不会改变 Agent loop。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Capture</strong><p>Ledger 镜像会话事件；Ops 承载 agent-error 与 shutdown。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Redact</strong><p>部署方 waterfall 变换导出副本；规则抛错时 fail-closed 扣下该条。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Emit</strong><p>后端非阻塞入队；批处理、重试、留存和丢失策略归 SDK。</p></div>
+        </div>
+        <div class="warning"><strong>尽力而为，不是审计真源</strong><p>记录可能丢失或重复，接收端应按 <code>(session.id, event.seq)</code> 去重 ledger。脱敏只修改导出副本，权威 Session 日志永不改写。</p></div>
+
+        <h2 id="invariants">运行时 Invariants<a href="#invariants" class="anchor">#</a></h2>
+        <p>Invariant Registry 让每个包注册自己拥有的运行时约束，例如事件必须成对、状态转换必须合法。检查断言权威事件流或可变数据关系，而不是简单确认某个服务或方法存在。</p>
+        <div class="detail-card"><strong>失败可归因到包</strong><p>违规会抛出稳定 code 为 <code>INVARIANT</code> 的错误，并携带完整 npm package name。每个 installer 在独立 child fiber 中运行，卸载后不会遗留监听器或 trace 状态。</p></div>
+        <p>部署可以用 allowlist 和 blocklist 正则选择检查范围，blocklist 优先。模式在服务启动时严格校验并在生命周期内固定，确保后续插件加载与 HMR 行为确定。</p>
+
+        <h2 id="feedback">消息反馈<a href="#feedback" class="anchor">#</a></h2>
+        <p>每条已完成 Assistant 消息可以保存好评或差评及可选备注。它是本地 Storage Domain 中的可编辑 sidecar，不是 Session 事件、模型上下文或自动遥测。</p>
+        <div class="compare-grid">
+          <div><strong>目标验证</strong><p>只接受持久日志中 append-origin、非空的 assistant message，部分中断输出没有反馈入口。</p></div>
+          <div><strong>乐观并发</strong><p>每次更新携带 opaque version；冲突直接返回权威当前值供 UI 对账。</p></div>
+          <div><strong>生命周期隔离</strong><p>Sidecar 绑定 Session 的 createdAt 与 cwd；Fork 不复制父会话反馈。</p></div>
+        </div>
+        <p>Web UI 首次 hover 或 focus 时才延迟读取整段会话的反馈，避免对每条消息单独请求。删除不存在的反馈是幂等成功；备注按 UTF-8 字节限制。</p>
+
+        <div class="chapter-break"><span>08</span><div><small>持续执行</small><strong>委派、计划与长上下文</strong></div></div>
 
         <h2 id="subagents">Subagent 委派<a href="#subagents" class="anchor">#</a></h2>
         <p>Subagent seam 让父 Agent 通过具名 Provider 委派工作。Provider 可以在同一进程、独立进程、ACP、Codex 或 Claude Code 中运行，但父级看到的启动与结果约定保持一致。</p>

@@ -24,6 +24,7 @@ const changed = execFileSync('git', [
   'diff', '--name-only', `${recorded}..${revision}`, '--',
   'README.zh.md', 'docs/user', 'apps/cli', 'packages/mcp', 'packages/skill', 'packages/plan', 'packages/web',
   'packages/subagent', 'packages/todo', 'packages/goal', 'packages/compaction',
+  'packages/interaction', 'packages/fs', 'packages/guard',
 ], { encoding: 'utf8' }).trim()
 
 console.log(`upstream moved: ${recorded.slice(0, 8)} -> ${revision.slice(0, 8)} (${date})`)

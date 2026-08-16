@@ -70,6 +70,16 @@
 .compact-visual .summary { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); }
 .compact-visual span, .compact-visual small { font-size: 10px; }
 .compact-visual i { color: var(--text-3); font-style: normal; text-align: center; }
+.permission-table { margin: 20px 0; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; }
+.permission-table > div { display: grid; grid-template-columns: 170px 120px 1fr; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid var(--border); font-size: 13px; }
+.permission-table > div:first-child { border-top: 0; }
+.permission-table .recommended { background: var(--blue-soft); }
+.permission-table span { color: var(--text-2); }
+.guard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 22px 0; }
+.guard-grid > div { position: relative; padding: 17px 17px 15px 55px; border: 1px solid var(--border); border-radius: 9px; background: var(--soft); }
+.guard-icon { position: absolute; left: 16px; top: 16px; width: 27px; height: 27px; display: grid; place-items: center; border-radius: 7px; background: var(--blue-soft); color: var(--blue); }
+.guard-grid p { margin: 5px 0; font-size: 12px; line-height: 1.5; }
+.guard-grid small { color: var(--text-3); font-size: 10px; }
 @media (max-width: 760px) {
   .language-btn span { display: none; }
   .error-table > div { grid-template-columns: 1fr; gap: 6px; }
@@ -83,4 +93,6 @@
   .subagent-modes, .todo-demo { grid-template-columns: 1fr; }
   .compact-visual { grid-template-columns: 1fr; }
   .compact-visual > i { transform: rotate(90deg); }
+  .permission-table > div { grid-template-columns: 1fr; gap: 5px; }
+  .guard-grid { grid-template-columns: 1fr; }
 }

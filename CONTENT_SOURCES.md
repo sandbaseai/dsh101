@@ -36,6 +36,9 @@ Last upstream review:
 | Todo snapshots | `packages/todo/tool-todo/README.zh.md` |
 | Persistent goals and goal rounds | `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |
 | Context compaction | `packages/compaction/compaction-basic/README.zh.md` |
+| Permission presets and approvals | `packages/interaction/permission-presets/README.zh.md`, `packages/interaction/user-approval/README.zh.md` |
+| Filesystem sandbox policy | `packages/fs/fs-sandbox/README.zh.md` |
+| Tool reliability guardrails | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
 
 ## Refresh checklist
 

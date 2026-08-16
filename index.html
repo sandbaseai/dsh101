@@ -70,6 +70,7 @@
           <a href="#workspace">工作区</a>
           <a href="#session">会话与任务</a>
           <a href="#permissions">权限与审批</a>
+          <a href="#sandbox">沙箱模式</a>
         </section>
         <section>
           <h2>SDK</h2>
@@ -100,6 +101,7 @@
           <a href="#todos">Todo 列表</a>
           <a href="#goals">持久 Goal</a>
           <a href="#compaction">上下文压缩</a>
+          <a href="#guardrails">工具 Guardrails</a>
         </section>
       </nav>
     </aside>
@@ -152,7 +154,16 @@
         <p>Agent 可以读取文件、执行命令并维护计划。当某项操作超出当前权限策略时，Web UI 会先请求你的批准。</p>
 
         <h2 id="permissions">权限与审批<a href="#permissions" class="anchor">#</a></h2>
-        <p>Harness 默认采用最小权限策略。文件写入、网络访问和高风险命令会根据你的配置触发审批，所有工具调用都会保留清晰记录。</p>
+        <p>Harness 把沙箱模式和审批策略作为两项独立机制。权限预设只是在产品层把两者组合成一个选择器；执行时仍由各自服务单独强制。</p>
+        <h3 id="sandbox">沙箱模式</h3>
+        <div class="permission-table">
+          <div><code>read-only</code><strong>只读</strong><span>文件变更被拒绝，读取保持可用。</span></div>
+          <div class="recommended"><code>workspace-write</code><strong>工作区写入</strong><span>仅工作区和平台临时目录可写；默认搭配 <code>ask</code>。</span></div>
+          <div><code>danger-full-access</code><strong>完整访问</strong><span>不添加文件围栏；默认搭配 <code>never</code>。</span></div>
+        </div>
+        <p>文件系统围栏会在目标规范化后检查可写根，并在写入前重新规范化以缩小符号链接竞态。不过它是可信进程中的策略围栏，不是针对恶意宿主代码的内核安全边界。</p>
+        <h3>一次性审批</h3>
+        <p>审批结果只有 <code>allowed-once</code>、<code>rejected</code>、<code>cancelled</code> 和 <code>unavailable</code>。每次决定都会写入成对审计事件；没有应答者或应答失败时默认拒绝。<code>never</code> 策略会在交互分发前确定性拒绝请求。</p>
 
         <div class="chapter-break"><span>02</span><div><small>程序化使用</small><strong>从 Web UI 走向 SDK</strong></div></div>
 
@@ -368,6 +379,14 @@ print(result.final_response)</code></pre>
           <i>+</i><div class="recent"><span>recent turns</span><span>current work</span></div>
         </div>
         <p>超大工具结果可先经过不依赖模型的剪枝；若压力仍高，再调用摘要模型。摘要只保存文本，不保留私有推理或遗留工具调用。压缩会替换历史，因此会移动 KV Cache 的可复用边界。</p>
+
+        <h2 id="guardrails">工具 Guardrails<a href="#guardrails" class="anchor">#</a></h2>
+        <p>Guard 插件通过 <code>tools/execute</code> 流水线增加可靠性策略，不改变具体 Tool 的实现。当前常见的两类保护是协作式超时与重复调用提醒。</p>
+        <div class="guard-grid">
+          <div><div class="guard-icon">⏱</div><strong>Timeout Policy</strong><p>从 Tool Definition 读取 <code>timeoutMs</code>，通过 <code>exec.signal</code> 通知截止，并返回结构化 <code>TOOL_TIMEOUT</code>。</p><small>协作式，不是硬终止</small></div>
+          <div><div class="guard-icon">↻</div><strong>Repeat Reminder</strong><p>按 Agent 统计同一工具和规范化参数的连续调用，在 3、5、8 次等阈值注入逐级提醒。</p><small>提供建议，不阻止调用</small></div>
+        </div>
+        <p>不受跟踪的记录类工具对重复链透明，因此在两次相同调用之间写 Todo 不会掩盖循环。各 Subagent 的重复链彼此隔离。</p>
 
         <div class="source-note">
           <div><span class="pulse"></span><strong>内容来源</strong></div>

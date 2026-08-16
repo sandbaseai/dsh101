@@ -81,6 +81,7 @@
           <a href="#agent-delivery">Agent 投递与取消</a>
           <a href="#session-queue">实时消息队列</a>
           <a href="#queue-operations">Queue 编辑与插话</a>
+          <a href="#keyboard-delivery">键盘投递规则</a>
           <a href="#permissions">权限与审批</a>
           <a href="#permission-presets">权限预设</a>
           <a href="#approval-flow">审批链路</a>
@@ -353,6 +354,15 @@
         </div>
         <p>待处理 steering 从 QueueDock 隐藏后，会立即在 Chat 尾部显示为用户样式气泡；Host 等对应的持久 user/message 进入 mux 流才退役临时项。交接因此没有空档或重复，并能从同一权威在重连和回放后恢复。</p>
         <div class="warning"><strong>已关闭窗口不是发送失败</strong><p>如果严格 steer 输给已经关闭的 next-step 窗口，原条目留在 Queue 中正常投递；如果驱动器已经认领它，投递已经开始。这两种已收敛竞态不显示错误，只有传输或未知故障才会报告失败。</p></div>
+
+        <h3 id="keyboard-delivery">运行中会话的键盘投递<a href="#keyboard-delivery" class="anchor">#</a></h3>
+        <p>键盘提交会同时检查所寻址会话是否正在运行、是否支持 steering，以及 Host-backed 的 busyEnter 偏好。空闲时 Enter 与 Cmd/Ctrl+Enter 都执行普通 Queue；在上述可编辑状态中，Shift+Enter 始终只换行。</p>
+        <div class="compare-grid">
+          <div><strong>繁忙主会话交换两个手势</strong><p>默认 Enter 为 Queue、Cmd/Ctrl+Enter 为 Steer；偏好切到 Steer 后两者互换。设置保存在同一用户 home 的 settings.yaml，可跨 Web 端口复用。</p></div>
+          <div><strong>空草稿可严格插入整队列</strong><p>繁忙且支持 steering 时，空草稿按 Cmd/Ctrl+Enter 会依 FIFO 把所有待处理项逐一严格 steer；普通 Enter 仍无操作，placeholder 会在可用时提示手势。</p></div>
+          <div><strong>Subagent 始终只 Queue</strong><p>已寻址 subagent 的继续执行传输不公开 steering；即使正在运行，Enter 与 Cmd/Ctrl+Enter 都走它唯一支持的 Queue 路径。</p></div>
+        </div>
+        <div class="warning"><strong>偏好只影响键盘手势</strong><p>发送按钮和其他非键盘提交始终使用 Queue。Composer 的 Steer 是尽力而为：如果 next-step 窗口在接纳前关闭，消息会成为下一轮 Queue 唤醒，不报假失败，也不丢失草稿事务。</p></div>
 
         <h2 id="permissions">权限与审批<a href="#permissions" class="anchor">#</a></h2>
         <p>Harness 把沙箱模式和审批策略作为两项独立机制。权限预设只是在产品层把两者组合成一个选择器；执行时仍由各自服务单独强制。</p>

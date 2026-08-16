@@ -58,6 +58,7 @@ Last upstream review:
 | Agent delivery, cancellation, and ownership | `docs/subsystems/core.zh.md` |
 | Web queue snapshots, editing, steering, and keyboard delivery | `packages/host/apiproxy/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | Queue text-only editing, immutable mixed-content steering, subagent read-only behavior, race convergence, and pending-to-durable bubble handoff | `packages/client/ui-conversation/README.zh.md` |
+| Idle/busy keyboard delivery matrix, host-backed Busy Enter preference, empty-draft whole-queue steering, subagent fallback, and best-effort composer steering | `packages/client/ui-conversation/README.zh.md` |
 | MCP transports and tool bridge | `packages/mcp/mcp-client/README.zh.md` |
 | Skill discovery and loading | `docs/subsystems/skills.zh.md`, `packages/skill/skill/README.zh.md`, `packages/skill/tool-skill/README.zh.md` |
 | Plan collaboration state | `docs/subsystems/plan.zh.md`, `packages/plan/plan-mode/README.zh.md` |

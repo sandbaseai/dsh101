@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A source-verified bilingual tutorial for typed, validated DeepSeek Harness plugin configuration." />
+    <meta name="theme-color" content="#050907" />
+    <link rel="canonical" href="https://dsh101.com/config/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://dsh101.com/config/" />
+    <link rel="alternate" hreflang="en-US" href="https://dsh101.com/config/?lang=en" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>插件配置 · DSH 101</title>
+    <link rel="stylesheet" href="/subpage.css" />
+    <link rel="stylesheet" href="/plugin.css" />
+    <link rel="stylesheet" href="/tool.css" />
+    <link rel="stylesheet" href="/config.css" />
+  </head>
+  <body>
+    <header class="sub-header">
+      <a class="sub-brand" href="/"><img src="https://www.deepseek.com/harness/images/dsh-logo.svg" alt="DeepSeek Harness" /><span>101</span></a>
+      <a href="/tool/" data-zh="开发工具" data-en="Build a tool">开发工具</a>
+      <a href="/" data-zh="返回首页" data-en="Back home">返回首页</a>
+      <a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/basic/config" target="_blank" rel="noreferrer" data-zh="官方教程 ↗" data-en="Official tutorial ↗">官方教程 ↗</a>
+      <div class="locale-switch" role="group" aria-label="Language"><button type="button" data-locale="zh" class="active">中</button><button type="button" data-locale="en">EN</button></div>
+    </header>
+
+    <main class="sub-main plugin-main config-main">
+      <section class="plugin-hero config-hero">
+        <div class="plugin-intro">
+          <p class="sub-kicker" data-zh="类型与运行时校验" data-en="Types and runtime validation">类型与运行时校验</p>
+          <h1 data-zh="让插件配置成为明确契约。" data-en="Make plugin config an explicit contract.">让插件配置成为明确契约。</h1>
+          <p class="sub-lead" data-zh="用同名 Config 类型和 Schemastery schema 接收配置，在加载时校验并填充默认值。" data-en="Pair a Config type with a Schemastery schema to validate input and fill defaults during plugin load.">用同名 Config 类型和 Schemastery schema 接收配置，在加载时校验并填充默认值。</p>
+          <div class="plugin-prerequisite"><strong data-zh="前置条件" data-en="Prerequisite">前置条件</strong><span data-zh="沿用前两篇教程的 scratch-plugin。本页会把 greet 的行为改成可配置。" data-en="Keep the scratch-plugin from the previous tutorials. This page makes greet behavior configurable.">沿用前两篇教程的 scratch-plugin。本页会把 greet 的行为改成可配置。</span></div>
+        </div>
+        <div class="code-stage config-code-stage" aria-label="Typed Schemastery plugin configuration source code">
+          <div class="code-stage-head"><span>scratch-plugin/src/my-plugin.ts</span><button class="copy-code" type="button" data-copy-target="config-schema" data-zh="复制" data-en="Copy">复制</button></div>
+          <pre><code id="config-schema">import type { Context } from '@deepseek-ai/cordis'
+import Schema from '@deepseek-ai/schemastery'
+
+export const name = 'my-plugin'
+
+export interface Config {
+  greeting: string
+  maxRetries: number
+  verbose?: boolean
+}
+
+export const Config: Schema&lt;Config&gt; = Schema.object({
+  greeting: Schema.string().default('Hello'),
+  maxRetries: Schema.number().default(3),
+  verbose: Schema.boolean().default(false),
+})
+
+export function apply(ctx: Context, config: Config) {
+  console.log(config.greeting)
+}</code></pre>
+        </div>
+      </section>
+
+      <aside class="source-note"><span data-zh="核对基线" data-en="Verified baseline">核对基线</span><p data-zh="官方提交 47f9438，2026-08-13。类型、schema、默认值、加载失败和 HMR 行为均来自官方配置教程。" data-en="Official commit 47f9438, 2026-08-13. Types, schemas, defaults, load failures, and HMR behavior follow the official configuration tutorial.">官方提交 47f9438，2026-08-13。类型、schema、默认值、加载失败和 HMR 行为均来自官方配置教程。</p></aside>
+
+      <nav class="chapter-nav" aria-label="Tutorial chapters">
+        <a href="#pipeline" data-zh="配置管线" data-en="Config pipeline">配置管线</a>
+        <a href="#overlay" data-zh="写入 overlay" data-en="Edit overlay">写入 overlay</a>
+        <a href="#validation" data-zh="严格校验" data-en="Validate strictly">严格校验</a>
+        <a href="#hmr" data-zh="热替换" data-en="Hot replacement">热替换</a>
+      </nav>
+
+      <section id="pipeline" class="config-pipeline">
+        <div class="tool-section-heading"><h2 data-zh="配置在加载时完成四件事" data-en="Configuration does four jobs at load time">配置在加载时完成四件事</h2><p data-zh="TypeScript 类型服务开发期，Schemastery schema 负责运行时。两者同名，但职责不同。" data-en="The TypeScript type serves development time, while the Schemastery schema owns runtime behavior. They share a name but have different jobs.">TypeScript 类型服务开发期，Schemastery schema 负责运行时。两者同名，但职责不同。</p></div>
+        <div class="pipeline-track">
+          <article><code>cordis.yml</code><h3 data-zh="读取用户值" data-en="Read user values">读取用户值</h3><p data-zh="config 节点提供当前部署的选择。" data-en="The config node supplies deployment-specific choices.">config 节点提供当前部署的选择。</p></article>
+          <article><code>Config schema</code><h3 data-zh="校验并补默认值" data-en="Validate and fill defaults">校验并补默认值</h3><p data-zh="字段规则在插件加载期间执行。" data-en="Field rules run while the plugin loads.">字段规则在插件加载期间执行。</p></article>
+          <article><code>apply(ctx, config)</code><h3 data-zh="传入类型安全对象" data-en="Pass a typed object">传入类型安全对象</h3><p data-zh="apply 读取用户值或 schema 默认值。" data-en="apply receives user values or schema defaults.">apply 读取用户值或 schema 默认值。</p></article>
+          <article><code>plugin instance</code><h3 data-zh="按配置运行" data-en="Run with config">按配置运行</h3><p data-zh="实现无需重新解析原始 YAML。" data-en="Implementation code never reparses raw YAML.">实现无需重新解析原始 YAML。</p></article>
+        </div>
+      </section>
+
+      <section id="overlay" class="plugin-chapter">
+        <div class="chapter-copy"><h2 data-zh="在原有插件行增加 config" data-en="Add config to the existing plugin row">在原有插件行增加 config</h2><p data-zh="保留“第一个插件”教程中已经验证的绝对路径，只增加 config 节点。这样 greeting 覆盖默认值，未写入的 verbose 仍使用 false。" data-en="Keep the absolute path verified in First plugin and add only the config node. greeting overrides its default, while omitted verbose remains false.">保留“第一个插件”教程中已经验证的绝对路径，只增加 config 节点。这样 greeting 覆盖默认值，未写入的 verbose 仍使用 false。</p></div>
+        <div class="chapter-work">
+          <div class="code-block"><div><span>scratch-plugin/cordis.yml</span><button class="copy-code" type="button" data-copy-target="config-yaml" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="config-yaml">- insert:
+    - id: hello
+      name: '/absolute/path/to/deepseek-harness/scratch-plugin/src/my-plugin.ts'
+      config:
+        greeting: 'Hi there'
+        maxRetries: 5</code></pre></div>
+          <div class="doc-difference"><strong data-zh="来源差异" data-en="Source discrepancy">来源差异</strong><p data-zh="官方配置篇片段使用 ./src/my-plugin.ts，但同一提交的第一篇教程明确说明 patch 不改变模块解析所用的 profile 目录，并要求绝对路径。本站保持绝对路径，避免教程链在此中断。" data-en="The official config snippet uses ./src/my-plugin.ts, while First plugin at the same commit says a patch does not change the profile directory used for module resolution and requires an absolute path. This guide keeps the absolute path so the tutorial chain remains runnable.">官方配置篇片段使用 ./src/my-plugin.ts，但同一提交的第一篇教程明确说明 patch 不改变模块解析所用的 profile 目录，并要求绝对路径。本站保持绝对路径，避免教程链在此中断。</p></div>
+        </div>
+      </section>
+
+      <section id="validation" class="plugin-chapter chapter-offset">
+        <div class="chapter-copy"><h2 data-zh="把无效配置挡在插件加载阶段" data-en="Reject invalid config while the plugin loads">把无效配置挡在插件加载阶段</h2><p data-zh="required、default 和 union 都属于 schema。无效值应让插件以明确错误停止加载，而不是带着错误状态进入执行路径。" data-en="required, default, and union belong in the schema. Invalid values should stop plugin loading with an actionable error instead of entering execution in a bad state.">required、default 和 union 都属于 schema。无效值应让插件以明确错误停止加载，而不是带着错误状态进入执行路径。</p></div>
+        <div class="chapter-work"><div class="code-block"><div><span>TypeScript</span><button class="copy-code" type="button" data-copy-target="strict-schema" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="strict-schema">export interface Config {
+  apiKey: string
+  timeout: number
+  mode: 'fast' | 'accurate'
+}
+
+export const Config = Schema.object({
+  apiKey: Schema.string().required(),
+  timeout: Schema.number().default(30000),
+  mode: Schema.union(['fast', 'accurate']).default('fast'),
+})</code></pre></div><p data-zh="不要导出普通对象作为 Config。Cordis 需要它实现 Standard Schema 接口。" data-en="Do not export a plain object as Config. Cordis requires the Standard Schema interface.">不要导出普通对象作为 Config。Cordis 需要它实现 Standard Schema 接口。</p></div>
+      </section>
+
+      <section class="config-principle">
+        <div><h2 data-zh="一个简单判断标准" data-en="A simple decision rule">一个简单判断标准</h2><p data-zh="如果两个部署可能需要不同值，它就应该是配置字段，而不是代码常量。" data-en="If two deployments may need different values, make it a config field rather than a code constant.">如果两个部署可能需要不同值，它就应该是配置字段，而不是代码常量。</p></div>
+        <div class="contrast-code"><div><span data-zh="不要硬编码" data-en="Do not hardcode">不要硬编码</span><code>const TIMEOUT = 30000</code></div><div><span data-zh="交给配置" data-en="Make it config">交给配置</span><code>timeoutMs: number</code></div></div>
+      </section>
+
+      <section id="hmr" class="tool-boundaries config-hmr">
+        <div class="tool-section-heading"><h2 data-zh="配置修改会热替换插件实例" data-en="A config edit hot-replaces the plugin instance">配置修改会热替换插件实例</h2><p data-zh="框架先卸载旧实例，再加载新实例。通过 ctx 注册的 effect 会自动清理，所以旧注册不会残留。" data-en="The framework unloads the old instance before loading the new one. Effects registered through ctx clean themselves up, so old registrations do not remain.">框架先卸载旧实例，再加载新实例。通过 ctx 注册的 effect 会自动清理，所以旧注册不会残留。</p></div>
+        <div class="hmr-sequence"><span data-zh="修改 config" data-en="Edit config">修改 config</span><i>→</i><span data-zh="卸载旧实例" data-en="Unload old instance">卸载旧实例</span><i>→</i><span data-zh="清理注册" data-en="Clean registrations">清理注册</span><i>→</i><span data-zh="加载新实例" data-en="Load new instance">加载新实例</span></div>
+      </section>
+
+      <section class="plugin-next">
+        <div><h2 data-zh="下一步，打包并安装插件" data-en="Next, package and install the plugin">下一步，打包并安装插件</h2></div>
+        <div class="next-links"><a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/basic/publish" target="_blank" rel="noreferrer"><strong data-zh="发布插件" data-en="Publish a plugin">发布插件</strong><span data-zh="构建可安装包 ↗" data-en="Build an installable package ↗">构建可安装包 ↗</span></a><a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/framework/" target="_blank" rel="noreferrer"><strong data-zh="插件生命周期" data-en="Plugin lifecycle">插件生命周期</strong><span data-zh="理解完整加载与卸载流程 ↗" data-en="Understand the full load and unload flow ↗">理解完整加载与卸载流程 ↗</span></a></div>
+      </section>
+    </main>
+
+    <footer class="sub-footer"><span>DSH 101 / Plugin configuration</span><span data-zh="非 DeepSeek 官方网站，差异已明确标注" data-en="Unofficial site. Source discrepancies are explicitly noted.">非 DeepSeek 官方网站，差异已明确标注</span></footer>
+    <script type="module" src="/plugin.js"></script>
+  </body>
+</html>

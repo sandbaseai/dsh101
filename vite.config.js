@@ -11,6 +11,7 @@ export default defineConfig({
         quickstart: resolve(import.meta.dirname, 'quickstart/index.html'),
         plugin: resolve(import.meta.dirname, 'plugin/index.html'),
         tool: resolve(import.meta.dirname, 'tool/index.html'),
+        config: resolve(import.meta.dirname, 'config/index.html'),
       },
     },
   },

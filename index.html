@@ -589,6 +589,15 @@ print(result.final_response)</code></pre>
         <p><code>update</code> 合并稀疏 patch；<code>replace</code> 整体替换并让缺失字段重新继承；持有脱敏视图的 UI 必须使用路径级 <code>mutate</code>，避免覆盖自己从未看到的 secret 字段。每次写入都带 revision，可拒绝过期页面的并发覆盖。</p>
         <div class="detail-card"><strong>生效时间是产品提示</strong><p><code>live</code> owner 观察变更并热应用；<code>restart</code> owner 只在构造时读取。外部编辑无效时，运行中的 namespace 保留最后一个已验证值。</p></div>
 
+        <h3 id="settings-safe-update">安全更新与并发收敛<a href="#settings-safe-update" class="anchor">#</a></h3>
+        <p><code>settings.describe</code> 返回 resolved、<code>base</code> 与 <code>user</code> 三层的脱敏快照、secret 槽位状态和原始用户分节的单调 <code>revision</code>。secret 值不搭乘任何响应，只能沿写入请求单向进入 Host。</p>
+        <div class="compare-grid">
+          <div><strong>改一个字段</strong><p>使用 <code>settings.mutate</code> 的路径级 <code>set</code> / <code>unset</code>，并附带最近的 <code>expectedRevision</code>。</p></div>
+          <div><strong>页面已经过期</strong><p>Host 返回 <code>settings-conflict</code> 和新旧 revision，不覆盖已经提交的写入；客户端重新读取后再让用户决策。</p></div>
+          <div><strong>外部或断线变更</strong><p>客户端在首次读取前先监听更新，并在 <code>settings/document-updated</code> 或连接重置后重新读取；迟到的旧响应不能覆盖较新的发布值。</p></div>
+        </div>
+        <div class="warning"><strong>不要用脱敏结果重建整个分节</strong><p>网络 descriptor 从未包含 secret 明文；据此调用 <code>replace</code> 会把不可见的 secret 当成缺失并删除。当前脱敏 walker 也不能证明所有 union、intersection 或 transform 内的 secret 都安全，因此暴露到协议的 namespace 只应使用可验证遍历的 schema。</p></div>
+
         <h2 id="credentials-system">凭据引用与热轮换<a href="#credentials-system" class="anchor">#</a></h2>
         <p>配置文件只保存形如环境变量名的 <code>CredentialRef</code>，明文由 Credentials provider 管理。LLM Adapter 在每次请求前重新解析引用，不跨操作缓存，因此轮换后的密钥会在下一次请求生效，无需重启。</p>
         <div class="compare-grid">

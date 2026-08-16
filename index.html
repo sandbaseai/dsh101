@@ -99,6 +99,7 @@
           <h2>进阶</h2>
           <a href="#plugins">第一个插件</a>
           <a href="#tools">开发 Tool</a>
+          <a href="#tool-schema-contract">Tool Schema 契约</a>
           <a href="#tool-execution-pipeline">Tool 执行流水线</a>
           <a href="#tool-output-contract">Tool 输出契约</a>
           <a href="#parallel-tools">并行 Tool 调度</a>
@@ -509,6 +510,16 @@ print(result.final_response)</code></pre>
           <div><span>02</span><strong>返回规范值</strong><p>execute 返回由 output schema 约束的数据。</p></div>
           <div><span>03</span><strong>渲染模型内容</strong><p>render 将规范值转换为模型真正看到的结果。</p></div>
         </div>
+
+        <h3 id="tool-schema-contract">一份声明同时约束类型与运行时<a href="#tool-schema-contract" class="anchor">#</a></h3>
+        <p>defineTool 用统一的值 Schema DSL 描述参数和规范输出，支持 JSON 标量、数组、对象、不受约束的 json，以及必须恰好命中一个分支的 oneOf。必填参数通过属性上的 required 标记声明。</p>
+        <div class="compare-grid">
+          <div><strong>参数根默认开放</strong><p>parameters 映射是隐式开放对象；原始 JSON Schema 对象也遵循开放默认值。只有显式对象把 additionalProperties 设为 false 时才拒绝未声明键，空的封闭对象只接受空对象。</p></div>
+          <div><strong>Default 只是一条注解</strong><p>系统不会替调用补默认值。缺少必填字段、类型不符、枚举无效与嵌套违规都会成为 INVALID_ARGS；工具正文或后置策略返回错误形状则成为 INVALID_TOOL_OUTPUT。</p></div>
+          <div><strong>类型深度不限制校验深度</strong><p>InferValue 在 16 层容器内保留精确 TypeScript 类型，之后回退为 JsonValue；编译和运行时验证使用显式工作栈，仍会遍历完整的有效深层 Schema。</p></div>
+        </div>
+        <div class="detail-card"><strong>oneOf 要求唯一匹配</strong><p>它至少包含两个分支，一个值必须恰好通过其中一个；同时匹配多个分支也算失败。enum 与 const 只能使用和节点类型一致的 JSON 标量。</p></div>
+        <div class="warning"><strong>不支持的关键字不会假装生效</strong><p>注册表先验证所支持的原始 JSON Schema 子集，并用带路径的错误拒绝未知或错误组合。通过原始 API 注册的工具仍需自行验证输入，但输出 Schema 始终由注册表强制执行。</p></div>
 
         <h3 id="tool-execution-pipeline">从调用记录到权威结果的执行流水线<a href="#tool-execution-pipeline" class="anchor">#</a></h3>
         <p>模型产生完整工具块后，Harness 先记录 tool/call，再把同一次调用依次交给可改写的前置流水线、不可放宽的单调 Guard、环绕执行器和后置流水线。工具正文只是其中一段，不拥有整条策略顺序。</p>

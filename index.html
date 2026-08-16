@@ -125,6 +125,7 @@
           <a href="#plan-mode">Plan Mode</a>
           <a href="#web-tools">Web 工具</a>
           <a href="#attachments">图片附件</a>
+          <a href="#deliverables">产出文件</a>
           <a href="#user-questions">向用户提问</a>
           <a href="#filesystem-seam">文件系统语义</a>
           <a href="#file-search">Glob 与 Grep</a>
@@ -728,6 +729,16 @@ print(result.final_response)</code></pre>
         <p>这些限制由 Host 的 <code>imageLimits</code> 投影发布，浏览器在加入草稿前先检查数量、单图与总字节并显示具体提示；Host 在提交时仍会重新验证真实格式和解码尺寸，因此客户端检查不是安全边界。</p>
         <div class="warning"><strong>历史图片读取仍会验证完整性</strong><p>本地对象存放在 <code>$DSH_HOME/attachments/v1</code> 的私有内容寻址目录。打开历史图片时会重新检查摘要、媒体签名、尺寸与引用元数据；失败会显示重试入口，而不是展示未经验证的字节。</p></div>
         <p>当前仅支持图片，没有普通文件卡片或上传进度。收紧部署限制不会让已经接纳的历史图片失效；附件对象可能被恢复后的会话和 Fork 共享，因此目前不会随单个会话删除而立即回收。</p>
+
+        <h2 id="deliverables">轮次产出文件与可点击引用<a href="#deliverables" class="anchor">#</a></h2>
+        <p>Web patch 中的 <code>ui-deliverables</code> 从成功修改工具提供的 <code>locations</code> 构建每轮产出文件清单，不依赖模型是否在最终回复中点名。读取、删除和失败调用不会贡献条目；同一路径按首次出现顺序去重，也不会溢出到下一轮。</p>
+        <div class="compare-grid">
+          <div><strong>轮次尾部文件行</strong><p>最终正文下方最多展示六个能放下的文件标签，并始终为“+ N 个文件”保留空间；相对路径按会话 cwd 解析。</p></div>
+          <div><strong>正文行内链接</strong><p>只匹配精确路径或本轮唯一的 basename。若两个产出共享文件名，就保持普通代码文本，不猜测目标。</p></div>
+          <div><strong>宿主原生打开</strong><p>文件标签复用 Host 打开器；“在文件夹中显示”仅在 loopback 页面且握手声明 <code>canOpenPath</code> 时出现。</p></div>
+        </div>
+        <p>插件还注册一段静态系统提示词，要求最终回复用 Markdown 行内代码引用主要变更文件。该提示只教授渲染器接受的语法，不会把未成功修改的任意路径加入可点击词表。</p>
+        <div class="warning"><strong>终端创建的文件不会自动成为 Deliverable</strong><p>产出识别依赖修改工具声明的渲染意图和位置元数据，而不是扫描工作区。单纯由 shell 命令间接生成的文件没有相应成功修改位置时，即使正文提到它也不会变成链接；远程 Web 和无桌面 Host 也不会显示原生文件夹操作。</p></div>
 
         <h2 id="user-questions">向用户提问<a href="#user-questions" class="anchor">#</a></h2>
         <p>当 Agent 缺少会实质改变结果的信息时，可以通过结构化问题暂停并等待人类回答。每个问题带稳定 id，可提供单选、多选、自由文本和补充说明；回答仍按 id 返回，避免批量提问时依赖位置。</p>

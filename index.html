@@ -86,6 +86,8 @@
           <a href="#events">事件系统</a>
           <a href="#lifecycle">插件生命周期</a>
           <a href="#client-modules">Web Client 模块</a>
+          <a href="#scope-routing">Scope 路由</a>
+          <a href="#web-server">Web Server</a>
           <a href="#capability-seam">能力三层拆分</a>
           <a href="#llm-adapter">LLM 适配器</a>
           <a href="#llm-streaming">流式协议与重试</a>
@@ -133,6 +135,7 @@
           <a href="#guardrails">工具 Guardrails</a>
           <a href="#background-jobs">后台任务</a>
           <a href="#session-history">会话检索与导出</a>
+          <a href="#session-reference">跨会话引用</a>
           <a href="#session-title">会话标题</a>
           <a href="#persistence">会话持久化</a>
           <a href="#session-projection">会话投影</a>
@@ -320,6 +323,24 @@ print(result.final_response)</code></pre>
           <div><span>03</span><strong>Activate</strong><p>immediately 只负责预取和登记，真正的激活顺序由 Fiber 依赖等待决定。</p></div>
         </div>
         <p>单个 bundle 的 rev 来自内容哈希，整图 rev 会随任一行变化。开发时 HMR 重新哈希并通过 SSE 广播；生产图不含 HMR。插件元数据会按包名缓存，因此插件集合变化需重启，单纯重建 bundle 则走 rebuilt 通知。</p>
+
+        <h2 id="scope-routing">Scope 路由与生命周期所有权<a href="#scope-routing" class="anchor">#</a></h2>
+        <p>Scope 用同一个注册上下文同时表达“哪个 Agent 能看见这项贡献”和“谁负责在生命周期结束时拆除它”。不透明的 ScopeKey 只按对象身份比较；事件使用路由载体过滤，但真实业务对象仍作为显式参数传递。</p>
+        <div class="compare-grid">
+          <div><strong>Global layer</strong><p>立即存在，保存所有 Agent 都可见的具名与匿名注册项。</p></div>
+          <div><strong>Scoped layer</strong><p>按需创建，近层同名条目遮蔽全局项；读取本身不会意外创建状态。</p></div>
+          <div><strong>Quiescent dispose</strong><p>并发 dispose 会等待同一个完全停稳边界，精确撤销该 Scope 拥有的贡献。</p></div>
+        </div>
+        <p>同一层的具名条目保持插入顺序；匿名条目即使值相等也拥有独立身份。只有整个作用域层的所有 table 都为空时才回收它，避免删除一个注册表时误伤兄弟表。</p>
+
+        <h2 id="web-server">Web Server 的路由与暴露边界<a href="#web-server" class="anchor">#</a></h2>
+        <p>GUI 的 HTTP Server 只是浏览器载体，不理解 Agent loop。请求先匹配 exact 路由，再匹配最长 prefix，最后交给唯一 fallback；重复路由或第二个 fallback 会在组装时直接报错。</p>
+        <div class="permission-table">
+          <div><code>127.0.0.1</code><strong>默认回环</strong><span>只供本机浏览器访问，是默认监听姿态。</span></div>
+          <div><code>0.0.0.0</code><strong>显式网络暴露</strong><span>服务本身没有 TLS、认证或 Origin 策略，会暴露给所在网络。</span></div>
+          <div><code>port: 0</code><strong>系统分配端口</strong><span>操作系统选择空闲端口，服务公开最终监听值。</span></div>
+        </div>
+        <p>静态 SPA fallback 对路径穿越返回 403、非 GET/HEAD 返回 405，未知扩展资源不会伪装成 JavaScript。关闭时同时停止监听并强制关闭 SSE 等长连接，避免插件卸载永久挂起。</p>
 
         <h2 id="capability-seam">能力的三种角色<a href="#capability-seam" class="anchor">#</a></h2>
         <p>当能力需要可替换提供方时，Harness 将它拆成三个角色。只有完整组合才构成一个 capability seam；单独一个角色并不完整。</p>
@@ -641,6 +662,17 @@ print(result.final_response)</code></pre>
         </div>
         <p>跨会话访问要求目标与调用方的 <code>cwd</code> 严格相同；当前会话的搜索会截止到调用步骤之前，避免工具匹配自身。搜索文本按字面量、不区分大小写并灵活匹配空白，过滤条件之间为 AND，同一列表内为 OR。</p>
         <div class="detail-card"><strong>导出完整审计材料</strong><p>Web UI 的 Session log 按钮或 <code>/export</code> 会下载包含根会话、子会话和附件的流式 ZIP。命令只在用户命令平面执行，不创建模型轮次，也不消耗模型 token；下载位置由浏览器决定。</p></div>
+
+        <h2 id="session-reference">结构化跨会话引用<a href="#session-reference" class="anchor">#</a></h2>
+        <p>宿主可以把选中的历史 Session 作为结构化引用附在新消息上，而不是把 UI 的 @mention 语法传入核心。Session id 是权威身份，label 只是快照显示信息；候选项使用最新持久标题，并按当前工作目录亲和度排序。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Discover</strong><p>只搜索 session id、cwd 与标题，不扫描 transcript 正文。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Snapshot</strong><p>入队前读取所有引用并施加数量与字节预算，拒绝自引用。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Attach</strong><p>移除宿主 mention token，保留可读消息，并追加一个不可信聚合上下文。</p></div>
+        </div>
+        <p>错误通过稳定 code 区分无效引用、源读取失败、预算超限和取消。准备结果是不可变快照：源 Session 后续变化不会悄悄改写已经排队的目标消息。</p>
 
         <h2 id="session-title">会话标题的生成与固定<a href="#session-title" class="anchor">#</a></h2>
         <p>标题是后写覆盖的持久日志状态。内置 fallback 或可选 Provider 会根据合格的人类文本消息生成标题，并记录精确的来源消息 seq；用户手动重命名后，标题会被固定，后续自动生成停止调度。</p>

@@ -25,6 +25,8 @@ Last upstream review:
 | Bundles and publishing | `docs/user/develop/basic/publish.zh.md` |
 | Fiber lifecycle | `docs/user/develop/framework/index.zh.md` |
 | Web client module graph and bundle delivery | `docs/subsystems/client-modules.zh.md` |
+| Scoped registration layers and ownership | `docs/subsystems/scope.zh.md` |
+| Web server routing and exposure boundary | `docs/subsystems/web-server.zh.md` |
 | Services and dependency injection | `docs/user/develop/framework/service.zh.md` |
 | Event dispatch modes | `docs/user/develop/framework/events.zh.md` |
 | Capability role design | `docs/user/develop/practice/index.zh.md` |
@@ -49,6 +51,7 @@ Last upstream review:
 | Tool reliability guardrails | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
 | Background job runtime | `docs/subsystems/jobs.zh.md` |
 | Session search and log export | `docs/subsystems/session-query.zh.md`, `packages/session-query/tool-session-query/README.zh.md`, `packages/session-query/session-log-export/README.zh.md` |
+| Structured cross-session references | `docs/subsystems/session-reference.zh.md` |
 | Durable session titles | `docs/subsystems/session-title.zh.md` |
 | Session persistence and crash recovery | `docs/subsystems/persistence.zh.md`, `packages/session/session-checkpoint-policy/README.zh.md` |
 | Session projections and cold-read cache | `docs/subsystems/session-projection.zh.md` |

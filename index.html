@@ -190,6 +190,7 @@
         <section>
           <h2>持续执行</h2>
           <a href="#subagents">Subagents</a>
+          <a href="#external-subagent-providers">进程外 Provider</a>
           <a href="#subagent-activation">Subagent Activation</a>
           <a href="#subagent-report">Subagent 报告通道</a>
           <a href="#subagent-discovery">Subagent 目录发现</a>
@@ -1413,6 +1414,22 @@ print(result.final_response)</code></pre>
           <div><span>Continuable</span><strong>可继续子级</strong><p>拥有持久 Session，可接收后续消息并在需要时冷恢复。</p></div>
         </div>
         <p>同级委派可以并发执行，结果仍按模型调用顺序提交。子级继承父级显式沙箱覆盖，但审批策略固定为 <code>never</code>，避免无人处理的提权请求。</p>
+
+        <h3 id="external-subagent-providers">进程外 Subagent Provider 如何选择<a href="#external-subagent-providers" class="anchor">#</a></h3>
+        <p>ACP、DSH SDK、Codex 与 Claude Code Provider 都为每次运行创建隔离的子进程活动。它们只接收独立任务和父会话的绝对 cwd，不继承父对话；也不声明 persona、tool filter、depth limit 或 output schema 等启动期能力，要求这些能力的请求会被本地 seam 明确拒绝。</p>
+        <div class="permission-table">
+          <div><code>ACP</code><strong>跨产品互操作</strong><span>驱动任意兼容 ACP Agent，收集已提交 agent_message_chunk；权限按配置自动允许或拒绝，并映射协议 stop reason。</span></div>
+          <div><code>DSH SDK</code><strong>完整 Harness 子运行时</strong><span>启动由 cordis.yml 组合的对等 Harness，从 Session 事件选择最终文本，并用最后一个持久 turn/end 映射结果。</span></div>
+          <div><code>Codex</code><strong>临时线程与单轮</strong><span>通过 app-server 等待 turn/completed，只接受 final_answer 或兼容回退文本；无人值守审批默认不予批准。</span></div>
+          <div><code>Claude Code</code><strong>一次性 SDK Query</strong><span>只接受正常结束且非错误的 success result；读取 cwd 下的原生用户、项目和本地设置，交互请求不会转交 Harness UI。</span></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>发布前必须完成握手</strong><p>Provider 只有在子进程、协议初始化和远端会话或线程就绪后才交出 Run。此前失败或取消会先回收全部已取得的资源，再拒绝 start。</p></div>
+          <div><strong>父级只得到最终投影</strong><p>推理、工具活动、中间消息、stderr、用量和工作区差异不会复制进父 Session。DSH 子运行时的完整 transcript 也只留在自己的持久化根。</p></div>
+          <div><strong>清理与结果彼此独立</strong><p>dispose 幂等地发出协议取消或关闭，再通过 EOF、平台终止和强杀等待整棵进程树退出；结果失败与清理失败分别报告。</p></div>
+        </div>
+        <div class="detail-card"><strong>凭据必须显式跨进程</strong><p>子环境先清除疑似凭据和继承的 DSH_* 名称，再合并 Provider 的 env。Codex 与 Claude Code 仍使用宿主安装、账户和原生设置；插件不会安装 CLI、登录、选择模型或隔离这些设置。</p></div>
+        <div class="warning"><strong>取消不回滚已经发生的副作用</strong><p>每次运行都可能在共享 cwd 修改文件或访问外部系统。取消只争取成为结果竞态的 aborted 并确保进程停止，不会撤销已经完成的写入；这些 Provider 也没有内建墙钟超时或进程池。</p></div>
 
         <h3 id="subagent-activation">可继续 Subagent 的 Activation 生命周期<a href="#subagent-activation" class="anchor">#</a></h3>
         <p>可继续子级的持久 Session 是身份与历史；Activation 则是该 Session 当前驻留在进程内的一段运行期。同一 Session 至多有一个 Activation，但它可以执行多个 FIFO 轮次，并在自己的后代仍运行时继续驻留。</p>

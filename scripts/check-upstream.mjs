@@ -50,7 +50,7 @@ const changed = execFileSync('git', [
   'docs/subsystems/workflow.zh.md',
   'packages/settings', 'packages/credentials', 'packages/preset',
   'docs/subsystems/settings.zh.md', 'docs/subsystems/credentials.zh.md',
-  'docs/subsystems/system-prompt.zh.md',
+  'docs/subsystems/system-prompt.zh.md', 'packages/context/agent-instructions',
   'docs/subsystems/approval.zh.md', 'packages/interaction/user-approval',
   'docs/subsystems/session-title.zh.md', 'packages/session/session-title',
   'docs/subsystems/session-projection.zh.md', 'packages/session/session-projection',

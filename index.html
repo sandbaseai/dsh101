@@ -114,6 +114,7 @@
           <a href="#credentials-system">凭据引用</a>
           <a href="#agent-presets">Agent Presets</a>
           <a href="#prompt-assembly">Persona 与提示词</a>
+          <a href="#workspace-instructions">工作区指令</a>
         </section>
         <section>
           <h2>Agent 工作流</h2>
@@ -626,6 +627,18 @@ print(result.final_response)</code></pre>
           <div><code>100–199</code><strong>Tool guidance</strong><span>由工具插件携带的使用策略。</span></div>
         </div>
         <p>Persona 的 <code>complete: true</code> 会让该段成为唯一系统提示词，但工具与上下文仍先完成解析。<code>includeRuntimeContext: false</code> 只抑制模型看到的动态快照，不会关闭沙箱、审批等实际服务。</p>
+
+        <h2 id="workspace-instructions">工作区指令的持久加载<a href="#workspace-instructions" class="anchor">#</a></h2>
+        <p><code>agent-instructions</code> 在首次模型步骤前读取 <code>$DSH_HOME/AGENTS.md</code>，再从项目根目录走到当前工作目录，逐层加载 <code>AGENTS.md</code>、<code>CLAUDE.md</code> 及其本地 overlay。越具体的目录优先级越高；同目录内容完全相同的候选文件只注入一次。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>建立基线</strong><p>指令作为带来源的持久 user message 进入第一步，与直接提示词一起抵达首次请求。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>发现深层规则</strong><p>成功的第一方 read、write 或 edit 到达新目录后，追加适用于该 scope 的指令。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>对账变化</strong><p>编辑产生替换消息，删除产生 tombstone；恢复和压缩后依靠持久来源重新收敛。</p></div>
+        </div>
+        <p><code>maxBytes</code> 为整个渲染设置硬预算，优先保留最具体的文件：先省略较宽泛来源，再截断最具体来源，并向模型报告省略或截断路径。单文件读取还受 <code>maxSourceBytes</code> 限制。</p>
+        <div class="warning"><strong>发现由结构化文件操作驱动</strong><p>插件没有文件 watcher，也不会解析任意 shell 语法；<code>bash</code> 中的 <code>cd</code> 不会发现嵌套指令。外部改动会在下一次成功的第一方文件操作、会话恢复对账或压缩后重建基线时变得可见。候选文件末段 symlink 会被跟随，因此不受信任仓库仍需文件系统策略或 OS 沙箱约束。</p></div>
 
         <div class="chapter-break"><span>05</span><div><small>Agent 工作流</small><strong>连接外部能力</strong></div></div>
 

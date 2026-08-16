@@ -18,11 +18,11 @@ npx wrangler pages project create dsh101 --production-branch=main
 
 ### 2. 创建 API Token
 
-在 Cloudflare 创建一个受限 API Token，只授予目标账号的 **Cloudflare Pages: Edit** 权限。不要把 Token 写入源码或 workflow。
+在 Cloudflare 创建一个受限 API Token，授予目标账号的 **Cloudflare Pages: Edit**，并为 `dsh101.com` Zone 授予 **Zone: Read** 与 **DNS: Edit**。不要把 Token 写入源码或 workflow。
 
 当前 workflow 使用的 Cloudflare Account ID 是 `244d49f84a987ecfa2cf9480ed9d8628`。Account ID 是账号标识，不是凭据，因此可以保存在 workflow 中。
 
-正式域名使用独立域名 `dsh101.com`。部署 workflow 会把该域名关联到 Pages 项目；域名必须位于同一 Cloudflare 账号并使用 Cloudflare nameserver，Cloudflare 才能完成 apex DNS 与证书验证。
+正式域名使用独立域名 `dsh101.com`。部署 workflow 会把该域名关联到 Pages 项目，并在同名记录不存在时创建指向 `dsh101-50l.pages.dev` 的 apex CNAME；若已有记录指向其他目标则拒绝覆盖。域名必须位于同一 Cloudflare 账号并使用 Cloudflare nameserver，Cloudflare 才能完成 CNAME flattening 与证书验证。
 
 ### 3. 添加 GitHub Secret
 

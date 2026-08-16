@@ -43,6 +43,7 @@ Last upstream review:
 | Bundles and publishing | `docs/user/develop/basic/publish.zh.md` |
 | Fiber lifecycle | `docs/user/develop/framework/index.zh.md` |
 | Cordis Context scoping, Registry dependency scheduling, Fiber ownership, strict service resolution, reversible effects, and generated core API reference | `docs/cordis-primer.zh.md`, `docs/cordis-api/context.zh.md`, `docs/cordis-api/fiber.zh.md`, `docs/cordis-api/registry.zh.md`, `scripts/gen-cordis-catalog.ts` |
+| Contributor delivery checklist for workspace packages, Tools, LLM adapters, Conversation Nodes, package manifests, project references, Model Experience docs, composition coverage, and repository gates | `docs/cookbook/adding-a-package.zh.md`, `docs/cookbook/adding-a-tool.zh.md`, `docs/cookbook/adding-an-llm-adapter.zh.md`, `docs/cookbook/adding-a-conversation-node.zh.md`, `docs/testing.zh.md`, `docs/development.zh.md` |
 | Web client module graph and bundle delivery | `docs/subsystems/client-modules.zh.md` |
 | Browser UI slot declarations, chain selection, stores, and recursive lifecycle cleanup | `packages/client/ui-slots/README.zh.md` |
 | Slot declaration injection, epoch-bound effects, transactional registration, and teardown | `packages/client/runtime/README.zh.md` |

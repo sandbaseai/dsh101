@@ -142,6 +142,7 @@
           <a href="#code-runtime">Code Runtime</a>
           <a href="#code-mode-entry">Code Mode 入口边界</a>
           <a href="#profiles">Profile 与组合包</a>
+          <a href="#contributor-delivery">贡献者交付清单</a>
         </section>
         <section>
           <h2>Agent 配置</h2>
@@ -1158,6 +1159,31 @@ print(result.final_response)</code></pre>
           <div><strong>失败仍保活</strong><p>失败候选不会覆盖最后一个可用树；服务记录错误并广播 <code>hmr/config-update-failed(filename, Error)</code>。</p></div>
         </div>
         <div class="warning"><strong>Patch 不是深合并</strong><p>按 id 命中的 patch 会替换整个 <code>config</code>，需要重述所有保留字段；找不到 id 会写入 stderr。空文件或纯注释不是“禁用”，请写成 <code>[]</code>。<code>--patch</code> 是临时最高层，不要把它当作这两个持久用户文件。</p></div>
+
+        <h2 id="contributor-delivery">从新包到产品能力的交付清单<a href="#contributor-delivery" class="anchor">#</a></h2>
+        <p>在 DeepSeek Harness 中，新建 workspace 包、注册一个服务或写出单元测试都不等于能力已经交付。贡献需要同时穿过包契约、运行时契约、模型或界面契约和真实组合证据；任何一层缺失，都可能出现“源码存在、CI 局部绿色、用户路径却不可达”。</p>
+        <div class="capability-flow four-step">
+          <div><span>01</span><strong>Package</strong><p>建立 manifest、Project Reference、公开入口和包 README，让构建、类型与发布工具认识它。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Runtime</strong><p>声明 name、inject、Config 与 apply，并在真正使用的 bundle、profile 或 cordis.yml 中显式装配。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Surface</strong><p>证明工具 Schema、模型流、持久事件或 Client bundle 确实进入对应的产品表层。</p></div>
+          <i>→</i>
+          <div><span>04</span><strong>Evidence</strong><p>从已发布入口或 Loader 组合运行无密钥场景，断言请求、日志、持久状态或用户可见输出。</p></div>
+        </div>
+        <div class="permission-table">
+          <div><code>package.json</code><strong>发布形状必须一致</strong><span>版本、ESM 入口、types、exports 与 files 受 constraints 约束；Cordis 和每个 DSH peer dependency 必须在 devDependencies 中使用同一范围镜像。</span></div>
+          <div><code>tsconfig</code><strong>只加入一个构建面</strong><span>普通包恰好加入 Host 或 Client aggregate 的 Project References；Client 插件还要声明 dsh.client、导出 client 入口并使用共享 browser 构建 preset。</span></div>
+          <div><code>README</code><strong>记录模型体验与限制</strong><span>公开 API、事件和扩展点之外，还要说明模型看到什么、token 影响、KV Cache 影响，以及持久的消费方缺口。</span></div>
+          <div><code>composition</code><strong>发现不等于启用</strong><span>workspace、构建和 lint 可由 glob 自动发现新包，但产品运行树仍需要配置行或组合入口；不要把包可导入误当成用户可调用。</span></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>新增 Tool</strong><p>返回由 output.schema 声明的规范 JSON 值，把自然语言放进 render；遵守 exec.signal，并让工具在 Code Mode 中通过同一 Schema 自动获得类型化绑定。</p></div>
+          <div><strong>新增 LLM Adapter</strong><p>保持 block index 与 start/end 配对，usage 位于最后的 finish 之前；不支持的请求字段必须抛出 UNSUPPORTED，不能静默忽略。</p></div>
+          <div><strong>新增 Web 节点</strong><p>用稳定业务 id 把持久事件折叠为增量 State；append 热路径只匹配当前事件，分页、回放和渲染必须保持相同节点身份。</p></div>
+        </div>
+        <div class="detail-card"><strong>门禁按变更表面分层运行</strong><p>新包先注册 workspace 依赖，再运行 doc-sync、constraints、typecheck、lint、build 与 hygiene；行为测试遵循所属包政策。面向模型、协议或 UI 的非平凡变化，还要在同一变更中加入对应无密钥快照或真实组合场景。</p></div>
+        <div class="warning"><strong>手工 ctx.plugin 测试不能证明交付入口</strong><p>它可能主动补回真实模块导出丢失的 name、inject 或 Config，也可能在平铺 Context 中绕过作用域问题。产品可见插件至少需要一个通过 Loader 和应用或进程启动的非单元测试，并在需要时从构建后的 lib 入口运行。</p></div>
 
         <div class="chapter-break"><span>04</span><div><small>Agent 配置</small><strong>设置、凭据与组装</strong></div></div>
 

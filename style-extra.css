@@ -16,6 +16,7 @@
 .event-grid code { grid-row: span 2; align-self: start; }
 .event-grid p { margin: 3px 0 0; font-size: 12px; line-height: 1.5; }
 .capability-flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 9px; margin: 24px 0; }
+.capability-flow.four-step { grid-template-columns: repeat(3, minmax(0, 1fr) auto) minmax(0, 1fr); }
 .capability-flow > div { min-height: 140px; padding: 16px; border: 1px solid var(--border); border-radius: 9px; background: var(--soft); }
 .capability-flow span { display: block; margin-bottom: 12px; color: var(--blue); font-size: 11px; font-weight: 700; }
 .capability-flow p { margin: 7px 0 0; font-size: 12px; line-height: 1.5; }
@@ -85,6 +86,7 @@
   .error-table > div { grid-template-columns: 1fr; gap: 6px; }
   .event-grid { grid-template-columns: 1fr; }
   .capability-flow { grid-template-columns: 1fr; }
+  .capability-flow.four-step { grid-template-columns: 1fr; }
   .capability-flow > i { transform: rotate(90deg); text-align: center; }
   .stream-flow { justify-content: flex-start; }
   .skill-pipeline, .plan-flow { grid-template-columns: 1fr; }

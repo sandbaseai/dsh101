@@ -173,6 +173,7 @@
           <a href="#todo-dock">Todo 计划条</a>
           <a href="#goals">持久 Goal</a>
           <a href="#compaction">上下文压缩</a>
+          <a href="#compaction-checkpoint">压缩检查点 UI</a>
           <a href="#guardrails">工具 Guardrails</a>
           <a href="#background-jobs">后台任务</a>
           <a href="#session-history">会话检索与导出</a>
@@ -1191,6 +1192,16 @@ print(result.final_response)</code></pre>
           <i>+</i><div class="recent"><span>recent turns</span><span>current work</span></div>
         </div>
         <p>超大工具结果可先经过不依赖模型的剪枝；若压力仍高，再调用摘要模型。摘要只保存文本，不保留私有推理或遗留工具调用。压缩会替换历史，因此会移动 KV Cache 的可复用边界。</p>
+
+        <h3 id="compaction-checkpoint">Chat 中的压缩检查点<a href="#compaction-checkpoint" class="anchor">#</a></h3>
+        <p>浏览器在检查点自己的日志位置渲染一行折叠标记，不会用它替换上方已经加载的 transcript。自动压缩显示“上下文已压缩”；若对应 compaction/summary 事件位于当前窗口，完成行会显示被替换条目数和估算 token，并允许展开摘要。</p>
+        <div class="compare-grid">
+          <div><strong>手动命令保持身份</strong><p>/compact 开始时先显示运行中的 compact 行；成功后，显式摘要引用把它折叠进检查点，同时保持同一个 React key，避免结算时闪烁换行。</p></div>
+          <div><strong>配对不依赖相邻位置</strong><p>压缩运行期间可能插入持久上下文，因此命令、检查点与摘要通过显式引用关联，而不是假设它们在日志里相邻。</p></div>
+          <div><strong>窗口缺页仍保留标记</strong><p>被引用的 summary 尚未加载时，检查点仍可见但不可展开；历史分页补齐来源后，界面才能展示摘要内容。</p></div>
+        </div>
+        <p>完成且静止时保留上下文压缩图标，只有悬浮或键盘聚焦才切换为展开/收起指示。输入被拒绝、没有可压缩历史、取消或失败时继续使用通用命令行及处理器文案，不伪装成成功检查点。</p>
+        <div class="warning"><strong>模型载荷不会重复出现在 Chat</strong><p>面向模型的带框检查点内容永不直接渲染；用户看到的是可解释的标记和可选摘要，而不是同一压缩正文的第二份消息。</p></div>
 
         <h2 id="guardrails">工具 Guardrails<a href="#guardrails" class="anchor">#</a></h2>
         <p>Guard 插件通过 <code>tools/execute</code> 流水线增加可靠性策略，不改变具体 Tool 的实现。当前常见的两类保护是协作式超时与重复调用提醒。</p>

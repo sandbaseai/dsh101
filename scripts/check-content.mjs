@@ -44,6 +44,7 @@ requiredSections.push('mcp-transport')
 requiredSections.push('locale-runtime', 'bilingual-docs')
 requiredSections.push('defensive-patterns')
 requiredSections.push('config-catalog')
+requiredSections.push('tool-catalog')
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)

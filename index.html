@@ -103,6 +103,7 @@
           <a href="#plugins">第一个插件</a>
           <a href="#tools">开发 Tool</a>
           <a href="#tool-schema-contract">Tool Schema 契约</a>
+          <a href="#tool-catalog">工具 Schema 目录</a>
           <a href="#tool-execution-pipeline">Tool 执行流水线</a>
           <a href="#tool-output-contract">Tool 输出契约</a>
           <a href="#parallel-tools">并行 Tool 调度</a>
@@ -585,6 +586,20 @@ print(result.final_response)</code></pre>
         </div>
         <div class="detail-card"><strong>oneOf 要求唯一匹配</strong><p>它至少包含两个分支，一个值必须恰好通过其中一个；同时匹配多个分支也算失败。enum 与 const 只能使用和节点类型一致的 JSON 标量。</p></div>
         <div class="warning"><strong>不支持的关键字不会假装生效</strong><p>注册表先验证所支持的原始 JSON Schema 子集，并用带路径的错误拒绝未知或错误组合。通过原始 API 注册的工具仍需自行验证输入，但输出 Schema 始终由注册表强制执行。</p></div>
+
+        <h3 id="tool-catalog">为什么工具 Schema 目录必须启动真实插件<a href="#tool-catalog" class="anchor">#</a></h3>
+        <p>上游 <code>docs/tool-catalog.md</code> 汇总随产品发布的模型可见工具：系统提示词最终提供的 <code>name</code>、<code>description</code> 与 JSON Schema <code>parameters</code>。它描述模型的输入契约，不替代执行局部的规范输出 Schema。</p>
+        <div class="compare-grid">
+          <div><strong>Boot, not AST</strong><p>生成器在隔离的真实 Context 中启动每个工具插件，再读取 ctx.tools.schemas；运行时枚举、拼接描述、配置名称和原始 MCP Schema 都无法仅靠源码静态推断。</p></div>
+          <div><strong>Completeness guard</strong><p>磁盘上的 packages/*/tool-* 必须全部出现在启动 manifest 中；任何包遗漏，或启动后一个工具都没有注册，都会让生成检查失败。</p></div>
+          <div><strong>Fresh snapshot</strong><p>verify-tool-catalog 重新采集并比较已提交英文页；中文页继续作为经评审的双语对侧维护。</p></div>
+        </div>
+        <div class="permission-table">
+          <div><code>default</code><strong>默认配置快照</strong><span>每个包通常按默认配置启动；必填但无默认值的分支由生成器明确选择并在包说明中披露。</span></div>
+          <div><code>name</code><strong>部署可以改名或增名</strong><span>工具名称可能由加载配置决定，随产品发布的别名会单独记录，因此目录不是任意部署的实时 inventory。</span></div>
+          <div><code>scope</code><strong>只含发布产品工具</strong><span>范围是 packages 下的 tool-* 包；examples 中的 echo 等演示工具明确排除。</span></div>
+        </div>
+        <div class="detail-card"><strong>先看映射，再看精确 Schema</strong><p>顶部映射把工具名称连接到插件包、依赖服务、写入／影响、发布别名和部署说明；各包章节随后给出模型实际接收的 JSON 参数 Schema 与源码位置。</p></div>
 
         <h3 id="tool-execution-pipeline">从调用记录到权威结果的执行流水线<a href="#tool-execution-pipeline" class="anchor">#</a></h3>
         <p>模型产生完整工具块后，Harness 先记录 tool/call，再把同一次调用依次交给可改写的前置流水线、不可放宽的单调 Guard、环绕执行器和后置流水线。工具正文只是其中一段，不拥有整条策略顺序。</p>

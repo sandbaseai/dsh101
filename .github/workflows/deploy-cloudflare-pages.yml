@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 244d49f84a987ecfa2cf9480ed9d8628
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -37,12 +38,37 @@ jobs:
       - name: Build static site
         run: npm run build
 
+      - name: Ensure Cloudflare Pages project exists
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        shell: bash
+        run: |
+          project_url="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/dsh101"
+          status="$(curl --silent --show-error --output /tmp/dsh101-project.json --write-out '%{http_code}' \
+            --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            "${project_url}")"
+
+          if [[ "${status}" == "200" ]]; then
+            echo "Cloudflare Pages project dsh101 already exists."
+          elif jq --exit-status '.errors[]? | select(.code == 8000007)' /tmp/dsh101-project.json >/dev/null; then
+            curl --fail-with-body --silent --show-error \
+              --request POST \
+              --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              --header 'Content-Type: application/json' \
+              --data '{"name":"dsh101","production_branch":"main"}' \
+              "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects" \
+              | jq --exit-status '.success == true' >/dev/null
+            echo "Created Cloudflare Pages project dsh101."
+          else
+            jq '{success, errors, messages}' /tmp/dsh101-project.json
+            exit 1
+          fi
+
       - name: Deploy to Cloudflare Pages
         if: env.CLOUDFLARE_API_TOKEN != ''
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: 244d49f84a987ecfa2cf9480ed9d8628
+          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy dist --project-name=dsh101 --branch=main
 
       - name: Report missing Cloudflare credentials

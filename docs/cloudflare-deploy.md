@@ -4,17 +4,17 @@
 
 ## 一次性配置
 
-### 1. 创建 Pages 项目
+### 1. Pages 项目
 
-先在目标 Cloudflare 账号下创建一个名为 `dsh101` 的 Direct Upload 项目，并将生产分支设为 `main`。
+首次携带有效 Token 运行时，部署 workflow 会查询目标账号；如果 Cloudflare 返回项目不存在，它会自动创建名为 `dsh101`、生产分支为 `main` 的 Direct Upload 项目。后续部署复用同一项目。
 
-可以在 Cloudflare Dashboard 的 **Workers & Pages** 中创建，也可以在已完成 Wrangler 登录的终端运行：
+也可以提前在 Cloudflare Dashboard 的 **Workers & Pages** 中创建，或在已完成 Wrangler 登录的终端运行：
 
 ```bash
 npx wrangler pages project create dsh101 --production-branch=main
 ```
 
-项目名需要与 [部署 workflow](../.github/workflows/deploy-cloudflare-pages.yml) 中的 `--project-name=dsh101` 保持一致。
+自动创建、手动创建和部署使用的项目名都必须与 [部署 workflow](../.github/workflows/deploy-cloudflare-pages.yml) 中的 `--project-name=dsh101` 保持一致。
 
 ### 2. 创建 API Token
 

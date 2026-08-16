@@ -178,6 +178,7 @@
           <a href="#persistence">会话持久化</a>
           <a href="#session-projection">会话投影</a>
           <a href="#chat-assembly">Chat 增量组装</a>
+          <a href="#chat-scroll-shell">Chat 滚动壳</a>
           <a href="#storage-domains">领域存储</a>
           <a href="#spill-output">大结果 Spill</a>
         </section>
@@ -1242,6 +1243,15 @@ print(result.final_response)</code></pre>
         </div>
         <p>Assistant 的每个流式 chunk 都会更新 Definition State，但物化请求最多每个 animation frame 一次；final message 与 Turn/Step 关闭则立即发布。prepend 只增加行，不替换已经存在的 keyed 节点。</p>
         <div class="warning"><strong>业务节点不能扫描 Chat 集合</strong><p>Definition 只根据当前事件匹配稳定业务 id，并保证 update 可按日志 seq 回放；renderer 只消费最终 Node data 与受限 Location。否则分页和 HMR 会产生与加载顺序相关的结果。</p></div>
+
+        <h3 id="chat-scroll-shell">Chat 滚动壳与编辑器几何<a href="#chat-scroll-shell" class="anchor">#</a></h3>
+        <p>无会话、空白会话和活跃会话复用同一个根滚动容器、Hero 与编辑器子树；会话出现时，标题栏和主体只填入各自 outlet，不会替换 textarea 或编辑器 seat。Workspace 切换因此能保留草稿、焦点相关状态与 DOM identity。</p>
+        <div class="compare-grid">
+          <div><strong>滚动条槽始终预留</strong><p><code>data-conversation-scroll</code> 无条件保留自己的 scrollbar gutter。无论记录是否足够长、当前切到 Chat 还是 overlay 视图，输入卡片都不会横向跳动。</p></div>
+          <div><strong>编辑器栈属于同一宿主</strong><p>统计 dock、输入 dock 与输入栏组成 sticky 栈，和流动排版的会话视图共用滚动容器；切换视图不会换掉一棵平行的 composer 树。</p></div>
+          <div><strong>草稿滚轮在边缘接力</strong><p>限高 textarea 有可滚内容时先在自身滚动；到达顶部或底部后，滚轮再交给会话宿主，避免长草稿把整页滚动永久截断。</p></div>
+        </div>
+        <div class="warning"><strong>不要把预留入口当成分页功能</strong><p>Assembler 已支持向前 prepend 历史并保留节点身份，但普通 Chat 的 assistant 逐消息分页目前仍只是设计 slot，尚未实现。现有 IconActions 只出现在已结束轮次最后一条有文本的 Assistant 消息下。</p></div>
 
         <h2 id="storage-domains">非会话数据的领域存储<a href="#storage-domains" class="anchor">#</a></h2>
         <p>设置、索引等不属于对话事件日志的数据进入 Storage subsystem。枢纽只负责注册后端和挂载数据形式，不执行 IO；领域层声明名称、格式版本、global slot、表和 zod schema，再按部署路由到 JSON 或 SQLite 后端。</p>

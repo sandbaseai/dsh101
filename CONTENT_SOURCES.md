@@ -90,6 +90,7 @@ Last upstream review:
 | Session persistence and crash recovery | `docs/subsystems/persistence.zh.md`, `packages/session/session-checkpoint-policy/README.zh.md` |
 | Session projections and cold-read cache | `docs/subsystems/session-projection.zh.md` |
 | Browser ConversationNode incremental assembly, prepend identity, gap repair, and frame-coalesced streaming | `packages/client/runtime/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
+| Persistent Chat scroll shell, reserved gutter, sticky composer geometry, textarea wheel chaining, and deferred per-message pagination | `packages/client/ui-conversation/README.zh.md` |
 | Domain storage | `docs/subsystems/storage.zh.md` |
 | Atomic Settings/Credentials replacement, cross-process locks, and durability limits | `packages/util/atomic-write/README.zh.md`, `packages/settings/settings-file/README.zh.md`, `packages/credentials/credentials-local/README.zh.md`, `packages/storage/storage-json/README.zh.md` |
 | Oversized tool result spill | `docs/subsystems/spill.zh.md` |

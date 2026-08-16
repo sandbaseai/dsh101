@@ -195,6 +195,7 @@
           <a href="#message-actions">消息操作边界</a>
           <a href="#archive-convergence">归档跨标签页收敛</a>
           <a href="#persistence">会话持久化</a>
+          <a href="#checkpoint-policy">持久性检查点</a>
           <a href="#session-projection">会话投影</a>
           <a href="#chat-assembly">Chat 增量组装</a>
           <a href="#chat-scroll-shell">Chat 滚动壳</a>
@@ -1426,6 +1427,16 @@ print(result.final_response)</code></pre>
         </div>
         <div class="warning"><strong>持久化意图不等于恰好一次</strong><p>工具调用可能已经产生外部副作用、但结果尚未落盘。恢复时 Harness 会写入 <code>TOOL_OUTCOME_UNKNOWN</code>，要求先验证状态；有副作用的 Provider 应尽量把 call id 用作幂等键。</p></div>
         <p>JSONL 后端为每个会话维护可选 Zstandard 压缩的追加日志；SQLite 后端则把每个事件存成一行。格式版本过新、过旧或遇到未知的必需事件时会明确拒绝恢复，而不是静默丢失语义。</p>
+
+        <h3 id="checkpoint-policy">副作用之前的持久性检查点<a href="#checkpoint-policy" class="anchor">#</a></h3>
+        <p>持久化后端负责有界后台批处理，Checkpoint Policy 则独立决定何时必须完全排空。第一方运行时同时挂载两者；专用部署可以替换策略，但只装后端意味着崩溃仍可能丢失批处理窗口内的事件。</p>
+        <div class="compare-grid">
+          <div><strong>请求先耐久，再构造模型流</strong><p>策略延迟包装 llm/stream。只有活动 Session 中已缓冲的请求事件全部 flush 后，下游适配器才会收到请求；拒绝检查点时 Provider 根本不会运行。</p></div>
+          <div><strong>调用先落盘，再进入工具正文</strong><p>顶层 tools/execute 在权限与 Guard 之后等待检查点，确保模型可见的 tool/call 已持久化。嵌套分派复用外层调用的屏障，不为内部实现重复制造检查点。</p></div>
+          <div><strong>下一步先封存上一批结果</strong><p>agent/pre-step 在派生新请求前持久化前一响应和有序工具结果。步骤边界失败会终止当前轮次，避免在未确认历史上继续调用模型。</p></div>
+        </div>
+        <div class="detail-card"><strong>取消可以阻止尚未分派的副作用</strong><p>若取消在顶层工具等待 flush 时到达，包装层返回规范的 ABORTED_BEFORE_DISPATCH，不进入工具正文。并发工具检查点共享 Session 存储的串行排空流程，也不会重复分配事件序号。</p></div>
+        <div class="warning"><strong>检查点保护的是执行意图，不是外部事务</strong><p>硬崩溃若发生在工具正文之后、结果持久化之前，日志只能证明调用已经分派，不能证明副作用是否完成。恢复会补入未知结果而不自动重试；支持幂等性的 Provider 应转发 exec.callId。</p></div>
 
         <h2 id="session-projection">会话投影与冷读取<a href="#session-projection" class="anchor">#</a></h2>
         <p>Session Projection 把仅追加事件日志折叠成供客户端直接消费的完整领域状态。每个领域只注册同步的 <code>init → apply → view</code> 纯计算单元；框架统一订阅已提交事件，客户端从不自行重放领域事件。</p>

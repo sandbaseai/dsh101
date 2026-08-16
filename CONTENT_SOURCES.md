@@ -94,7 +94,7 @@ Last upstream review:
 | Session fork, rename, archive, and workspace deletion boundaries | `packages/host/apiproxy/README.zh.md`, `packages/client/runtime/README.zh.md`, `packages/client/ui-conversation/README.zh.md`, `packages/client/ui-workspace/README.zh.md` |
 | Assistant footer action placement, completed-turn branching, read-only user messages, and selection behavior on failure | `packages/client/ui-conversation/README.zh.md` |
 | Full-snapshot archive set, cross-tab and reconnect convergence, selection clearing, and UI failure behavior | `packages/client/runtime/README.zh.md`, `packages/client/ui-workspace/README.zh.md` |
-| Session persistence and crash recovery | `docs/subsystems/persistence.zh.md`, `packages/session/session-checkpoint-policy/README.zh.md` |
+| Session persistence, crash recovery, semantic checkpoint dispatch boundaries, cancellation, and unknown tool outcomes | `docs/subsystems/persistence.zh.md`, `packages/session/session-checkpoint-policy/README.zh.md` |
 | Session projections and cold-read cache | `docs/subsystems/session-projection.zh.md` |
 | Browser ConversationNode incremental assembly, prepend identity, gap repair, and frame-coalesced streaming | `packages/client/runtime/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | Recoverable composer blocks, localized disabled posture, model-seat exception, dependency direction, no-Workspace precedence, and Host authority | `packages/client/ui-conversation/README.zh.md`, `packages/client/ui-model-selection/README.zh.md` |

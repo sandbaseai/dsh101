@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="理解 DeepSeek Harness 背后的 Cordis：时空可组合性、可逆副作用与响应式依赖。" />
+    <meta name="theme-color" content="#05070c" />
+    <link rel="canonical" href="https://dsh101.com/cordis/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Cordis 与时空可组合性 · DeepSeek Harness</title>
+  </head>
+  <body>
+    <header class="sub-header">
+      <a class="sub-brand" href="/"><img src="/wordmark.svg" alt="DeepSeek" /><span>Harness</span></a>
+      <a href="/" data-zh="返回首页" data-en="Back home">返回首页</a>
+      <a href="https://github.com/cordiverse/paper" target="_blank" rel="noreferrer">GitHub</a>
+      <div class="locale-switch"><button data-locale="zh" class="active">中文</button><button data-locale="en">EN</button></div>
+    </header>
+    <main class="sub-main">
+      <p class="sub-kicker" data-zh="DeepSeek Harness 的组合内核" data-en="The composition kernel behind DeepSeek Harness">DeepSeek Harness 的组合内核</p>
+      <h1 data-zh="时空可组合性" data-en="Spatiotemporal composability">时空可组合性</h1>
+      <p class="sub-lead" data-zh="Cordis 把动态组合的两个正交问题变成运行时机制：组件移除后能否完整撤销副作用，以及组件能否声明并响应式管理依赖。" data-en="Cordis turns two orthogonal problems of dynamic composition into runtime mechanisms: whether a component can fully revert its effects when removed, and whether it can declare and reactively manage dependencies.">Cordis 把动态组合的两个正交问题变成运行时机制：组件移除后能否完整撤销副作用，以及组件能否声明并响应式管理依赖。</p>
+      <div class="sub-note" data-zh="论文为 2026-08-13 预印本，仍在修订。具体结论应以最新版本为准。" data-en="The paper is an August 13, 2026 preprint under active revision. Consult the latest version before relying on specific results.">论文为 2026-08-13 预印本，仍在修订。具体结论应以最新版本为准。</div>
+
+      <section class="concept-grid">
+        <article><span>01</span><h2 data-zh="时间可组合性" data-en="Temporal composability">时间可组合性</h2><p data-zh="组件被移除时，其副作用能够完整撤销。运行时必须知道某次上下文变换的逆操作，而不是依赖插件作者在多个地方手工清理。" data-en="When a component is removed, its side effects can be fully reverted. The runtime knows the inverse of each context transformation instead of relying on scattered manual cleanup.">组件被移除时，其副作用能够完整撤销。运行时必须知道某次上下文变换的逆操作，而不是依赖插件作者在多个地方手工清理。</p></article>
+        <article><span>02</span><h2 data-zh="空间可组合性" data-en="Spatial composability">空间可组合性</h2><p data-zh="组件能够声明自己需要的上下文，并在依赖出现、替换或消失时由运行时响应式管理，而不是假定启动顺序永远正确。" data-en="A component declares the context it needs, and the runtime reacts as dependencies appear, change, or disappear instead of assuming a permanently correct startup order.">组件能够声明自己需要的上下文，并在依赖出现、替换或消失时由运行时响应式管理，而不是假定启动顺序永远正确。</p></article>
+        <article><span>03</span><h2 data-zh="可逆副作用" data-en="Revertible effects">可逆副作用</h2><p data-zh="每次上下文变换都携带由运行时追踪的逆变换。监听器、服务、定时器和其他注册因此可以随 Fiber 生命周期成组撤销。" data-en="Every context transformation carries an inverse tracked by the runtime. Listeners, services, timers, and other registrations can therefore unwind together with their Fiber lifecycle.">每次上下文变换都携带由运行时追踪的逆变换。监听器、服务、定时器和其他注册因此可以随 Fiber 生命周期成组撤销。</p></article>
+        <article><span>04</span><h2 data-zh="响应式协效应" data-en="Reactive coeffects">响应式协效应</h2><p data-zh="上下文每次变化都会根据组件的协效应规格通知并重新评估它，使依赖解析、配置协调与热模块替换共享同一个模型。" data-en="Each context change notifies and reevaluates a component against its coeffect specification, unifying dependency resolution, configuration reconciliation, and hot module replacement.">上下文每次变化都会根据组件的协效应规格通知并重新评估它，使依赖解析、配置协调与热模块替换共享同一个模型。</p></article>
+      </section>
+
+      <div class="formula"><strong data-zh="可逆 Effect" data-en="Revertible effect">可逆 Effect</strong><i>+</i><strong data-zh="响应式 Coeffect" data-en="Reactive coeffect">响应式 Coeffect</strong><i>→</i><strong data-zh="统一 Context 类型" data-en="Unified context type">统一 Context 类型</strong></div>
+
+      <section class="explain-block"><h2 data-zh="为什么 Harness 需要它" data-en="Why a harness needs it">为什么 Harness 需要它</h2><p data-zh="Agent Harness 的模型、工具、沙箱、Session、存储和 UI 会在不同时间被选择、替换与重新组合。Cordis 让这些能力不仅能“装上去”，还能够在依赖改变时停稳、撤销并重新装配。" data-en="Models, tools, sandboxes, sessions, storage, and UI are selected, replaced, and recomposed at different times. Cordis lets these capabilities not only mount, but also settle, unwind, and reassemble when dependencies change.">Agent Harness 的模型、工具、沙箱、Session、存储和 UI 会在不同时间被选择、替换与重新组合。Cordis 让这些能力不仅能“装上去”，还能够在依赖改变时停稳、撤销并重新装配。</p></section>
+      <section class="explain-block"><h2 data-zh="从理论到实现" data-en="From theory to implementation">从理论到实现</h2><p data-zh="论文把 effect context 与 coeffect context 统一成 context type，并进一步组成 component 与动态组合演算。Cordis 将其实现为带副作用追踪和依赖解析的核心库，以及支持配置协调和 HMR 的声明式 Loader。" data-en="The paper unifies effect and coeffect contexts into a context type, then builds components and a calculus of dynamic composition. Cordis implements this as a core with effect tracking and dependency resolution plus a declarative loader with configuration reconciliation and HMR.">论文把 effect context 与 coeffect context 统一成 context type，并进一步组成 component 与动态组合演算。Cordis 将其实现为带副作用追踪和依赖解析的核心库，以及支持配置协调和 HMR 的声明式 Loader。</p><div class="source-actions"><a href="https://github.com/cordiverse/paper" target="_blank" rel="noreferrer" data-zh="查看论文仓库" data-en="View paper repository">查看论文仓库</a><a href="https://github.com/cordiverse/paper/blob/main/paper.pdf" target="_blank" rel="noreferrer" data-zh="阅读 PDF" data-en="Read the PDF">阅读 PDF</a><a href="https://deepseek-harness.github.io/deepseek-harness/en/reference/cordis-primer" target="_blank" rel="noreferrer" data-zh="Cordis 官方入门" data-en="Official Cordis primer">Cordis 官方入门</a></div></section>
+    </main>
+    <footer class="sub-footer"><span data-zh="基于 Cordis 论文预印本整理" data-en="Based on the Cordis paper preprint">基于 Cordis 论文预印本整理</span><a href="https://github.com/sandbaseai/dsh101">dsh101.com</a></footer>
+    <script type="module" src="/subpage.js"></script>
+  </body>
+</html>

@@ -42,6 +42,7 @@ Last upstream review:
 | Agent-authored dynamic Cordis extensions | `docs/subsystems/extensions.zh.md`, `packages/extensions/README.zh.md`, `packages/extensions/cordis-host-runner/README.zh.md`, `packages/extensions/tool-cordis/README.zh.md` |
 | Optional code runtime and structured bindings | `docs/subsystems/code-runtime.zh.md` |
 | Agent delivery, cancellation, and ownership | `docs/subsystems/core.zh.md` |
+| Web queue snapshots, editing, steering, and keyboard delivery | `packages/host/apiproxy/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |
 | MCP transports and tool bridge | `packages/mcp/mcp-client/README.zh.md` |
 | Skill discovery and loading | `docs/subsystems/skills.zh.md`, `packages/skill/skill/README.zh.md`, `packages/skill/tool-skill/README.zh.md` |
 | Plan collaboration state | `docs/subsystems/plan.zh.md`, `packages/plan/plan-mode/README.zh.md` |

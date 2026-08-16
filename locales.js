@@ -669,7 +669,18 @@ export const en = {
   '原生目录选择、设置、凭据和本地文档操作属于特权面，浏览器载体将它们限制在回环地址的同源请求；应用内目录浏览仍经过 Host 与 Origin 信任栅栏。': 'Native directory selection, settings, credentials, and local-document operations are privileged surfaces restricted to same-origin requests on loopback addresses; in-app directory browsing still passes the Host and Origin trust fence.',
   '路径由宿主根据预设 ID 或无路径操作解析；浏览器载荷不能指定任意文件去打开。': 'The host resolves paths from preset IDs or pathless operations; browser payloads cannot choose arbitrary files to open.',
   '不要把监听地址当成认证': 'Do not treat the listen address as authentication',
-  '底层 Web Server 本身不提供 TLS 或用户认证。需要远程访问时，应在可信反向代理后增加 HTTPS 和访问控制，并审查诊断错误是否适合向多用户公开。': 'The underlying Web Server provides neither TLS nor user authentication. For remote access, put it behind a trusted reverse proxy with HTTPS and access control, and review whether diagnostic errors are safe to expose to multiple users.'
+  '底层 Web Server 本身不提供 TLS 或用户认证。需要远程访问时，应在可信反向代理后增加 HTTPS 和访问控制，并审查诊断错误是否适合向多用户公开。': 'The underlying Web Server provides neither TLS nor user authentication. For remote access, put it behind a trusted reverse proxy with HTTPS and access control, and review whether diagnostic errors are safe to expose to multiple users.',
+  '实时消息队列': 'Live message queue',
+  '运行中的实时消息队列': 'The live queue during a run',
+  'Web UI 的 Queue 是实时控制面，不是从聊天记录猜出来的视图。宿主在队列变化及重连时发送完整的 ': 'The Web UI Queue is a real-time control plane, not a view inferred from chat history. The host sends a complete ',
+  ' 快照；每项由稳定的 MessageId 寻址，因此编辑、删除和插话都只作用于那一次入队。': ' snapshot whenever the queue changes or reconnects. Each item has a stable MessageId, so edits, deletion, and steering affect exactly one enqueue operation.',
+  '保留为下一轮输入，当前轮次结束后按 FIFO 领取。取消 Web 会话中的活动轮次会保留这些待处理项。': 'Keeps input for a later turn, claimed FIFO after the current turn ends. Cancelling the active turn through the Web session preserves these pending items.',
+  '尝试在最近的下一步骤插入用户指引；若窗口已经关闭，则安全退回普通 Queue，不丢失草稿。': 'Tries to insert user guidance at the nearest next step. If that window has closed, it safely falls back to the ordinary Queue without losing the draft.',
+  '审批通知、任务完成和附件快照等注入上下文在领取前不向用户界面展示。': 'Injected context such as approval notices, job completion, and attachment snapshots stays hidden from the UI until claimed.',
+  '队列只有一项时直接显示，多项时默认折叠并可逐项编辑、删除或严格 steer。若 Agent 已经领取目标项，操作会收敛为“已开始投递”，客户端不会靠轮次状态擅自移除或重发消息。': 'A single queue item is shown directly; multiple items collapse by default and can be edited, removed, or strictly steered one at a time. If the agent has already claimed an item, the operation converges on delivery already having started; the client never removes or resends messages based on turn state guesses.',
+  '导出前先用 HEAD 预检，活动会话会经过 flush 持久性屏障，然后浏览器直接接管 GET 下载；JavaScript 不会把整个 ZIP 缓存在内存。归档保留持久化工件的原始内容，子代理按目录分组，共享附件只写入一次。': 'Export first uses a HEAD preflight, active sessions pass through a flush durability barrier, and the browser then takes over the GET download; JavaScript never buffers the whole ZIP in memory. The archive preserves raw persisted artifacts, groups subagents in directories, and writes shared attachments only once.',
+  '导出会明确失败，不会静默缺件': 'Export fails explicitly instead of silently omitting files',
+  '缺少根会话返回 404，后端不支持逐会话原始工件返回 501；子会话工件或引用附件读取失败会让整个流失败。HEAD 只能发现开始传输前的错误，后续失败由浏览器下载管理器报告。': 'A missing root session returns 404, while a backend without per-session raw artifacts returns 501. Failure to read a child-session artifact or referenced attachment fails the entire stream. HEAD can only catch errors before streaming begins; later failures are reported by the browser download manager.'
 }
 
 export const normalizedEn = new Map(

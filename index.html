@@ -74,6 +74,7 @@
           <a href="#session">会话与任务</a>
           <a href="#session-log">Session 事件日志</a>
           <a href="#agent-delivery">Agent 投递与取消</a>
+          <a href="#session-queue">实时消息队列</a>
           <a href="#permissions">权限与审批</a>
           <a href="#permission-presets">权限预设</a>
           <a href="#approval-flow">审批链路</a>
@@ -252,6 +253,15 @@
         </div>
         <p>cancel 只中止当前活动并默认清理排队与 steering；keepInbox 可以保留尚未开始的工作。whenIdle 等待整个 Agent 达到真正静止，包括取消后的收敛、替换工作和 maintenance task，而不是确认某一条消息已经得到回答。</p>
         <div class="detail-card"><strong>拥有 Handle 才拥有销毁能力</strong><p>创建或恢复 Agent 的调用方拿到 AgentHandle；dispose 会停止 loop、等待退出、注销 Agent、移除内存 Session，最后展开整个 Agent scope。普通 registry 查询只返回不可销毁的 Agent。</p></div>
+
+        <h2 id="session-queue">运行中的实时消息队列<a href="#session-queue" class="anchor">#</a></h2>
+        <p>Web UI 的 Queue 是实时控制面，不是从聊天记录猜出来的视图。宿主在队列变化及重连时发送完整的 <code>session/queue</code> 快照；每项由稳定的 MessageId 寻址，因此编辑、删除和插话都只作用于那一次入队。</p>
+        <div class="compare-grid">
+          <div><strong>Queue</strong><p>保留为下一轮输入，当前轮次结束后按 FIFO 领取。取消 Web 会话中的活动轮次会保留这些待处理项。</p></div>
+          <div><strong>Steer</strong><p>尝试在最近的下一步骤插入用户指引；若窗口已经关闭，则安全退回普通 Queue，不丢失草稿。</p></div>
+          <div><strong>Context</strong><p>审批通知、任务完成和附件快照等注入上下文在领取前不向用户界面展示。</p></div>
+        </div>
+        <p>队列只有一项时直接显示，多项时默认折叠并可逐项编辑、删除或严格 steer。若 Agent 已经领取目标项，操作会收敛为“已开始投递”，客户端不会靠轮次状态擅自移除或重发消息。</p>
 
         <h2 id="permissions">权限与审批<a href="#permissions" class="anchor">#</a></h2>
         <p>Harness 把沙箱模式和审批策略作为两项独立机制。权限预设只是在产品层把两者组合成一个选择器；执行时仍由各自服务单独强制。</p>
@@ -814,6 +824,8 @@ print(result.final_response)</code></pre>
         </div>
         <p>跨会话访问要求目标与调用方的 <code>cwd</code> 严格相同；当前会话的搜索会截止到调用步骤之前，避免工具匹配自身。搜索文本按字面量、不区分大小写并灵活匹配空白，过滤条件之间为 AND，同一列表内为 OR。</p>
         <div class="detail-card"><strong>导出完整审计材料</strong><p>Web UI 的 Session log 按钮或 <code>/export</code> 会下载包含根会话、子会话和附件的流式 ZIP。命令只在用户命令平面执行，不创建模型轮次，也不消耗模型 token；下载位置由浏览器决定。</p></div>
+        <p>导出前先用 HEAD 预检，活动会话会经过 flush 持久性屏障，然后浏览器直接接管 GET 下载；JavaScript 不会把整个 ZIP 缓存在内存。归档保留持久化工件的原始内容，子代理按目录分组，共享附件只写入一次。</p>
+        <div class="warning"><strong>导出会明确失败，不会静默缺件</strong><p>缺少根会话返回 404，后端不支持逐会话原始工件返回 501；子会话工件或引用附件读取失败会让整个流失败。HEAD 只能发现开始传输前的错误，后续失败由浏览器下载管理器报告。</p></div>
 
         <h2 id="session-reference">结构化跨会话引用<a href="#session-reference" class="anchor">#</a></h2>
         <p>宿主可以把选中的历史 Session 作为结构化引用附在新消息上，而不是把 UI 的 @mention 语法传入核心。Session id 是权威身份，label 只是快照显示信息；候选项使用最新持久标题，并按当前工作目录亲和度排序。</p>

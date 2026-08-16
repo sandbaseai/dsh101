@@ -180,6 +180,7 @@
           <a href="#chat-assembly">Chat 增量组装</a>
           <a href="#chat-scroll-shell">Chat 滚动壳</a>
           <a href="#context-disclosure">上下文来源展开项</a>
+          <a href="#thinking-tail">实时 Think 摘要</a>
           <a href="#storage-domains">领域存储</a>
           <a href="#spill-output">大结果 Spill</a>
         </section>
@@ -1263,6 +1264,17 @@ print(result.final_response)</code></pre>
         </div>
         <p>展开内容自适应高度，最高 141px，超出后在内部滚动；它不会合成工具状态或摘要。这个 opaque 路径是正式默认协议，而非错误兜底，因此恢复、fork 或外部写入的历史即使缺少当前生产插件，也仍能渲染。</p>
         <div class="warning"><strong>Steering 不添加虚构标记</strong><p>持久或待处理的中途引导继续使用用户气泡样式；transcript 唯一的 steering 线索是它位于轮次中途。界面不会写入日志里不存在的来源或状态。</p></div>
+
+        <h3 id="thinking-tail">实时 Think 行与阅读保护<a href="#thinking-tail" class="anchor">#</a></h3>
+        <p>Think 行默认折叠，但流式阶段并非停在一条过时摘要上。当 reasoning 块位于消息流尾部时，折叠标题从结算后的首行切换为当前最新的非空行，让用户无需展开就能确认推理仍在推进。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>折叠追随尾部</strong><p>单行摘要随每个 delta 更新，并把自身横向滚动到行内末端。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>展开让出控制</strong><p>用户展开后移除移动摘要，完整推理进入普通页面流，不再由内部跟随器抢动阅读位置。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>结算恢复稳定</strong><p>流式块结束后，标题回到左对齐的稳定首行摘要，历史记录不再自行移动。</p></div>
+        </div>
+        <div class="warning"><strong>这是展示策略，不是额外推理数据</strong><p>界面只在运行时已经投影出的 reasoning 内容中选择摘要和滚动位置；它不会生成、补写或推断模型没有输出的思维过程。</p></div>
 
         <h2 id="storage-domains">非会话数据的领域存储<a href="#storage-domains" class="anchor">#</a></h2>
         <p>设置、索引等不属于对话事件日志的数据进入 Storage subsystem。枢纽只负责注册后端和挂载数据形式，不执行 IO；领域层声明名称、格式版本、global slot、表和 zod schema，再按部署路由到 JSON 或 SQLite 后端。</p>

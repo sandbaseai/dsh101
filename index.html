@@ -526,6 +526,15 @@ print(result.final_response)</code></pre>
         </div>
         <p>远程流有有限的 idle timeout；上下文溢出统一映射为 <code>CONTEXT_WINDOW_EXCEEDED</code>，空 completion 映射为可重试的 <code>EMPTY_RESPONSE</code>。Provider 的 retry-after 只是事实，不是自动重试决定。</p>
         <div class="detail-card"><strong>TokenUsage 计数互不重叠</strong><p>未缓存 input、cache read、cache write 三项相加才是计费输入；reasoning tokens 已包含在 output 中，汇总时不能重复计算。</p></div>
+        <h3 id="llm-retry">默认重试策略与界面状态</h3>
+        <p>未显式配置时使用 normal 策略：只对 <code>EMPTY_RESPONSE</code>、<code>RATE_LIMIT</code>、<code>SERVER</code>、<code>TIMEOUT</code> 和 <code>TRANSPORT</code> 最多重试两次，退避从 500ms 增长到最多 10 秒并加入 10% 抖动。有效且未超过上限的 Provider Retry-After 会替代本地延迟。</p>
+        <div class="compare-grid">
+          <div><strong>normal</strong><p>有限预算，只重试明确允许的失败码；格式错误凭据和认证失败不会默认反复请求。</p></div>
+          <div><strong>always</strong><p>每次模型请求失败都无限重试，直到成功、取消或插件释放，包括永久性认证和配额错误。</p></div>
+          <div><strong>cancel</strong><p>取消会中止退避；尚未开始的新尝试不会写入 retry-started，界面显示已取消状态。</p></div>
+        </div>
+        <p>Web UI 把连续尝试折叠为一条稳定状态行，显示倒计时、当前次数与有限上限或 <code>∞</code>。每个调度事件仍持久保留；失败步骤未完成的流式尾部会被移除，终态失败则留在轮次边界供排查。</p>
+        <div class="warning"><strong>重试可能重复计费</strong><p>每次重试都是新的 Provider 请求，可能再次计费输入 token。模型不会看到失败分片、延迟或 Provider 错误；认证错误的界面文案也不会回显提供方返回的凭据片段。</p></div>
 
         <h2 id="dynamic-extensions">Agent 动态扩展运行时<a href="#dynamic-extensions" class="anchor">#</a></h2>
         <p>自引用 Cordis 工具让 Agent 先检查活的服务、API、事件和 Client slots，再定义并运行临时动态包。<code>cordis_define</code> 只做语法预检和登记；所有副作用都推迟到显式 <code>cordis_run</code>。</p>

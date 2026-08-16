@@ -740,7 +740,18 @@ export const en = {
   '历史图片读取仍会验证完整性': 'Historical image reads still verify integrity',
   '本地对象存放在 ': 'Local objects are stored in the private content-addressed directory under ',
   ' 的私有内容寻址目录。打开历史图片时会重新检查摘要、媒体签名、尺寸与引用元数据；失败会显示重试入口，而不是展示未经验证的字节。': '. Opening a historical image rechecks its digest, media signature, dimensions, and reference metadata; failures show a retry action instead of rendering unverified bytes.',
-  '当前仅支持图片，没有普通文件卡片或上传进度。收紧部署限制不会让已经接纳的历史图片失效；附件对象可能被恢复后的会话和 Fork 共享，因此目前不会随单个会话删除而立即回收。': 'Only images are supported today, with no generic file card or upload progress. Tightening deployment limits does not invalidate already accepted historical images; attachment objects may be shared by restored sessions and forks, so they are not immediately collected with a single session.'
+  '当前仅支持图片，没有普通文件卡片或上传进度。收紧部署限制不会让已经接纳的历史图片失效；附件对象可能被恢复后的会话和 Fork 共享，因此目前不会随单个会话删除而立即回收。': 'Only images are supported today, with no generic file card or upload progress. Tightening deployment limits does not invalidate already accepted historical images; attachment objects may be shared by restored sessions and forks, so they are not immediately collected with a single session.',
+  '默认重试策略与界面状态': 'Default retry policy and UI state',
+  '未显式配置时使用 normal 策略：只对 ': 'Without explicit configuration, the normal policy retries only ',
+  ' 和 ': ' and ',
+  ' 最多重试两次，退避从 500ms 增长到最多 10 秒并加入 10% 抖动。有效且未超过上限的 Provider Retry-After 会替代本地延迟。': ' up to two times, with backoff growing from 500ms to at most 10 seconds and 10% jitter. A valid Provider Retry-After within the maximum replaces the local delay.',
+  '有限预算，只重试明确允许的失败码；格式错误凭据和认证失败不会默认反复请求。': 'Uses a finite budget and retries only explicitly eligible failure codes; malformed credentials and authentication failures are not repeatedly requested by default.',
+  '每次模型请求失败都无限重试，直到成功、取消或插件释放，包括永久性认证和配额错误。': 'Retries every model-request failure without a count limit until success, cancellation, or plugin disposal, including permanent authentication and quota errors.',
+  '取消会中止退避；尚未开始的新尝试不会写入 retry-started，界面显示已取消状态。': 'Cancellation aborts backoff; a new attempt that has not started writes no retry-started event, and the UI shows a cancelled state.',
+  'Web UI 把连续尝试折叠为一条稳定状态行，显示倒计时、当前次数与有限上限或 ': 'The Web UI folds consecutive attempts into one stable status row showing a countdown, current attempt, and either a finite limit or ',
+  '。每个调度事件仍持久保留；失败步骤未完成的流式尾部会被移除，终态失败则留在轮次边界供排查。': '. Every scheduled event remains durable; incomplete streaming tails from failed steps are removed, while terminal failures remain at the turn boundary for diagnosis.',
+  '重试可能重复计费': 'Retries may be billed repeatedly',
+  '每次重试都是新的 Provider 请求，可能再次计费输入 token。模型不会看到失败分片、延迟或 Provider 错误；认证错误的界面文案也不会回显提供方返回的凭据片段。': 'Every retry is a new Provider request and may bill input tokens again. The model does not see failed fragments, delays, or Provider errors, and authentication-error UI copy never echoes credential fragments returned by the provider.'
 }
 
 export const normalizedEn = new Map(

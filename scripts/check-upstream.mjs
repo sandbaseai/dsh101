@@ -54,7 +54,7 @@ const changed = execFileSync('git', [
   'docs/subsystems/session-title.zh.md', 'packages/session/session-title',
   'docs/subsystems/session-projection.zh.md', 'packages/session/session-projection',
   'docs/subsystems/client-modules.zh.md', 'packages/client/modules',
-  'docs/subsystems/llm-streaming.zh.md', 'packages/llm/llm',
+  'docs/subsystems/llm-streaming.zh.md', 'packages/llm/llm', 'packages/llm/llm-retry',
   'docs/subsystems/extensions.zh.md', 'packages/extensions',
   'docs/subsystems/scope.zh.md', 'packages/core/scope',
   'docs/subsystems/web-server.zh.md', 'packages/host/webserver',

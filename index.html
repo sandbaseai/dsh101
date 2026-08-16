@@ -180,6 +180,7 @@
           <a href="#todos">Todo 列表</a>
           <a href="#todo-dock">Todo 计划条</a>
           <a href="#goals">持久 Goal</a>
+          <a href="#goal-round-admission">Goal Round 准入</a>
           <a href="#compaction">上下文压缩</a>
           <a href="#compaction-checkpoint">压缩检查点 UI</a>
           <a href="#guardrails">工具 Guardrails</a>
@@ -1266,6 +1267,16 @@ print(result.final_response)</code></pre>
         </div>
         <p>Goal Round 只在 Agent idle、目标仍 active 且有剩余容量时追加；人类消息优先且不消耗 Round。恢复会话或 fork 后，自动续行默认停用，必须由用户明确恢复。</p>
         <div class="detail-card"><strong>完成需要证据</strong><p>模型必须读取精确 goal id 与 revision 后再更新。困难或不确定不是阻塞；只有同一阻碍连续达到配置阈值后才能报告 blocked。</p></div>
+
+        <h3 id="goal-round-admission">Goal Round 何时才真正消耗额度<a href="#goal-round-admission" class="anchor">#</a></h3>
+        <p>驱动器先为下一编号预留一条携带当前 goal id 与 revision 的消息，但预留本身不增加 roundsStarted。只有该 goal 来源的 user/message 被 Inbox 领取并通过 pre-step 复核，才算一次已准入 Round。</p>
+        <div class="compare-grid">
+          <div><strong>陈旧预留不占编号</strong><p>Goal 在领取前被编辑、暂停、完成或换 revision 时，旧消息会被拒绝；编号没有缺口，后续仍从当前 roundsStarted 加一。</p></div>
+          <div><strong>人类工作始终让自动轮次让路</strong><p>人类消息先进入 Inbox 或与预留落在同一待处理批次时，自动提示词会被拒绝并等待下一次 idle；人类轮次不消耗 Goal 上限。</p></div>
+          <div><strong>排队前先越过持久屏障</strong><p>goal 变更后，驱动器先等待 Session flush，再重新检查 revision 与竞争输入。Flush 失败会停用续行，避免用未确认状态启动下一 Round。</p></div>
+        </div>
+        <div class="detail-card"><strong>取消不会自动重新开跑</strong><p>取消涉及已预留或已准入的 Goal 尝试时，下一次 idle 检查点会暂停目标；其他取消也会撤销进程内续行权限。暂时性 Provider 或持久化故障需要用户之后明确 resume。</p></div>
+        <div class="warning"><strong>maxGoalRounds 不是资源预算</strong><p>它只限制已准入的自动 Round 数量，不限制 token、费用、墙钟时间或提供方配额。Provider 失败与 token 上限也不会被驱动器自动分类为完成或阻塞。</p></div>
 
         <h2 id="compaction">上下文压缩<a href="#compaction" class="anchor">#</a></h2>
         <p>Basic Compaction 在上下文压力达到阈值时，把较早的完整历史单元替换为结构化检查点，同时逐字保留近期尾部。默认阈值为模型上下文窗口的 80%，近期保留预算为 16%。</p>

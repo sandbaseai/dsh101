@@ -76,7 +76,7 @@ Last upstream review:
 | Subagent delegation, continuable Activation routing, Inbox ownership, child-first disposal, interrupt boundaries, explicit reports, settlement notices, and durable directory discovery | `docs/subsystems/subagent.zh.md`, `packages/subagent/subagent/README.zh.md`, `packages/subagent/tool-subagent/README.zh.md`, `packages/subagent/tool-subagent-control/README.zh.md`, `packages/subagent/tool-subagent-report/README.zh.md` |
 | Todo snapshots | `packages/todo/tool-todo/README.zh.md` |
 | TodoDock current-plan projection, turn-boundary clearing, slot order, collapsed status counts, composer visibility, and single-line limit | `packages/client/ui-conversation/README.zh.md`, `packages/todo/tool-todo/README.zh.md` |
-| Persistent goals and goal rounds | `docs/subsystems/goal.zh.md`, `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |
+| Persistent goals, compare-and-set updates, Goal Round reservation and admission, human-input priority, durability barriers, and cancellation | `docs/subsystems/goal.zh.md`, `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |
 | Context compaction | `docs/subsystems/compaction.zh.md`, `packages/compaction/compaction-basic/README.zh.md` |
 | Browser compaction markers, explicit summary pairing, manual-command identity, unloaded-summary behavior, accessibility affordances, and model-payload suppression | `packages/client/ui-conversation/README.zh.md` |
 | Permission presets and approvals | `packages/interaction/permission-presets/README.zh.md`, `packages/interaction/user-approval/README.zh.md` |

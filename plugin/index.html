@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A source-verified bilingual guide to creating and loading your first DeepSeek Harness plugin." />
+    <meta name="theme-color" content="#050907" />
+    <link rel="canonical" href="https://dsh101.com/plugin/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://dsh101.com/plugin/" />
+    <link rel="alternate" hreflang="en-US" href="https://dsh101.com/plugin/?lang=en" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>第一个插件 · DSH 101</title>
+    <link rel="stylesheet" href="/subpage.css" />
+    <link rel="stylesheet" href="/plugin.css" />
+  </head>
+  <body>
+    <header class="sub-header">
+      <a class="sub-brand" href="/"><img src="https://www.deepseek.com/harness/images/dsh-logo.svg" alt="DeepSeek Harness" /><span>101</span></a>
+      <a href="/quickstart/" data-zh="快速开始" data-en="Quickstart">快速开始</a>
+      <a href="/" data-zh="返回首页" data-en="Back home">返回首页</a>
+      <a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/basic/" target="_blank" rel="noreferrer" data-zh="官方教程 ↗" data-en="Official tutorial ↗">官方教程 ↗</a>
+      <div class="locale-switch" role="group" aria-label="Language"><button type="button" data-locale="zh" class="active">中</button><button type="button" data-locale="en">EN</button></div>
+    </header>
+
+    <main class="sub-main plugin-main">
+      <section class="plugin-hero">
+        <div class="plugin-intro">
+          <p class="sub-kicker" data-zh="从源码运行路径开始" data-en="Start from a source checkout">从源码运行路径开始</p>
+          <h1 data-zh="写下第一个 Harness 插件。" data-en="Write your first Harness plugin.">写下第一个 Harness 插件。</h1>
+          <p class="sub-lead" data-zh="创建一个 TypeScript 模块，通过配置叠加加载它，再验证卸载时的自动清理。这里的代码和行为均来自官方开发教程。" data-en="Create a TypeScript module, load it through a configuration overlay, then verify automatic cleanup on unload. The code and behavior follow the official developer tutorial.">创建一个 TypeScript 模块，通过配置叠加加载它，再验证卸载时的自动清理。这里的代码和行为均来自官方开发教程。</p>
+          <div class="plugin-prerequisite"><strong data-zh="开始之前" data-en="Before you begin">开始之前</strong><span data-zh="先完成官方仓库的从源码运行流程，并从仓库根目录执行本文命令。" data-en="Complete the repository's run-from-source path, then run these commands from its root.">先完成官方仓库的从源码运行流程，并从仓库根目录执行本文命令。</span></div>
+        </div>
+        <div class="code-stage" aria-label="Minimal Harness plugin source code">
+          <div class="code-stage-head"><span>scratch-plugin/src/my-plugin.ts</span><button class="copy-code" type="button" data-copy-target="hero-plugin" data-zh="复制" data-en="Copy">复制</button></div>
+          <pre><code id="hero-plugin">import type { Context } from '@deepseek-ai/cordis'
+
+export const name = 'hello-plugin'
+
+export function apply(ctx: Context) {
+  console.log('[hello-plugin] plugin loaded!')
+}</code></pre>
+        </div>
+      </section>
+
+      <aside class="source-note"><span data-zh="核对基线" data-en="Verified baseline">核对基线</span><p data-zh="官方提交 47f9438，2026-08-13。DeepSeek Harness 仍处于开发者预览阶段，API 可能发生不兼容变更。" data-en="Official commit 47f9438, 2026-08-13. DeepSeek Harness remains in developer preview and APIs may change incompatibly.">官方提交 47f9438，2026-08-13。DeepSeek Harness 仍处于开发者预览阶段，API 可能发生不兼容变更。</p></aside>
+
+      <nav class="chapter-nav" aria-label="Tutorial chapters">
+        <a href="#create" data-zh="创建模块" data-en="Create module">创建模块</a>
+        <a href="#load" data-zh="加载配置" data-en="Load config">加载配置</a>
+        <a href="#cleanup" data-zh="管理清理" data-en="Manage cleanup">管理清理</a>
+        <a href="#dependencies" data-zh="声明依赖" data-en="Declare dependencies">声明依赖</a>
+      </nav>
+
+      <section id="create" class="plugin-chapter">
+        <div class="chapter-copy"><p class="chapter-label" data-zh="创建模块" data-en="Create the module">创建模块</p><h2 data-zh="一个 apply 函数就是完整插件" data-en="An apply function is a complete plugin">一个 apply 函数就是完整插件</h2><p data-zh="Harness 加载模块时调用 apply，并传入 Cordis Context。插件通过 ctx 注册工具、事件和其他能力。name 用于提供清晰的插件标识。" data-en="Harness calls apply with a Cordis Context when loading the module. The plugin registers tools, events, and other capabilities through ctx. The name export provides a clear plugin identity.">Harness 加载模块时调用 apply，并传入 Cordis Context。插件通过 ctx 注册工具、事件和其他能力。name 用于提供清晰的插件标识。</p></div>
+        <div class="chapter-work">
+          <p data-zh="在仓库根目录创建临时项目：" data-en="Create a scratch project from the repository root:">在仓库根目录创建临时项目：</p>
+          <div class="code-block"><div><span>shell</span><button class="copy-code" type="button" data-copy-target="mkdir-code" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="mkdir-code">mkdir -p scratch-plugin/src</code></pre></div>
+          <p data-zh="然后把上方完整代码保存到 scratch-plugin/src/my-plugin.ts。" data-en="Then save the complete code above as scratch-plugin/src/my-plugin.ts.">然后把上方完整代码保存到 scratch-plugin/src/my-plugin.ts。</p>
+        </div>
+      </section>
+
+      <section id="load" class="plugin-chapter chapter-offset">
+        <div class="chapter-copy"><p class="chapter-label" data-zh="加载配置" data-en="Load with configuration">加载配置</p><h2 data-zh="用 Web overlay 插入本地模块" data-en="Insert the local module with a Web overlay">用 Web overlay 插入本地模块</h2><p data-zh="先运行 pwd，复制仓库绝对路径。patch 文件贡献配置，但不会改变 loader 解析模块时采用的 profile 目录，所以本地插件路径必须是绝对路径。" data-en="Run pwd and copy the absolute repository path. A patch contributes configuration but does not change the profile directory used for module resolution, so the local plugin path must be absolute.">先运行 pwd，复制仓库绝对路径。patch 文件贡献配置，但不会改变 loader 解析模块时采用的 profile 目录，所以本地插件路径必须是绝对路径。</p></div>
+        <div class="chapter-work">
+          <p data-zh="创建 scratch-plugin/cordis.yml，并替换示例路径：" data-en="Create scratch-plugin/cordis.yml and replace the example path:">创建 scratch-plugin/cordis.yml，并替换示例路径：</p>
+          <div class="code-block"><div><span>cordis.yml</span><button class="copy-code" type="button" data-copy-target="yaml-code" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="yaml-code">- insert:
+    - id: hello
+      name: '/absolute/path/to/deepseek-harness/scratch-plugin/src/my-plugin.ts'</code></pre></div>
+          <div class="code-block"><div><span>shell</span><button class="copy-code" type="button" data-copy-target="run-code" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="run-code">pnpm dsh web --patch ./scratch-plugin/cordis.yml</code></pre></div>
+          <p data-zh="打开 http://127.0.0.1:3080。启动期间，终端应打印 [hello-plugin] plugin loaded!。" data-en="Open http://127.0.0.1:3080. During startup, the terminal should print [hello-plugin] plugin loaded!.">打开 http://127.0.0.1:3080。启动期间，终端应打印 [hello-plugin] plugin loaded!。</p>
+        </div>
+      </section>
+
+      <section id="cleanup" class="plugin-chapter">
+        <div class="chapter-copy"><p class="chapter-label" data-zh="管理清理" data-en="Manage cleanup">管理清理</p><h2 data-zh="让副作用随插件一起卸载" data-en="Unload effects with the plugin">让副作用随插件一起卸载</h2><p data-zh="通过 ctx 注册的事件监听、工具和定时器会自动清理。网络连接等外部资源需要显式释放时，用 ctx.effect() 返回 disposer。" data-en="Event listeners, tools, and timers registered through ctx are cleaned up automatically. When an external resource such as a network connection needs explicit disposal, return a disposer from ctx.effect().">通过 ctx 注册的事件监听、工具和定时器会自动清理。网络连接等外部资源需要显式释放时，用 ctx.effect() 返回 disposer。</p></div>
+        <div class="chapter-work"><div class="code-block"><div><span>TypeScript</span><button class="copy-code" type="button" data-copy-target="effect-code" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="effect-code">export function apply(ctx: Context) {
+  ctx.effect(() => {
+    const timer = setInterval(() => {
+      console.log('heartbeat')
+    }, 5000)
+
+    return () => clearInterval(timer)
+  })
+}</code></pre></div><p data-zh="disposer 在插件卸载时运行。这样重载配置或移除插件时，不会留下孤立资源。" data-en="The disposer runs when the plugin unloads, preventing orphaned resources after configuration reloads or plugin removal.">disposer 在插件卸载时运行。这样重载配置或移除插件时，不会留下孤立资源。</p></div>
+      </section>
+
+      <section id="dependencies" class="plugin-chapter chapter-offset">
+        <div class="chapter-copy"><p class="chapter-label" data-zh="声明依赖" data-en="Declare dependencies">声明依赖</p><h2 data-zh="需要服务时，先写进 inject" data-en="Put required services in inject">需要服务时，先写进 inject</h2><p data-zh="插件消费 tools 或 llm 等服务时，用 inject 声明。框架会等待全部必需服务就绪，再调用 apply。" data-en="When a plugin consumes services such as tools or llm, declare them with inject. The framework waits until every required service is ready before calling apply.">插件消费 tools 或 llm 等服务时，用 inject 声明。框架会等待全部必需服务就绪，再调用 apply。</p></div>
+        <div class="chapter-work"><div class="code-block"><div><span>TypeScript</span><button class="copy-code" type="button" data-copy-target="inject-code" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="inject-code">export const name = 'my-tool-plugin'
+export const inject = ['tools']
+
+export function apply(ctx: Context) {
+  ctx.tools.register(/* ... */)
+}</code></pre></div><p data-zh="函数形式适合大多数插件。插件需要向其他插件提供服务时，再考虑继承 Service 的类形式。" data-en="Function form fits most plugins. Consider the Service class form when the plugin must provide a service to other plugins.">函数形式适合大多数插件。插件需要向其他插件提供服务时，再考虑继承 Service 的类形式。</p></div>
+      </section>
+
+      <section class="plugin-next">
+        <div><p class="chapter-label" data-zh="继续开发" data-en="Continue building">继续开发</p><h2 data-zh="从最小模块走向真实能力" data-en="Take the minimal module toward real capabilities">从最小模块走向真实能力</h2></div>
+        <div class="next-links"><a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/basic/tool" target="_blank" rel="noreferrer"><strong data-zh="开发一个工具" data-en="Build a tool">开发一个工具</strong><span data-zh="学习官方工具定义 DSL ↗" data-en="Learn the official tool definition DSL ↗">学习官方工具定义 DSL ↗</span></a><a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/basic/config" target="_blank" rel="noreferrer"><strong data-zh="接受插件配置" data-en="Accept plugin config">接受插件配置</strong><span data-zh="定义并验证用户配置 ↗" data-en="Define and validate user configuration ↗">定义并验证用户配置 ↗</span></a></div>
+      </section>
+    </main>
+
+    <footer class="sub-footer"><span>DSH 101 / First plugin</span><span data-zh="非 DeepSeek 官方网站，代码以官方文档为准" data-en="Unofficial site. Official documentation remains authoritative.">非 DeepSeek 官方网站，代码以官方文档为准</span></footer>
+    <script type="module" src="/plugin.js"></script>
+  </body>
+</html>

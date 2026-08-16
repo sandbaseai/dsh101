@@ -9,6 +9,7 @@ export default defineConfig({
         cordis: resolve(import.meta.dirname, 'cordis/index.html'),
         ecosystem: resolve(import.meta.dirname, 'ecosystem/index.html'),
         quickstart: resolve(import.meta.dirname, 'quickstart/index.html'),
+        plugin: resolve(import.meta.dirname, 'plugin/index.html'),
       },
     },
   },

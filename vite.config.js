@@ -7,6 +7,7 @@ export default defineConfig({
       input: {
         home: resolve(import.meta.dirname, 'index.html'),
         cordis: resolve(import.meta.dirname, 'cordis/index.html'),
+        ecosystem: resolve(import.meta.dirname, 'ecosystem/index.html'),
       },
     },
   },

@@ -131,6 +131,7 @@
           <a href="#api-gateway-lifecycle">Gateway 调用生命周期</a>
           <a href="#remote-event-forwarding">Host 事件转发</a>
           <a href="#acp-automation">ACP 自动化协议</a>
+          <a href="#acp-loader-postmortem">ACP Loader 接线复盘</a>
           <a href="#capability-seam">能力三层拆分</a>
           <a href="#llm-adapter">LLM 适配器</a>
           <a href="#llm-streaming">流式协议与重试</a>
@@ -958,6 +959,27 @@ print(result.final_response)</code></pre>
         <p><code>session/cancel</code> 只取消指定 Agent，并把它尚未结算的提示词标记为 cancelled；未知 session id 是无操作。取消不是整个共享 Context 的全局开关。</p>
         <p>客户端断开和插件释放共用一次记忆化清理：先拒绝新工作并结算待处理提示词，只 drain 本连接拥有的 Agent 及其可继续后代，再并行释放 handle 并等待全部清理完成。其他前端拥有的 Agent 森林不会被带走。</p>
         <div class="warning"><strong>stopReason 不是提示词专属轮次摘要</strong><p>ACP 在整个自有活动期间转发已提交消息；提示词之后发生的 steering 或注入工作也可能参与，达到 token 上限的轮次仍可能在 Agent 最终空闲时以 end_turn 结算。需要完整推理、工具轨迹或持久日志时，应从 Session 系统读取，而不是从 ACP 响应反推。</p></div>
+
+        <h3 id="acp-loader-postmortem">事故复盘：100% 行覆盖为何仍漏掉 ACP 接线崩溃<a href="#acp-loader-postmortem" class="anchor">#</a></h3>
+        <p>ACP Bridge 曾在真实编辑器首次调用 <code>session/new</code> 与 <code>session/load</code> 时分别崩溃，二者都显示 <code>cannot get property ... without inject</code>，但实际是两个独立机制。178 个单元测试和 100% 行覆盖都通过，因为测试绕过了真实 Loader 导出路径和真实 Fiber 调用拓扑。</p>
+        <div class="compare-grid">
+          <div><strong>Bug 1 · 默认导出丢失命名空间</strong><p>模块同时导出 name、inject、Config、apply 和 export default apply。Loader 优先 unwrap default，得到没有元数据属性的裸函数，于是 apply 在未注入任何服务的 Fiber 中运行。</p></div>
+          <div><strong>Bug 2 · Shadow 只向祖先查找</strong><p>经另一 Fiber 的 traceable 代理调用 AgentLoop.resume 时，属性代理从 AgentLoop shadow 向祖先遍历，无法看见兄弟分支提供的可选 sessionPersistence。</p></div>
+          <div><strong>同一错误字符串不是同一根因</strong><p>删除默认导出修复 session/new 后，session/load 才暴露真正的 shadow 问题；Fiber 跟踪证明第一个异常发生在插件加载时而非请求处理器中。</p></div>
+        </div>
+        <div class="permission-table">
+          <div><code>namespace</code><strong>命名空间插件不要 default export</strong><span>保留 name、inject、Config、apply 的同级命名导出，让 Loader 读取完整模块元数据。</span></div>
+          <div><code>optional</code><strong>机会性服务使用 ctx.get</strong><span>未列入 static inject 的可选服务用拓扑无关的 ctx.get(name) 查找，并保留活跃状态检查。</span></div>
+          <div><code>required</code><strong>声明服务继续用属性访问</strong><span>已经属于插件 inject 集合的服务仍使用 ctx.service，让 Fiber 依赖等待和失活守卫保持生效。</span></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Load</strong><p>无 API Key 的 e2e 通过真实 cordis.yml、Loader 和 stdio 子进程启动。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Call</strong><p>至少驱动 session/new 等不需要模型的核心 RPC，而不只检查 initialize 或 stdout。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Resolve</strong><p>TSX_TSCONFIG_PATH 固定到仓库 tsconfig，防止临时 cwd 静默加载陈旧 lib 产物。</p></div>
+        </div>
+        <div class="warning"><strong>行覆盖率不是交付路径覆盖率</strong><p>手动构造 <code>ctx.plugin({ name, inject, apply })</code> 会主动补回本应由模块导出携带的元数据；平铺根 Context 还会触发全局查找捷径。至少一个测试必须按用户真正使用的入口加载并调用插件。</p></div>
 
         <h2 id="capability-seam">能力的三种角色<a href="#capability-seam" class="anchor">#</a></h2>
         <p>当能力需要可替换提供方时，Harness 将它拆成三个角色。只有完整组合才构成一个 capability seam；单独一个角色并不完整。</p>

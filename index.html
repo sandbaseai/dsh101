@@ -144,6 +144,7 @@
           <a href="#code-mode-entry">Code Mode 入口边界</a>
           <a href="#profiles">Profile 与组合包</a>
           <a href="#contributor-delivery">贡献者交付清单</a>
+          <a href="#testing-evidence">测试证据梯度</a>
         </section>
         <section>
           <h2>Agent 配置</h2>
@@ -1207,6 +1208,30 @@ print(result.final_response)</code></pre>
         </div>
         <div class="detail-card"><strong>门禁按变更表面分层运行</strong><p>新包先注册 workspace 依赖，再运行 doc-sync、constraints、typecheck、lint、build 与 hygiene；行为测试遵循所属包政策。面向模型、协议或 UI 的非平凡变化，还要在同一变更中加入对应无密钥快照或真实组合场景。</p></div>
         <div class="warning"><strong>手工 ctx.plugin 测试不能证明交付入口</strong><p>它可能主动补回真实模块导出丢失的 name、inject 或 Config，也可能在平铺 Context 中绕过作用域问题。产品可见插件至少需要一个通过 Loader 和应用或进程启动的非单元测试，并在需要时从构建后的 lib 入口运行。</p></div>
+
+        <h2 id="testing-evidence">测试证据梯度：每一层证明什么<a href="#testing-evidence" class="anchor">#</a></h2>
+        <p>Harness 的测试层不是互相替代的分数表，而是针对不同失败面的证据组合。单元和覆盖率守住局部契约，快照守住组装后的外部行为，浏览器车道守住真实渲染，带密钥 e2e 守住提供方集成，构建产物冒烟则证明用户实际执行的入口没有被源码解析器掩盖。</p>
+        <div class="permission-table">
+          <div><code>test</code><strong>局部语义与竞态</strong><span>覆盖边界、错误路径、事件顺序、并发和 HMR 清理；真实实现优先，只 mock LLM、网络、时钟等昂贵或不确定边界。</span></div>
+          <div><code>coverage</code><strong>每行都被执行</strong><span>按文件 100% 可以暴露死代码，却不证明产品按预期交付；行被走过不等于断言验证了正确状态。</span></div>
+          <div><code>snapshot</code><strong>无密钥组装行为</strong><span>真实 Loader 示例配合脚本化模型，固定 JSON-RPC、持久日志和 transcript；每项非平凡的模型、协议或人类可见变化都需要对应场景。</span></div>
+          <div><code>test:web</code><strong>浏览器输出</strong><span>Chromium 从构建后的插件 CSS 回放应用并比较快照；CI 只允许 replay，不会替贡献者改写期望结果。</span></div>
+          <div><code>test:e2e</code><strong>真实提供方链路</strong><span>带各自密钥调用 DeepSeek、Exa、Perplexity 等真实 API；缺少密钥时自动跳过，keyless 绿色不代表该层通过。</span></div>
+          <div><code>built entry</code><strong>已发布入口</strong><span>用普通 node 从 lib/bin.js、worker 或共享单例产物启动，捕获 tsx 与源码路径映射会隐藏的解析、结算和加载失败。</span></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>断言外部世界</strong><p>文件改动应重新读取文件，命令结果应重新执行检查；只在 Agent 回复中搜索关键词，会让自我报告或迎合断言的输出蒙混过关。</p></div>
+          <div><strong>证明守卫真的会红</strong><p>新增回归守卫时先临时引入目标故障并观察失败，再回退故障。一个永远绿色、却无法被它声称防止的回归触发的测试没有证据价值。</p></div>
+          <div><strong>资源必须完全释放</strong><p>e2e 自己创建 Harness，并在 afterEach 中即使遇到失败、重试或超时也 dispose；共享 fixture 不能放进会被导入后重复注册的 spec 文件。</p></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Record</strong><p>模型输入契约变化且旧回放不再成立时重新录制输入与期望行为。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Refresh</strong><p>回放输入仍有效时只刷新派生期望；逐项审查 JSONL、协议与呈现差异。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Replay</strong><p>CI 以只读模式证明提交的 fixture 能稳定复现，绝不在失败时自动接受新输出。</p></div>
+        </div>
+        <div class="warning"><strong>快照刷新是生产 fixture，不是批准行为</strong><p>刷新只能说明新输出可重复，不能证明工具存在、权限正确、错误状态可达或外部副作用符合意图。语义断言与真实入口测试必须先独立证明这些事实，再审查并提交快照变化。</p></div>
 
         <div class="chapter-break"><span>04</span><div><small>Agent 配置</small><strong>设置、凭据与组装</strong></div></div>
 

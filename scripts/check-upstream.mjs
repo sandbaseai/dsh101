@@ -32,6 +32,7 @@ const changed = execFileSync('git', [
   'diff', '--name-only', `${recorded}..${revision}`, '--',
   'README.zh.md', 'package.json', 'LICENSE', 'docs/user', 'apps/cli', 'packages/mcp', 'packages/skill', 'packages/plan', 'packages/web',
   'packages/client/ui-settings-models', 'packages/client/ui-model-selection',
+  'packages/host/plugin-inventory', 'packages/client/ui-settings-plugin-inventory',
   'packages/llm/llm-deepseek',
   'packages/subagent', 'packages/todo', 'packages/goal', 'packages/compaction',
   'packages/interaction', 'packages/fs', 'packages/guard',

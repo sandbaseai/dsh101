@@ -95,6 +95,7 @@
           <a href="#events">事件系统</a>
           <a href="#lifecycle">插件生命周期</a>
           <a href="#client-modules">Web Client 模块</a>
+          <a href="#plugin-inventory">插件清单诊断</a>
           <a href="#scope-routing">Scope 路由</a>
           <a href="#web-server">Web Server</a>
           <a href="#web-api-security">Web API 安全边界</a>
@@ -428,6 +429,17 @@ print(result.final_response)</code></pre>
           <div><span>03</span><strong>Activate</strong><p>immediately 只负责预取和登记，真正的激活顺序由 Fiber 依赖等待决定。</p></div>
         </div>
         <p>单个 bundle 的 rev 来自内容哈希，整图 rev 会随任一行变化。开发时 HMR 重新哈希并通过 SSE 广播；生产图不含 HMR。插件元数据会按包名缓存，因此插件集合变化需重启，单纯重建 bundle 则走 rebuilt 通知。</p>
+
+        <h2 id="plugin-inventory">用插件清单核对运行拓扑<a href="#plugin-inventory" class="anchor">#</a></h2>
+        <p>设置中的「插件」页面是当前 Cordis Loader 树的只读快照。它首次打开时才查询 Host，跳过结构性 group 行，并按 Loader 顺序列出条目 ID、模块标识、有效启用状态和根 Fiber 阶段。</p>
+        <div class="permission-table">
+          <div><code>active</code><strong>运行中</strong><span>根 Fiber 已经完成加载并处于活动阶段。</span></div>
+          <div><code>pending / loading</code><strong>尚未就绪</strong><span>依赖或初始化仍在进行，不能只凭配置行判断能力已经可用。</span></div>
+          <div><code>failed / unloading</code><strong>失败或退出中</strong><span>条目存在于 Loader，但其运行生命周期并非可服务状态。</span></div>
+          <div><code>null</code><strong>没有存活 Fiber</strong><span>快照无法区分从未启动、已结束或其他历史原因。</span></div>
+        </div>
+        <p>插件页支持按模块短名和条目 ID 搜索，但没有修改能力、失败历史或实时订阅；重新打开 Settings 才会取得新快照。它回答“现在加载成什么样”，而 <code>--dump-config</code> 回答“配置由哪一层引入”，两者要结合使用。</p>
+        <div class="warning"><strong>运行清单不提供来源归因</strong><p>清单不会告诉你条目来自 bundle、profile、DSH_HOME patch 还是命令行 override。需要追踪来源时，请检查带逐行来源标注的生效配置；需要失败堆栈时，请查看 Host 启动日志。</p></div>
 
         <h2 id="scope-routing">Scope 路由与生命周期所有权<a href="#scope-routing" class="anchor">#</a></h2>
         <p>Scope 用同一个注册上下文同时表达“哪个 Agent 能看见这项贡献”和“谁负责在生命周期结束时拆除它”。不透明的 ScopeKey 只按对象身份比较；事件使用路由载体过滤，但真实业务对象仍作为显式参数传递。</p>

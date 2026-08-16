@@ -700,7 +700,22 @@ export const en = {
   '只把 Session ID 加入全局归档集合，从所有分组和搜索视图隐藏；日志与 Workspace 记账保持不变。': 'Only adds the Session ID to the global archive set and hides it from every grouping and search view; logs and Workspace bookkeeping remain unchanged.',
   '当前没有删除 Session 或取消归档控件': 'There is currently no Delete Session or Unarchive control',
   '删除 Workspace 只删除注册记录，目录与 Session 日志仍保留，相关会话会进入 Ungrouped。归档同样不是删除；当前 Web UI 没有查看或恢复已归档会话的入口。': 'Deleting a Workspace removes only its registry record; the directory and Session logs remain, and related sessions move to Ungrouped. Archiving is not deletion either; the current Web UI has no entry point to view or restore archived sessions.',
-  '若 Fork 已成功发布子会话、但加入 Workspace 或自动改名失败，错误仍会携带并保留已创建的子会话，客户端先完成对账再报告失败，避免重试时产生重复分支。': 'If a fork publishes the child successfully but Workspace attachment or automatic renaming fails, the error still identifies and preserves the created child. The client reconciles that partial success before reporting failure, preventing a retry from creating duplicate forks.'
+  '若 Fork 已成功发布子会话、但加入 Workspace 或自动改名失败，错误仍会携带并保留已创建的子会话，客户端先完成对账再报告失败，避免重试时产生重复分支。': 'If a fork publishes the child successfully but Workspace attachment or automatic renaming fails, the error still identifies and preserves the created child. The client reconciles that partial success before reporting failure, preventing a retry from creating duplicate forks.',
+  '插件清单诊断': 'Plugin inventory diagnostics',
+  '用插件清单核对运行拓扑': 'Verify runtime topology with the plugin inventory',
+  '设置中的「插件」页面是当前 Cordis Loader 树的只读快照。它首次打开时才查询 Host，跳过结构性 group 行，并按 Loader 顺序列出条目 ID、模块标识、有效启用状态和根 Fiber 阶段。': 'The Plugins page in Settings is a read-only snapshot of the current Cordis Loader tree. It queries the host only when first opened, skips structural group rows, and lists entry ID, module specifier, effective enabled state, and root Fiber phase in Loader order.',
+  '运行中': 'Running',
+  '根 Fiber 已经完成加载并处于活动阶段。': 'The root Fiber has completed loading and is active.',
+  '尚未就绪': 'Not ready yet',
+  '依赖或初始化仍在进行，不能只凭配置行判断能力已经可用。': 'Dependencies or initialization are still in progress; a configuration row alone does not prove the capability is available.',
+  '失败或退出中': 'Failed or unloading',
+  '条目存在于 Loader，但其运行生命周期并非可服务状态。': 'The entry exists in the Loader, but its runtime lifecycle is not in a serviceable state.',
+  '没有存活 Fiber': 'No live Fiber',
+  '快照无法区分从未启动、已结束或其他历史原因。': 'The snapshot cannot distinguish never started, already ended, or other historical causes.',
+  '插件页支持按模块短名和条目 ID 搜索，但没有修改能力、失败历史或实时订阅；重新打开 Settings 才会取得新快照。它回答“现在加载成什么样”，而 ': 'The Plugins page can search by module short name and entry ID, but offers no mutation, failure history, or live subscription; reopening Settings obtains a new snapshot. It answers “what is loaded now,” while ',
+  ' 回答“配置由哪一层引入”，两者要结合使用。': ' answers “which layer introduced the configuration”; use both together.',
+  '运行清单不提供来源归因': 'The runtime inventory does not attribute sources',
+  '清单不会告诉你条目来自 bundle、profile、DSH_HOME patch 还是命令行 override。需要追踪来源时，请检查带逐行来源标注的生效配置；需要失败堆栈时，请查看 Host 启动日志。': 'The inventory does not say whether an entry came from a bundle, profile, DSH_HOME patch, or command-line override. For provenance, inspect effective configuration with per-row source annotations; for failure stacks, inspect the host startup log.'
 }
 
 export const normalizedEn = new Map(

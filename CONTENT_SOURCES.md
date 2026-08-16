@@ -53,6 +53,7 @@ Last upstream review:
 | ACP automation transport, capability negotiation, prompt and committed-message semantics, permissions, cancellation, multi-session ownership, and connection cleanup | `packages/acp/README.zh.md`, `packages/acp/acp/README.zh.md`, `packages/examples/acp-demo/README.zh.md` |
 | Services and dependency injection | `docs/user/develop/framework/service.zh.md` |
 | Event dispatch modes | `docs/user/develop/framework/events.zh.md` |
+| Defensive failure reporting, public-boundary normalization, asynchronous interval ownership, quiescent disposal, listener isolation, scrubbed environments, private temporary files, and link-safe deletion | `docs/defensive-patterns.zh.md` |
 | Capability role design | `docs/user/develop/practice/index.zh.md` |
 | LLM adapter protocol | `docs/user/develop/practice/llm-adapter.zh.md` |
 | LLM streaming, normalized failures, retry policy, max-token termination, and Web status | `docs/subsystems/llm-streaming.zh.md`, `docs/subsystems/session.zh.md`, `packages/core/agent-loop/README.zh.md`, `packages/llm/llm-retry/README.zh.md`, `packages/client/runtime/README.zh.md`, `packages/client/ui-conversation/README.zh.md` |

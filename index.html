@@ -112,6 +112,7 @@
           <a href="#config-schema">配置 Schema</a>
           <a href="#events">事件系统</a>
           <a href="#lifecycle">插件生命周期</a>
+          <a href="#defensive-patterns">防御性失败模式</a>
           <a href="#client-modules">Web Client 模块</a>
           <a href="#ui-slots">UI Slots</a>
           <a href="#slot-injection">Slot 声明注入</a>
@@ -679,6 +680,20 @@ print(result.final_response)</code></pre>
           <span>PENDING</span><i>→</i><span>LOADING</span><i>→</i><span class="active-state">ACTIVE</span><i>→</i><span>UNLOADING</span><i>→</i><span>DISPOSED</span>
         </div>
         <p><code>ctx.on()</code>、工具注册和 <code>ctx.effect()</code> 都由 Fiber 追踪，卸载时自动撤销。若多个清理步骤存在先后依赖，应放入同一个 effect 的 disposer 中串行执行。</p>
+
+        <h2 id="defensive-patterns">失败、并发与清理的防御性模式<a href="#defensive-patterns" class="anchor">#</a></h2>
+        <p>这些不是抽象风格建议，而是 DeepSeek Harness 从已经发布或差点发布的缺陷类别中提炼出的实现规则。共同目标是让失败事实保持完整、资源真正停稳，并让不可信输入无法跨越边界。</p>
+        <div class="compare-grid">
+          <div><strong>正交事实分别上报</strong><p>超时、signal 与 exitCode 可以同时成立；例如进程捕获终止信号后仍以 0 退出。不得用一个标志的分支决定是否记录另一个标志。</p></div>
+          <div><strong>公共边界先规范化</strong><p>同一失败可由实现抛错或终止分片表达，公共 Runtime 应先统一成约定形态；middleware 与消费者自身缺陷仍保持异常，不能混成 Provider 失败。</p></div>
+          <div><strong>异步状态不等于单次结果</strong><p>followup 没有逐消息完成值，status 和 whenIdle 也可能覆盖队列、steering 与注入工作。自动化调用方必须明确自己观察的完整活动区间。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>Dispose 必须等待完全停稳</strong><p>只发终止或 abort 信号便返回会留下孤儿任务。清理应先关闭监听与通知注册，再等待子进程退出和所有工作达到 quiescence。</p></div>
+          <div><strong>分发器隔离回调异常</strong><p>一个用户监听器抛错不能 reject 它所在的核心 Promise，也不能饿死后续监听器；分发循环应逐项捕获并记录。</p></div>
+          <div><strong>敏感环境与临时路径默认不可信</strong><p>子进程环境应移除名称中包含 KEY、SECRET、TOKEN 或 PASSWORD 的值；spill 与临时文件使用 0700 私有目录、随机名称、wx 和 0600。</p></div>
+        </div>
+        <div class="warning"><strong>删除链接，不要递归删除它指向的目录</strong><p>可能是 symlink 或 Windows junction 的路径应先 lstat，再用 unlink 删除链接本身；只有确认是真实目录后才允许 recursive rm，避免沿链接越界删除目标。</p></div>
 
         <h2 id="client-modules">Web Client 模块与启动图<a href="#client-modules" class="anchor">#</a></h2>
         <p>带浏览器界面的插件通过 package.json 的 <code>dsh.client</code> 声明加入 Web 启动图。Host 把每个 bundle 的地址、内容哈希、依赖边和预取标记组合进 <code>window.__DSH_BOOT__</code>；浏览器必须先验证整张图，才会启动任何模块。</p>

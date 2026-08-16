@@ -71,6 +71,7 @@
         <section>
           <h2>核心概念</h2>
           <a href="#workspace">工作区</a>
+          <a href="#workspace-list">工作区列表收敛</a>
           <a href="#directory-picker">工作区选择器</a>
           <a href="#session">会话与任务</a>
           <a href="#session-log">Session 事件日志</a>
@@ -247,6 +248,16 @@
         <h2 id="workspace">选择工作区<a href="#workspace" class="anchor">#</a></h2>
         <p>点击「选择工作区」，添加你启动 <code>dsh</code> 时所在的项目目录。工作区决定 Agent 能够读取和修改的文件范围。</p>
         <div class="warning"><strong>注意</strong><p>选择工作区前，会话输入框保持禁用。请勿将包含敏感凭证的目录设为工作区。</p></div>
+
+        <h3 id="workspace-list">工作区列表如何收敛<a href="#workspace-list" class="anchor">#</a></h3>
+        <p>Workspace 与 Session 列表各有独立的 pending → ready 基线。基线请求进行时到达的新增、更新、移除和顺序帧不会丢失，而是在响应之上重放；重连后的新基线会接纳其他客户端在离线期间提交的持久顺序。</p>
+        <div class="compare-grid">
+          <div><strong>拖拽先乐观显示</strong><p>Workspace 拖拽会立即安装本地顺序，再等待 Host 确认。只有最新请求的回声可以结算它，更新的 Host 顺序帧又优先于较旧回声。</p></div>
+          <div><strong>失败回到已确认值</strong><p>最新排序请求被拒时，列表恢复最近一次 Host 确认的顺序，不会倒退到更早、且仍未提交的某次拖拽。</p></div>
+          <div><strong>删除不会被迟到帧复活</strong><p>已移除的 Workspace id 在当前进程保留删除标记，延迟到达的 changed 帧不能重新插入它；删除成功后相关 Session 转入 Ungrouped。</p></div>
+        </div>
+        <p>Workspace 的拖拽顺序始终由 Host 持久化。Session 顺序则取决于视图：真实 Workspace 的手动排序可写回 Host，Ungrouped 与跨 Workspace 的单列表没有共同记账，只保存在当前浏览器。</p>
+        <div class="warning"><strong>列表顺序不是目录权限</strong><p>重排、折叠或删除 Workspace 注册记录都不会移动项目目录，也不会删除 Session 日志。它们只改变 Host 记账与浏览器投影。</p></div>
 
         <h2 id="directory-picker">工作区目录如何选择<a href="#directory-picker" class="anchor">#</a></h2>
         <p>目录选择不是浏览器自行读取磁盘，而是由宿主提供稳定的能力。自适应后端只在启动时判定一次：本机回环访问、非 SSH 且存在可用桌面会话时使用原生系统对话框；远程、无显示或情况不明确时使用应用内浏览器。</p>

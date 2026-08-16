@@ -101,6 +101,7 @@
           <a href="#tools">开发 Tool</a>
           <a href="#tool-execution-pipeline">Tool 执行流水线</a>
           <a href="#tool-output-contract">Tool 输出契约</a>
+          <a href="#parallel-tools">并行 Tool 调度</a>
           <a href="#tool-call-tree">Code Mode 调用树</a>
           <a href="#tool-details-boundary">工具详情边界</a>
           <a href="#config-schema">配置 Schema</a>
@@ -529,6 +530,16 @@ print(result.final_response)</code></pre>
         </div>
         <div class="detail-card"><strong>呈现函数必须是纯函数</strong><p>pending 卡片只能依赖调用参数，completed 卡片只能依赖参数和持久结果。它们在实时运行与日志回放都会执行，不能读取瞬时服务状态或产生副作用；旧日志参数校验失败时应安全回退。</p></div>
         <div class="warning"><strong>替换 content 不是保密边界</strong><p>内容重写只改变模型和日志看到的投影，执行流水线中的规范值仍可能被编程消费者读取。若某个值绝不能交给下游，应阻止结果或替换 value，而不是仅遮盖文本。</p></div>
+
+        <h3 id="parallel-tools">并行正文，顺序提交<a href="#parallel-tools" class="anchor">#</a></h3>
+        <p>同一步骤中的连续安全调用进入有界滚动池，默认最多重叠 10 个；独占调用会等待当前池完全排空，单独执行，并阻止后面的调用越过它。把上限设为 1 即恢复完全串行分派。</p>
+        <div class="compare-grid">
+          <div><strong>并发必须明确选择</strong><p>只有 isConcurrencySafe 对已解析参数确切返回 true 才进入并行池。工具未知、隐藏、未声明分类器、参数无效、分类器抛错或返回其他值时一律按独占处理。</p></div>
+          <div><strong>完成快不等于先提交</strong><p>后一个工具可以先完成正文，但它的 post-execute、tool/result 和 additionalContexts 必须等待前序槽位结算。模型历史因此始终与模型发出的调用顺序一致。</p></div>
+          <div><strong>尚未启动会重新分类</strong><p>每次补充滚动池前都会读取当前可见定义；前序结果导致注册表变化时，后续调用可以即时变成独占屏障，而不会沿用过期分类。</p></div>
+        </div>
+        <div class="detail-card"><strong>并发安全是状态所有权承诺</strong><p>选择并行的工具正文不能修改父级拥有的可变状态；共享状态上的竞态必须可交换，或在冲突时安全拒绝。并发池只提升允许重叠的工作，不改变策略与日志契约。</p></div>
+        <div class="warning"><strong>取消不会遗弃已经启动的正文</strong><p>取消会停止补充池并等待已启动调用 settle，再按顺序提交它们及其上下文；尚未分派的模型调用会得到 ABORTED_BEFORE_DISPATCH 合成结果，保证 transcript 仍然配对完整。</p></div>
 
         <h3 id="tool-call-tree">Code Mode 的嵌套工具调用树<a href="#tool-call-tree" class="anchor">#</a></h3>
         <p>Chat 按 call id 配对根工具调用与结果，再把 Code Dispatch 的 start 与 settlement 折叠进该根 Context。每个 ToolCallBlock 通过 <code>subCalls</code> 按启动顺序递归拥有 child；child 不会成为独立 Chat 根记录。</p>

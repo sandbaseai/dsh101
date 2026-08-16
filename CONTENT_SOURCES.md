@@ -87,6 +87,7 @@ Last upstream review:
 | Layered user settings, safe mutation, revision conflicts, and secret redaction | `docs/subsystems/settings.zh.md`, `packages/settings/settings/README.zh.md`, `packages/client/ui-settings/README.zh.md`, `packages/host/apiproxy/README.zh.md` |
 | Browser schema rehydration, user-layer drafts, validation, and executable-envelope trust | `packages/client/schema-form/README.zh.md`, `packages/client/ui-settings-plugins/README.zh.md` |
 | Credential references and rotation | `docs/subsystems/credentials.zh.md` |
+| Frozen launch environment, `.env` provenance, and credential-source precedence | `packages/util/launch-environment/README.zh.md`, `packages/boot/app-boot/README.zh.md`, `packages/credentials/credentials-local/README.zh.md` |
 | Agent preset composition | `packages/preset/agent-presets/README.zh.md` |
 | Persona and system prompt assembly | `packages/preset/persona/README.zh.md`, `docs/subsystems/system-prompt.zh.md` |
 | Durable workspace instruction discovery, refresh, and byte budgets | `packages/context/agent-instructions/README.zh.md` |

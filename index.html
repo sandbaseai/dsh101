@@ -113,6 +113,7 @@
           <a href="#settings-system">Settings 分层</a>
           <a href="#schema-form">Schema 表单</a>
           <a href="#credentials-system">凭据引用</a>
+          <a href="#launch-environment">启动环境</a>
           <a href="#agent-presets">Agent Presets</a>
           <a href="#prompt-assembly">Persona 与提示词</a>
           <a href="#workspace-instructions">工作区指令</a>
@@ -631,6 +632,21 @@ print(result.final_response)</code></pre>
           <div><strong>set / unset</strong><p>只修改 provider 管理的可写层；被只读环境变量遮蔽时明确拒绝。</p></div>
         </div>
         <div class="warning"><strong>不要把 Secret 放进 Settings</strong><p>Secret schema 字段在所有网络 descriptor 中都必须脱敏。模型配置引用凭据名，而不是复制 API Key。</p></div>
+
+        <h3 id="launch-environment">冻结的启动环境与来源优先级<a href="#launch-environment" class="anchor">#</a></h3>
+        <p>产品 CLI 启动时把环境冻结成带来源的不可变快照。Harness 自己解析面向用户的值时读取该快照，而不是压平后的 <code>process.env</code>，因为只有快照能区分每个值来自哪一层。</p>
+        <div class="layer-stack">
+          <div><span>3</span><strong>process · 启动 shell / CI / 容器的本次明确意图</strong></div>
+          <div><span>2</span><strong>project-env · 调用目录的 <code>.env</code></strong></div>
+          <div><span>1</span><strong>user-env · <code>$DSH_HOME/.env</code> 机器默认值</strong></div>
+        </div>
+        <p><code>getFrom</code> 可以拒绝某些来源层，但不能改变剩余层的可信顺序。变量名按平台规则匹配：POSIX 区分大小写，Windows 不区分大小写，避免同名变量因拼写大小写而错误越级。</p>
+        <div class="compare-grid">
+          <div><strong>只在启动时发现</strong><p>只读取调用目录和 Harness home，不搜索父目录；启动后修改 shell 环境或 Web 中切换 Workspace 都不会改变快照。</p></div>
+          <div><strong>文件值仍会物化</strong><p>非 bootstrap 变量也写入 <code>process.env</code> 供 Loader 和第三方库使用，因此快照并不是子进程隔离边界。</p></div>
+          <div><strong>凭据再加一层</strong><p>本地 Credentials 的顺序是继承环境 → 受管 <code>.credentials.yaml</code> → project-env → user-env；受管写入会覆盖旧的两个 <code>.env</code> 后备值。</p></div>
+        </div>
+        <div class="warning"><strong>选择工作区不会加载它的 .env</strong><p>项目环境绑定 Harness 的 invocation cwd，而不是随后由 Agent 选择的工作区。否则模型在会话中途切换目录，就可能间接改变宿主配置和凭据来源。</p></div>
 
         <h2 id="agent-presets">Agent Presets<a href="#agent-presets" class="anchor">#</a></h2>
         <p>Preset 是包含 <code>agent.cordis.yml</code> 的目录，决定一个 Agent 可见的工具、提示词和投影插件。Roster 把每个版本的组装常驻挂载一次，各会话通过 scope 父链加入，实现 <code>agent → preset → global</code> 的近层遮蔽。</p>

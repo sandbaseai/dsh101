@@ -1,48 +1,54 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { normalizedEn } from '../locales.js'
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
+const script = readFileSync(new URL('../landing.js', import.meta.url), 'utf8')
+const styles = readFileSync(new URL('../landing.css', import.meta.url), 'utf8')
 const manifest = readFileSync(new URL('../public/site.webmanifest', import.meta.url), 'utf8')
 const socialCard = readFileSync(new URL('../public/social-card.svg', import.meta.url), 'utf8')
+
 const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]))
 const brokenAnchors = [...html.matchAll(/\bhref="#([^"]+)"/g)]
   .map(match => match[1])
   .filter(id => !ids.has(id))
 if (brokenAnchors.length) throw new Error(`Broken local anchors: ${[...new Set(brokenAnchors)].join(', ')}`)
 
-const requiredSections = ['quickstart', 'run', 'models', 'workspace', 'task', 'python', 'develop', 'plugin-shapes', 'reference', 'capabilities', 'preview']
-const missingSections = requiredSections.filter(id => !ids.has(id))
-if (missingSections.length) throw new Error(`Missing official-guide sections: ${missingSections.join(', ')}`)
+for (const [label, url] of Object.entries({
+  repository: 'https://github.com/deepseek-ai/deepseek-harness',
+  documentation: 'https://deepseek-harness.github.io/deepseek-harness/en/guide/quickstart',
+  plugins: 'https://github.com/topics/dsh-plugin',
+  paper: 'https://github.com/cordiverse/paper',
+})) {
+  if (!html.includes(url)) throw new Error(`Missing ${label} reference: ${url}`)
+}
 
 for (const required of [
+  '一切皆插件', 'Everything is a plugin',
+  'Agent = Model + Harness',
+  'Cordis 内核', '每次运行都可追溯',
+  'Standard mode', 'Code mode', 'Minimal mode', 'Creator mode',
   'npx @deepseek-ai/dsh web',
-  'deepseek-harness-sdk',
-  '@deepseek-ai/cordis',
-  'danger-full-access',
-  'DeepSeek Harness 是由 DeepSeek AI 开发的开源 agent harness',
-  '本站为非官方社区镜像',
+  'git clone https://github.com/deepseek-ai/deepseek-harness',
 ]) {
-  if (!html.includes(required)) throw new Error(`Missing canonical public content: ${required}`)
+  if (!html.includes(required)) throw new Error(`Missing official landing content: ${required}`)
 }
+
+const localizedNodes = [...html.matchAll(/<[^>]+\bdata-zh="([^"]*)"[^>]+\bdata-en="([^"]*)"[^>]*>/g)]
+if (localizedNodes.length < 30) throw new Error(`Landing locale coverage is unexpectedly small: ${localizedNodes.length}`)
+for (const [, zh, en] of localizedNodes) {
+  if (!zh.trim() || !en.trim()) throw new Error('Landing locale pair contains an empty value')
+}
+
 for (const forbidden of ['TypeRT', 'DSH 101', '最后核对上游提交']) {
   if ([html, manifest, socialCard].some(source => source.includes(forbidden))) throw new Error(`Stale or incorrect public copy remains: ${forbidden}`)
 }
 
-const translatableHtml = html
-  .replace(/<(script|style|pre|svg|title)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
-  .replace(/<code\b[^>]*>[\s\S]*?<\/code>/gi, '<i></i>')
-  .replace(/<!--([\s\S]*?)-->/g, '')
-const chineseTextNodes = [...translatableHtml.matchAll(/>([^<]+)</g)]
-  .map(match => match[1].trim())
-  .filter(text => text && /\p{Script=Han}/u.test(text))
-const untranslated = [...new Set(chineseTextNodes.filter(text => !normalizedEn.has(text)))]
-if (untranslated.length) throw new Error(`English locale is missing ${untranslated.length} text nodes:\n${untranslated.map(text => `- ${text}`).join('\n')}`)
-
-for (const asset of ['public/favicon.svg', 'public/wordmark.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', 'docs/cloudflare-deploy.md', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml']) {
+for (const asset of ['public/favicon.svg', 'public/wordmark.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', 'docs/cloudflare-deploy.md', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml', 'landing.js', 'landing.css']) {
   if (!existsSync(new URL(`../${asset}`, import.meta.url))) throw new Error(`Required project asset is missing: ${asset}`)
 }
-for (const metadata of ['rel="manifest"', 'rel="canonical"', 'property="og:title"', 'property="og:url"', 'name="twitter:card"']) {
+for (const metadata of ['rel="manifest"', 'rel="canonical"', 'property="og:title"', 'property="og:url"', 'name="twitter:card"', 'hreflang="zh-CN"', 'hreflang="en-US"']) {
   if (!html.includes(metadata)) throw new Error(`Required page metadata is missing: ${metadata}`)
 }
+if (!script.includes('navigator.clipboard.writeText')) throw new Error('Quick-start copy interaction is missing')
+if (!styles.includes('@media(max-width:600px)')) throw new Error('Mobile landing breakpoint is missing')
 
-console.log(`content check passed (${ids.size} ids, ${requiredSections.length} public sections)`)
+console.log(`content check passed (${ids.size} ids, ${localizedNodes.length} bilingual landing nodes)`)

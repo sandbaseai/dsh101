@@ -1,8 +1,8 @@
 # Content sources
 
-DSH 101 is an unofficial community mirror. Its public learning path follows the
-pages selected by the official DeepSeek Harness documentation website rather
-than exposing every internal repository document.
+DSH 101 is an unofficial community reference implementation. Its product home
+follows the official DeepSeek Harness launch page, while technical learning
+links lead to the official documentation publication.
 
 Last upstream review:
 
@@ -14,6 +14,10 @@ Last upstream review:
 
 | DSH 101 surface | Canonical upstream source |
 | --- | --- |
+| Product narrative, visual hierarchy, feature screenshots, runtime modes, ecosystem calls to action | `https://www.deepseek.com/harness/en/` |
+| Published quickstart and documentation navigation | `https://deepseek-harness.github.io/deepseek-harness/en/guide/quickstart` |
+| Community plugin discovery | `https://github.com/topics/dsh-plugin` |
+| Spatiotemporal composability paper and Cordis foundations | `https://github.com/cordiverse/paper` |
 | Brand wordmark and favicon | `website/public/wordmark.svg`, `website/public/favicon.svg` |
 | Navigation, public routes, and locale structure | `website/docs.ts`, `website/.vitepress/config.ts` |
 | Product identity, preview status, install, and source launch | `README.md`, `README.zh.md` |

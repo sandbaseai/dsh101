@@ -10,14 +10,14 @@ if (brokenAnchors.length > 0) {
   throw new Error(`Broken local anchors: ${[...new Set(brokenAnchors)].join(', ')}`)
 }
 
-const requiredSections = ['quickstart', 'install', 'model', 'workspace', 'permissions', 'sandbox', 'python', 'plugins', 'tools', 'config-schema', 'events', 'lifecycle', 'capability-seam', 'llm-adapter', 'profiles', 'mcp', 'skills', 'plan-mode', 'web-tools', 'subagents', 'todos', 'goals', 'compaction', 'guardrails']
+const requiredSections = ['quickstart', 'install', 'model', 'workspace', 'permissions', 'sandbox', 'python', 'plugins', 'tools', 'config-schema', 'events', 'lifecycle', 'capability-seam', 'llm-adapter', 'profiles', 'mcp', 'skills', 'plan-mode', 'web-tools', 'attachments', 'user-questions', 'subagents', 'todos', 'goals', 'compaction', 'guardrails', 'background-jobs']
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)
 }
 
 const localeSource = readFileSync(new URL('../locales.js', import.meta.url), 'utf8')
-for (const marker of ['Sandbox modes', 'Python SDK quickstart', 'Configuration schema', 'Event system', 'Capability roles', 'LLM adapters', 'Connect an MCP server', 'Skill discovery and loading', 'Web search and fetch', 'Subagent delegation', 'Persistent goals', 'Context compaction', 'Tool guardrails', 'Content provenance']) {
+for (const marker of ['Sandbox modes', 'Python SDK quickstart', 'Configuration schema', 'Event system', 'Capability roles', 'LLM adapters', 'Connect an MCP server', 'Skill discovery and loading', 'Web search and fetch', 'Image attachments', 'Ask the user', 'Subagent delegation', 'Persistent goals', 'Context compaction', 'Tool guardrails', 'Background jobs', 'Content provenance']) {
   if (!localeSource.includes(marker)) throw new Error(`English locale is missing: ${marker}`)
 }
 

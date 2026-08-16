@@ -94,6 +94,8 @@
           <a href="#skills">Skills</a>
           <a href="#plan-mode">Plan Mode</a>
           <a href="#web-tools">Web 工具</a>
+          <a href="#attachments">图片附件</a>
+          <a href="#user-questions">向用户提问</a>
         </section>
         <section>
           <h2>持续执行</h2>
@@ -102,6 +104,7 @@
           <a href="#goals">持久 Goal</a>
           <a href="#compaction">上下文压缩</a>
           <a href="#guardrails">工具 Guardrails</a>
+          <a href="#background-jobs">后台任务</a>
         </section>
       </nav>
     </aside>
@@ -343,6 +346,26 @@ print(result.final_response)</code></pre>
         </div>
         <p>工具是否注册由产品配置决定，而不是由后端当前是否可用决定。这保持了模型看到的 Schema 稳定；提供方缺失或冲突会在执行时返回结构化 <code>WebError</code>。</p>
 
+        <h2 id="attachments">图片附件<a href="#attachments" class="anchor">#</a></h2>
+        <p>图片进入会话前会先被校验并持久化，再以不可变引用写入消息。会话日志只保存内容寻址的 attachment id、媒体类型、字节数和固有尺寸，不保存浏览器对象 URL、宿主临时路径、提供方 URL 或 base64 正文。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>验证全部图片</strong><p>检查真实媒体签名、解码结果、尺寸、单图与整批限制。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>原子持久化</strong><p>只有整批通过准入检查后才保存，拒绝不会留下部分对象。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>追加会话事件</strong><p>模型与历史记录拿到耐久引用，读取时再次校验摘要与元数据。</p></div>
+        </div>
+        <div class="detail-card"><strong>当前支持范围</strong><p>版本一只接受 PNG、JPEG、WebP 和 GIF 栅格图片。<code>AttachmentId</code> 是不透明标识；调用方不得解析它或据此拼接文件路径。</p></div>
+
+        <h2 id="user-questions">向用户提问<a href="#user-questions" class="anchor">#</a></h2>
+        <p>当 Agent 缺少会实质改变结果的信息时，可以通过结构化问题暂停并等待人类回答。每个问题带稳定 id，可提供单选、多选、自由文本和补充说明；回答仍按 id 返回，避免批量提问时依赖位置。</p>
+        <div class="compare-grid">
+          <div><strong>普通选择</strong><p>选项标签同时是 UI 文案和返回给模型的稳定值；说明文字只用于帮助决策。</p></div>
+          <div><strong>Plan review</strong><p>意图只改变 UI 呈现，不改变回答协议；批准项由标签明确指定，不能靠选项顺序猜测。</p></div>
+          <div><strong>自由输入</strong><p>单选时“其他”会覆盖已选项；多选时可以同时保留选项与补充文本。</p></div>
+        </div>
+        <div class="warning"><strong>只能由运行时根提问</strong><p>受父 Agent 管理的 Subagent 没有独立的人类应答者，因此不能发起交互请求；取消、没有 UI provider 或调用方已失活都会返回结构化错误，而不是无限等待。</p></div>
+
         <div class="chapter-break"><span>05</span><div><small>持续执行</small><strong>委派、计划与长上下文</strong></div></div>
 
         <h2 id="subagents">Subagent 委派<a href="#subagents" class="anchor">#</a></h2>
@@ -387,6 +410,16 @@ print(result.final_response)</code></pre>
           <div><div class="guard-icon">↻</div><strong>Repeat Reminder</strong><p>按 Agent 统计同一工具和规范化参数的连续调用，在 3、5、8 次等阈值注入逐级提醒。</p><small>提供建议，不阻止调用</small></div>
         </div>
         <p>不受跟踪的记录类工具对重复链透明，因此在两次相同调用之间写 Todo 不会掩盖循环。各 Subagent 的重复链彼此隔离。</p>
+
+        <h2 id="background-jobs">后台任务<a href="#background-jobs" class="anchor">#</a></h2>
+        <p>长时间运行的 Bash 与 Subagent 共用后台任务运行时。启动后会立即得到形如 <code>bash-1</code> 或 <code>subagent-2</code> 的 job id，再通过统一接口查看状态、增量读取输出、等待完成或请求终止。</p>
+        <div class="todo-demo">
+          <div><i></i><span>running</span><p>生产方持有执行资源，任务可读取新输出。</p></div>
+          <div class="doing"><i></i><span>stopping</span><p>终止请求已发出，等待生产方释放资源。</p></div>
+          <div class="done"><i>✓</i><span>completed / killed / failed</span><p>终态不可逆，并记录结束时间与详细原因。</p></div>
+        </div>
+        <p>输出读取使用单一消费游标：流式任务每次返回上次读取后的增量，只有最终输出的任务则在结束后重复返回同一结果。任务访问按拥有者 session 授权；Agent 被释放时，其任务会被取消并等待清理完成。</p>
+        <div class="detail-card"><strong>取消不是瞬间完成</strong><p><code>kill</code> 只请求生产方终止并把状态推进到 <code>stopping</code>。只有生产方真正释放资源、<code>done</code> settle 后，任务才进入 <code>killed</code> 或其他终态。</p></div>
 
         <div class="source-note">
           <div><span class="pulse"></span><strong>内容来源</strong></div>

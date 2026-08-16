@@ -32,6 +32,8 @@ Last upstream review:
 | Skill discovery and loading | `packages/skill/skill/README.zh.md`, `packages/skill/tool-skill/README.zh.md` |
 | Plan collaboration state | `packages/plan/plan-mode/README.zh.md` |
 | Web search and fetch tools | `packages/web/tool-web/README.zh.md` |
+| Persistent image attachments | `docs/subsystems/attachment.zh.md` |
+| Structured user questions | `docs/subsystems/user-questions.zh.md` |
 | Subagent delegation and lifecycles | `packages/subagent/subagent/README.zh.md`, `packages/subagent/tool-subagent/README.zh.md` |
 | Todo snapshots | `packages/todo/tool-todo/README.zh.md` |
 | Persistent goals and goal rounds | `packages/goal/tool-goal/README.zh.md`, `packages/goal/goal-round-driver/README.zh.md` |
@@ -39,6 +41,7 @@ Last upstream review:
 | Permission presets and approvals | `packages/interaction/permission-presets/README.zh.md`, `packages/interaction/user-approval/README.zh.md` |
 | Filesystem sandbox policy | `packages/fs/fs-sandbox/README.zh.md` |
 | Tool reliability guardrails | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
+| Background job runtime | `docs/subsystems/jobs.zh.md` |
 
 ## Refresh checklist
 

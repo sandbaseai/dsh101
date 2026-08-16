@@ -8,6 +8,7 @@ const script = readFileSync(new URL('../landing.js', import.meta.url), 'utf8')
 const styles = readFileSync(new URL('../landing.css', import.meta.url), 'utf8')
 const manifest = readFileSync(new URL('../public/site.webmanifest', import.meta.url), 'utf8')
 const socialCard = readFileSync(new URL('../public/social-card.svg', import.meta.url), 'utf8')
+const brandStyles = readFileSync(new URL('../brand.css', import.meta.url), 'utf8')
 
 const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]))
 const brokenAnchors = [...html.matchAll(/\bhref="#([^"]+)"/g)]
@@ -51,6 +52,17 @@ for (const forbidden of ['TypeRT', 'DSH 101', '最后核对上游提交']) {
   if ([html, cordis, manifest, socialCard].some(source => source.includes(forbidden))) throw new Error(`Stale or incorrect public copy remains: ${forbidden}`)
 }
 
+for (const forbidden of ['—', '–']) {
+  if ([html, cordis, ecosystem, quickstart].some(source => source.includes(forbidden))) throw new Error(`Taste preflight failed, forbidden dash remains: ${forbidden}`)
+}
+if (!brandStyles.includes('--brand-green:#22bd7e')) throw new Error('Sandbase brand green token is missing')
+if (!html.includes('class="hero-product"') || !html.includes('feat-plugin.en.png')) throw new Error('Taste preflight failed, hero lacks a real product visual')
+if (html.includes('class="hero-glow"')) throw new Error('Taste preflight failed, decorative hero glow remains')
+if (/<article><span>0\d<\/span>/.test(html)) throw new Error('Taste preflight failed, numbered feature labels remain')
+const eyebrowCount = [...html.matchAll(/class="(?:kicker|section-label)"/g)].length
+if (eyebrowCount > 2) throw new Error(`Taste preflight failed, too many eyebrow labels: ${eyebrowCount}`)
+if (!socialCard.toLowerCase().includes('#22bd7e')) throw new Error('Social card does not use Sandbase green')
+
 for (const concept of ['时间可组合性', '空间可组合性', '可逆副作用', '响应式协效应', 'revertible effects', 'Reactive coeffects']) {
   if (!cordis.toLowerCase().includes(concept.toLowerCase())) throw new Error(`Cordis concept page is missing: ${concept}`)
 }
@@ -72,7 +84,7 @@ for (const repository of ['deepseek-ai/deepseek-harness', 'awesome-dsh-plugin/aw
   if (!ecosystem.includes(`https://github.com/${repository}`)) throw new Error(`Ecosystem guide is missing repository source: ${repository}`)
 }
 
-for (const asset of ['public/favicon.svg', 'public/wordmark.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', 'docs/cloudflare-deploy.md', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml', 'landing.js', 'landing.css', 'navigation.css', 'subpage.js', 'subpage.css', 'ecosystem.css', 'quickstart.css', 'quickstart.js', 'cordis/index.html', 'ecosystem/index.html', 'quickstart/index.html', 'vite.config.js']) {
+for (const asset of ['public/favicon.svg', 'public/wordmark.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', 'docs/cloudflare-deploy.md', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml', 'landing.js', 'landing.css', 'navigation.css', 'brand.css', 'redesign.css', 'subpage.js', 'subpage.css', 'ecosystem.css', 'quickstart.css', 'quickstart.js', 'cordis/index.html', 'ecosystem/index.html', 'quickstart/index.html', 'vite.config.js']) {
   if (!existsSync(new URL(`../${asset}`, import.meta.url))) throw new Error(`Required project asset is missing: ${asset}`)
 }
 for (const metadata of ['rel="manifest"', 'rel="canonical"', 'property="og:title"', 'property="og:url"', 'name="twitter:card"', 'hreflang="zh-CN"', 'hreflang="en-US"']) {

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="DeepSeek Harness 开发者预览：一切皆插件。每项 Agent 能力都可替换、重组与扩展。" />
-    <meta name="theme-color" content="#05070c" />
+    <meta name="theme-color" content="#050907" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="DeepSeek Harness 开发者预览：一切皆插件" />
     <meta property="og:description" content="模型、工具、Skills、Session、沙箱、存储、循环、调度和 UI 都由插件提供。" />
@@ -34,19 +34,13 @@
 
     <main id="top">
       <section class="hero-section">
-        <div class="hero-grid"></div>
-        <div class="hero-glow"></div>
-        <div class="hero-content">
+        <div class="hero-layout"><div class="hero-content">
           <p class="kicker" data-zh="DeepSeek Harness 开发者预览" data-en="DeepSeek Harness developer preview">DeepSeek Harness 开发者预览</p>
           <h1 data-zh="一切皆插件" data-en="Everything is a plugin">一切皆插件</h1>
-          <p class="hero-lead" data-zh="DeepSeek Harness 现已面向全球 Agent Harness 开发者开放开发者预览，并同步开放源代码。" data-en="DeepSeek Harness is now in developer preview for agent harness developers worldwide — source code included.">DeepSeek Harness 现已面向全球 Agent Harness 开发者开放开发者预览，并同步开放源代码。</p>
-          <p class="hero-copy" data-zh="每项能力都是可以替换或重新组合的插件：模型、工具、Skills、Session、沙箱、存储、循环、调度以及 UI。" data-en="Every capability is a plugin that can be swapped or recomposed: models, tools, skills, sessions, sandboxes, storage, loops, scheduling, and the UI.">每项能力都是可以替换或重新组合的插件：模型、工具、Skills、Session、沙箱、存储、循环、调度以及 UI。</p>
+          <p class="hero-lead" data-zh="开放源代码的 Agent Harness。模型、工具、会话与 UI 都能通过插件重新组合。" data-en="An open-source agent harness where models, tools, sessions, and UI can be recomposed as plugins.">开放源代码的 Agent Harness。模型、工具、会话与 UI 都能通过插件重新组合。</p>
           <div class="hero-actions"><a class="button primary" href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noreferrer" data-zh="在 GitHub 查看" data-en="View on GitHub">在 GitHub 查看</a><a class="button secondary" href="https://deepseek-harness.github.io/deepseek-harness/en/guide/quickstart" target="_blank" rel="noreferrer" data-zh="开发文档" data-en="Developer docs">开发文档</a></div>
-        </div>
-        <div class="quick-card" aria-label="Quick start">
-          <div class="quick-tabs"><button class="active" data-command="npx @deepseek-ai/dsh web" data-zh="快速开始" data-en="Quick start">快速开始</button><button data-command="git clone https://github.com/deepseek-ai/deepseek-harness" data-zh="从源码安装" data-en="Install from source">从源码安装</button></div>
-          <div class="terminal-line"><span>$</span><code id="heroCommand">npx @deepseek-ai/dsh web</code><button class="copy-command" data-target="heroCommand" data-zh="复制" data-en="Copy">复制</button></div>
-        </div>
+          <div class="quick-card" aria-label="Quick start"><div class="quick-tabs"><button class="active" data-command="npx @deepseek-ai/dsh web" data-zh="快速开始" data-en="Quick start">快速开始</button><button data-command="git clone https://github.com/deepseek-ai/deepseek-harness" data-zh="从源码安装" data-en="Install from source">从源码安装</button></div><div class="terminal-line"><span>$</span><code id="heroCommand">npx @deepseek-ai/dsh web</code><button class="copy-command" data-target="heroCommand" data-zh="复制" data-en="Copy">复制</button></div></div>
+        </div><figure class="hero-product"><img src="https://www.deepseek.com/harness/images/harness/feat-plugin.en.png" alt="DeepSeek Harness plugin configuration interface" width="1440" height="900" fetchpriority="high" /></figure></div>
       </section>
 
       <section class="statement-section section-shell">
@@ -57,40 +51,36 @@
 
       <section class="capability-section section-shell">
         <div class="feature-grid">
-          <article><span>01</span><h3 data-zh="Cordis 内核" data-en="Cordis kernel">Cordis 内核</h3><p data-zh="Cordis 内核负责插件挂载、卸载和依赖管理；Agent 能力存在于插件中。" data-en="The Cordis kernel manages plugin mounting, unmounting, and dependencies. Agent capabilities live in the plugins.">Cordis 内核负责插件挂载、卸载和依赖管理；Agent 能力存在于插件中。</p></article>
-          <article><span>02</span><h3 data-zh="能力即插件" data-en="Capabilities as plugins">能力即插件</h3><p data-zh="模型、工具、Skills、Session、沙箱、存储、循环、调度和 UI 都由插件提供，服务和事件让它们协同工作。" data-en="Plugins provide models, tools, skills, sessions, sandboxes, storage, loops, scheduling, and the UI. Services and events let them work together.">模型、工具、Skills、Session、沙箱、存储、循环、调度和 UI 都由插件提供，服务和事件让它们协同工作。</p></article>
-          <article><span>03</span><h3 data-zh="使用配置组合" data-en="Compose with configuration">使用配置组合</h3><p data-zh="开发者无需修改 DeepSeek Harness 源代码，即可在配置中选择、替换或扩展任何能力。" data-en="Developers can select, swap, or extend any capability in configuration without changing the DeepSeek Harness source code.">开发者无需修改 DeepSeek Harness 源代码，即可在配置中选择、替换或扩展任何能力。</p></article>
+          <article><h3 data-zh="Cordis 内核" data-en="Cordis kernel">Cordis 内核</h3><p data-zh="Cordis 内核负责插件挂载、卸载和依赖管理；Agent 能力存在于插件中。" data-en="The Cordis kernel manages plugin mounting, unmounting, and dependencies. Agent capabilities live in the plugins.">Cordis 内核负责插件挂载、卸载和依赖管理；Agent 能力存在于插件中。</p></article>
+          <article><h3 data-zh="能力即插件" data-en="Capabilities as plugins">能力即插件</h3><p data-zh="模型、工具、Skills、Session、沙箱、存储、循环、调度和 UI 都由插件提供，服务和事件让它们协同工作。" data-en="Plugins provide models, tools, skills, sessions, sandboxes, storage, loops, scheduling, and the UI. Services and events let them work together.">模型、工具、Skills、Session、沙箱、存储、循环、调度和 UI 都由插件提供，服务和事件让它们协同工作。</p></article>
+          <article><h3 data-zh="使用配置组合" data-en="Compose with configuration">使用配置组合</h3><p data-zh="开发者无需修改 DeepSeek Harness 源代码，即可在配置中选择、替换或扩展任何能力。" data-en="Developers can select, swap, or extend any capability in configuration without changing the DeepSeek Harness source code.">开发者无需修改 DeepSeek Harness 源代码，即可在配置中选择、替换或扩展任何能力。</p></article>
         </div>
-        <img class="product-shot" src="https://www.deepseek.com/harness/images/harness/feat-plugin.en.png" alt="DeepSeek Harness plugin composition" />
       </section>
 
       <section id="approach" class="design-section section-shell">
-        <p class="section-label" data-zh="设计方法" data-en="Design approach">设计方法</p>
         <div class="design-tabs" role="tablist"><button class="active" data-panel="plugins" data-zh="一切皆插件" data-en="Everything is a plugin">一切皆插件</button><button data-panel="trace" data-zh="每次运行都可追溯" data-en="Every run is traceable">每次运行都可追溯</button></div>
         <article id="plugins" class="design-panel active"><h2 data-zh="一切皆插件" data-en="Everything is a plugin">一切皆插件</h2><p data-zh="DeepSeek Harness 构建在 Cordis 插件系统之上。所有 Agent 能力都由插件提供；开发者可以通过配置选择、替换和扩展，而无需修改 Harness 本身。" data-en="DeepSeek Harness is built on Cordis. Plugins provide every agent capability, and developers can select, swap, or extend them through configuration without changing the harness itself.">DeepSeek Harness 构建在 Cordis 插件系统之上。所有 Agent 能力都由插件提供；开发者可以通过配置选择、替换和扩展，而无需修改 Harness 本身。</p></article>
         <article id="trace" class="design-panel"><h2 data-zh="每次运行都可追溯" data-en="Every run is traceable">每次运行都可追溯</h2><p data-zh="模型看到的一切都记录在仅追加 Session 日志中：系统提示词、推理、工具调用与结果、子代理调度和每次上下文注入。Trajectory、恢复、Fork、搜索和回放都使用同一事件流。" data-en="Everything the model sees is recorded in an append-only session log: system prompts, reasoning, tool calls and results, subagent scheduling, and context injection. Trajectory, resume, fork, search, and replay use the same event stream.">模型看到的一切都记录在仅追加 Session 日志中：系统提示词、推理、工具调用与结果、子代理调度和每次上下文注入。Trajectory、恢复、Fork、搜索和回放都使用同一事件流。</p><img src="https://www.deepseek.com/harness/images/harness/trajectory-real-view.en.png" alt="DeepSeek Harness Trajectory view" /></article>
       </section>
 
       <section id="modes" class="modes-section section-shell">
-        <p class="section-label" data-zh="多种运行模式" data-en="Multiple runtime modes">多种运行模式</p>
         <h2 data-zh="为不同任务重新组合 Harness" data-en="Recompose the harness for every kind of work">为不同任务重新组合 Harness</h2>
         <div class="mode-grid">
-          <article><span>01</span><h3>Standard mode</h3><p data-zh="完整编码 Agent：文件编辑、Shell、文件与 Web 搜索、Skills、计划、Goals、Subagents 和 Workflows。" data-en="A full coding agent with editing, shell, file and web search, skills, planning, goals, subagents, and workflows.">完整编码 Agent：文件编辑、Shell、文件与 Web 搜索、Skills、计划、Goals、Subagents 和 Workflows。</p></article>
-          <article><span>02</span><h3>Code mode</h3><p data-zh="在 Standard 能力之上，通过 Code Mode SDK 让模型在一段 TypeScript 程序中组合多步工具操作。" data-en="Standard capabilities exposed through the Code Mode SDK so the model can combine multi-step operations in one TypeScript program.">在 Standard 能力之上，通过 Code Mode SDK 让模型在一段 TypeScript 程序中组合多步工具操作。</p></article>
-          <article><span>03</span><h3>Minimal mode</h3><p data-zh="只保留持久 Bash 和 str_replace_editor 的双工具编码 Agent，适合最小环境中的模型评测。" data-en="A two-tool coding agent with persistent bash and str_replace_editor for benchmarking in a minimal environment.">只保留持久 Bash 和 str_replace_editor 的双工具编码 Agent，适合最小环境中的模型评测。</p></article>
-          <article><span>04</span><h3>Creator mode</h3><p data-zh="用于创建自定义 Agent Preset：包含完整 Standard 能力，以及运行时检查、插件实验和 Preset 编写指导。" data-en="Built for custom agent presets, adding runtime inspection, plugin experiments, and preset-authoring guidance to Standard mode.">用于创建自定义 Agent Preset：包含完整 Standard 能力，以及运行时检查、插件实验和 Preset 编写指导。</p></article>
+          <article><h3>Standard mode</h3><p data-zh="完整编码 Agent：文件编辑、Shell、文件与 Web 搜索、Skills、计划、Goals、Subagents 和 Workflows。" data-en="A full coding agent with editing, shell, file and web search, skills, planning, goals, subagents, and workflows.">完整编码 Agent：文件编辑、Shell、文件与 Web 搜索、Skills、计划、Goals、Subagents 和 Workflows。</p></article>
+          <article><h3>Code mode</h3><p data-zh="在 Standard 能力之上，通过 Code Mode SDK 让模型在一段 TypeScript 程序中组合多步工具操作。" data-en="Standard capabilities exposed through the Code Mode SDK so the model can combine multi-step operations in one TypeScript program.">在 Standard 能力之上，通过 Code Mode SDK 让模型在一段 TypeScript 程序中组合多步工具操作。</p></article>
+          <article><h3>Minimal mode</h3><p data-zh="只保留持久 Bash 和 str_replace_editor 的双工具编码 Agent，适合最小环境中的模型评测。" data-en="A two-tool coding agent with persistent bash and str_replace_editor for benchmarking in a minimal environment.">只保留持久 Bash 和 str_replace_editor 的双工具编码 Agent，适合最小环境中的模型评测。</p></article>
+          <article><h3>Creator mode</h3><p data-zh="用于创建自定义 Agent Preset：包含完整 Standard 能力，以及运行时检查、插件实验和 Preset 编写指导。" data-en="Built for custom agent presets, adding runtime inspection, plugin experiments, and preset-authoring guidance to Standard mode.">用于创建自定义 Agent Preset：包含完整 Standard 能力，以及运行时检查、插件实验和 Preset 编写指导。</p></article>
         </div>
       </section>
 
       <section class="ecosystem-section section-shell">
-        <p class="section-label" data-zh="加入 DSH 插件生态" data-en="Join the DSH plugin ecosystem">加入 DSH 插件生态</p>
         <h2 data-zh="开放、可复用、可组合" data-en="Open, reusable, composable">开放、可复用、可组合</h2>
         <p data-zh="DeepSeek Harness 仍处于开发者预览阶段，核心插件和 API 会持续演进。我们期待与全球开发者一起，在开源基础设施之上探索智能上限。" data-en="DeepSeek Harness remains in developer preview, and its core plugins and APIs will continue to evolve. We look forward to exploring the limits of intelligence with developers worldwide on open-source infrastructure.">DeepSeek Harness 仍处于开发者预览阶段，核心插件和 API 会持续演进。我们期待与全球开发者一起，在开源基础设施之上探索智能上限。</p>
         <div class="ecosystem-links"><a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noreferrer">GitHub</a><a href="/quickstart/" data-zh="快速开始" data-en="Quickstart">快速开始</a><a href="/ecosystem/" data-zh="插件生态" data-en="Plugin ecosystem">插件生态</a><a href="/cordis/">Cordis paper</a></div>
       </section>
     </main>
 
-    <footer class="landing-footer"><div><img src="/wordmark.svg" alt="DeepSeek" /><span>Harness</span></div><p data-zh="开源 · MIT · 非官方社区参考实现" data-en="Open source · MIT · Unofficial community reference implementation">开源 · MIT · 非官方社区参考实现</p><a href="https://github.com/sandbaseai/dsh101" target="_blank" rel="noreferrer">dsh101.com</a></footer>
+    <footer class="landing-footer"><div><img src="/wordmark.svg" alt="DeepSeek" /><span>Harness</span></div><p data-zh="开源 / MIT / 非官方社区参考实现" data-en="Open source / MIT / Unofficial community reference implementation">开源 / MIT / 非官方社区参考实现</p><a href="https://github.com/sandbaseai/dsh101" target="_blank" rel="noreferrer">dsh101.com</a></footer>
     <script type="module" src="/landing.js"></script>
   </body>
 </html>

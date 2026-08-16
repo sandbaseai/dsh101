@@ -27,5 +27,11 @@ Last upstream review:
 | First Harness plugin | `docs/user/develop/basic/index.md`, `docs/user/develop/basic/index.zh.md` |
 | Public architecture vocabulary | `docs/architecture.md`, `docs/architecture.zh.md` |
 
+## Visual system provenance
+
+- DeepSeek Harness supplies the product wordmark, typography, screenshots, and dark product language.
+- Sandbase supplies the single accent token: `#22bd7e`, sourced from the Sandbase Blog design tokens.
+- Layout and interaction refinements follow the installed `design-taste-frontend` audit rules; they are not presented as official DeepSeek design assets.
+
 Internal postmortems, maintainer workflows, test guides, and unpublished
 implementation notes are intentionally excluded from the primary guide.

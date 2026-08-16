@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="理解 DeepSeek Harness 背后的 Cordis：时空可组合性、可逆副作用与响应式依赖。" />
-    <meta name="theme-color" content="#05070c" />
+    <meta name="theme-color" content="#050907" />
     <link rel="canonical" href="https://dsh101.com/cordis/" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>Cordis 与时空可组合性 · DeepSeek Harness</title>
@@ -23,10 +23,10 @@
       <div class="sub-note" data-zh="论文为 2026-08-13 预印本，仍在修订。具体结论应以最新版本为准。" data-en="The paper is an August 13, 2026 preprint under active revision. Consult the latest version before relying on specific results.">论文为 2026-08-13 预印本，仍在修订。具体结论应以最新版本为准。</div>
 
       <section class="concept-grid">
-        <article><span>01</span><h2 data-zh="时间可组合性" data-en="Temporal composability">时间可组合性</h2><p data-zh="组件被移除时，其副作用能够完整撤销。运行时必须知道某次上下文变换的逆操作，而不是依赖插件作者在多个地方手工清理。" data-en="When a component is removed, its side effects can be fully reverted. The runtime knows the inverse of each context transformation instead of relying on scattered manual cleanup.">组件被移除时，其副作用能够完整撤销。运行时必须知道某次上下文变换的逆操作，而不是依赖插件作者在多个地方手工清理。</p></article>
-        <article><span>02</span><h2 data-zh="空间可组合性" data-en="Spatial composability">空间可组合性</h2><p data-zh="组件能够声明自己需要的上下文，并在依赖出现、替换或消失时由运行时响应式管理，而不是假定启动顺序永远正确。" data-en="A component declares the context it needs, and the runtime reacts as dependencies appear, change, or disappear instead of assuming a permanently correct startup order.">组件能够声明自己需要的上下文，并在依赖出现、替换或消失时由运行时响应式管理，而不是假定启动顺序永远正确。</p></article>
-        <article><span>03</span><h2 data-zh="可逆副作用" data-en="Revertible effects">可逆副作用</h2><p data-zh="每次上下文变换都携带由运行时追踪的逆变换。监听器、服务、定时器和其他注册因此可以随 Fiber 生命周期成组撤销。" data-en="Every context transformation carries an inverse tracked by the runtime. Listeners, services, timers, and other registrations can therefore unwind together with their Fiber lifecycle.">每次上下文变换都携带由运行时追踪的逆变换。监听器、服务、定时器和其他注册因此可以随 Fiber 生命周期成组撤销。</p></article>
-        <article><span>04</span><h2 data-zh="响应式协效应" data-en="Reactive coeffects">响应式协效应</h2><p data-zh="上下文每次变化都会根据组件的协效应规格通知并重新评估它，使依赖解析、配置协调与热模块替换共享同一个模型。" data-en="Each context change notifies and reevaluates a component against its coeffect specification, unifying dependency resolution, configuration reconciliation, and hot module replacement.">上下文每次变化都会根据组件的协效应规格通知并重新评估它，使依赖解析、配置协调与热模块替换共享同一个模型。</p></article>
+        <article><h2 data-zh="时间可组合性" data-en="Temporal composability">时间可组合性</h2><p data-zh="组件被移除时，其副作用能够完整撤销。运行时必须知道某次上下文变换的逆操作，而不是依赖插件作者在多个地方手工清理。" data-en="When a component is removed, its side effects can be fully reverted. The runtime knows the inverse of each context transformation instead of relying on scattered manual cleanup.">组件被移除时，其副作用能够完整撤销。运行时必须知道某次上下文变换的逆操作，而不是依赖插件作者在多个地方手工清理。</p></article>
+        <article><h2 data-zh="空间可组合性" data-en="Spatial composability">空间可组合性</h2><p data-zh="组件能够声明自己需要的上下文，并在依赖出现、替换或消失时由运行时响应式管理，而不是假定启动顺序永远正确。" data-en="A component declares the context it needs, and the runtime reacts as dependencies appear, change, or disappear instead of assuming a permanently correct startup order.">组件能够声明自己需要的上下文，并在依赖出现、替换或消失时由运行时响应式管理，而不是假定启动顺序永远正确。</p></article>
+        <article><h2 data-zh="可逆副作用" data-en="Revertible effects">可逆副作用</h2><p data-zh="每次上下文变换都携带由运行时追踪的逆变换。监听器、服务、定时器和其他注册因此可以随 Fiber 生命周期成组撤销。" data-en="Every context transformation carries an inverse tracked by the runtime. Listeners, services, timers, and other registrations can therefore unwind together with their Fiber lifecycle.">每次上下文变换都携带由运行时追踪的逆变换。监听器、服务、定时器和其他注册因此可以随 Fiber 生命周期成组撤销。</p></article>
+        <article><h2 data-zh="响应式协效应" data-en="Reactive coeffects">响应式协效应</h2><p data-zh="上下文每次变化都会根据组件的协效应规格通知并重新评估它，使依赖解析、配置协调与热模块替换共享同一个模型。" data-en="Each context change notifies and reevaluates a component against its coeffect specification, unifying dependency resolution, configuration reconciliation, and hot module replacement.">上下文每次变化都会根据组件的协效应规格通知并重新评估它，使依赖解析、配置协调与热模块替换共享同一个模型。</p></article>
       </section>
 
       <div class="formula"><strong data-zh="可逆 Effect" data-en="Revertible effect">可逆 Effect</strong><i>+</i><strong data-zh="响应式 Coeffect" data-en="Reactive coeffect">响应式 Coeffect</strong><i>→</i><strong data-zh="统一 Context 类型" data-en="Unified context type">统一 Context 类型</strong></div>

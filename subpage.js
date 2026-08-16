@@ -1,4 +1,5 @@
 import './subpage.css'
+import './brand.css'
 
 const buttons = [...document.querySelectorAll('[data-locale]')]
 const nodes = [...document.querySelectorAll('[data-zh][data-en]')]

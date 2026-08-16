@@ -1,5 +1,7 @@
 import './landing.css'
 import './navigation.css'
+import './brand.css'
+import './redesign.css'
 
 const localeButtons = [...document.querySelectorAll('[data-locale]')]
 const translatable = [...document.querySelectorAll('[data-zh][data-en]')]
@@ -65,4 +67,22 @@ primaryNav?.addEventListener('click', event => {
     menuToggle?.setAttribute('aria-expanded', 'false')
     header?.classList.remove('menu-open')
   }
+})
+
+document.addEventListener('click', event => {
+  if (!event.target.closest('.nav-group')) {
+    navGroupButton?.setAttribute('aria-expanded', 'false')
+    navGroupButton?.closest('.nav-group')?.classList.remove('open')
+  }
+})
+
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return
+  const desktop = !window.matchMedia('(max-width: 900px)').matches
+  navGroupButton?.setAttribute('aria-expanded', 'false')
+  navGroupButton?.closest('.nav-group')?.classList.remove('open')
+  menuToggle?.setAttribute('aria-expanded', 'false')
+  header?.classList.remove('menu-open')
+  if (desktop) navGroupButton?.focus()
+  else menuToggle?.focus()
 })

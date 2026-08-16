@@ -84,6 +84,7 @@ Last upstream review:
 | Session-local schedules | `docs/subsystems/schedule.zh.md` |
 | Dynamic workflows and Ralph | `docs/subsystems/workflow.zh.md`, `packages/workflow/tool-workflow/README.zh.md`, `packages/workflow/tool-ralph/README.zh.md` |
 | Layered user settings, safe mutation, revision conflicts, and secret redaction | `docs/subsystems/settings.zh.md`, `packages/settings/settings/README.zh.md`, `packages/client/ui-settings/README.zh.md`, `packages/host/apiproxy/README.zh.md` |
+| Browser schema rehydration, user-layer drafts, validation, and executable-envelope trust | `packages/client/schema-form/README.zh.md`, `packages/client/ui-settings-plugins/README.zh.md` |
 | Credential references and rotation | `docs/subsystems/credentials.zh.md` |
 | Agent preset composition | `packages/preset/agent-presets/README.zh.md` |
 | Persona and system prompt assembly | `packages/preset/persona/README.zh.md`, `docs/subsystems/system-prompt.zh.md` |

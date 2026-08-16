@@ -111,6 +111,7 @@
         <section>
           <h2>Agent 配置</h2>
           <a href="#settings-system">Settings 分层</a>
+          <a href="#schema-form">Schema 表单</a>
           <a href="#credentials-system">凭据引用</a>
           <a href="#agent-presets">Agent Presets</a>
           <a href="#prompt-assembly">Persona 与提示词</a>
@@ -602,6 +603,16 @@ print(result.final_response)</code></pre>
           <div><strong>外部或断线变更</strong><p>客户端在首次读取前先监听更新，并在 <code>settings/document-updated</code> 或连接重置后重新读取；迟到的旧响应不能覆盖较新的发布值。</p></div>
         </div>
         <div class="warning"><strong>不要用脱敏结果重建整个分节</strong><p>网络 descriptor 从未包含 secret 明文；据此调用 <code>replace</code> 会把不可见的 secret 当成缺失并删除。当前脱敏 walker 也不能证明所有 union、intersection 或 transform 内的 secret 都安全，因此暴露到协议的 namespace 只应使用可验证遍历的 schema。</p></div>
+
+        <h3 id="schema-form">Schema 草稿、覆盖与客户端校验<a href="#schema-form" class="anchor">#</a></h3>
+        <p><code>settings.describe</code> 把 Host 使用的 schemastery schema 序列化给浏览器，<code>schema-form</code> 再将其重建为活校验器。页面因此能在写入前用与 Service Definition 同源的规则校验整份用户分节草稿。</p>
+        <div class="compare-grid">
+          <div><strong>不可变路径编辑</strong><p><code>setPath</code> 物化中间对象；<code>deletePath</code> 删除用户层字段，使解析值重新继承组合 base 与 schema 默认值。</p></div>
+          <div><strong>覆盖按存在性判断</strong><p>字段只要出现在原始用户草稿中就算已覆盖，即使它恰好等于默认值；这与 Settings 的分层语义一致。</p></div>
+          <div><strong>无法解析就降级</strong><p><code>nodeAtPath</code> 只沿 object 属性和 dict inner 探测节点；找不到路径时返回 <code>undefined</code>，功能表单必须进入明确的降级路径。</p></div>
+        </div>
+        <p>当前没有通用 React 表单生成器，各功能围绕草稿辅助函数手写控件。校验返回整份草稿的第一条失败消息及 <code>$.path</code>，不会自动把多项错误分发到每个字段。</p>
+        <div class="warning"><strong>序列化 Schema 是可执行信封</strong><p>schemastery 重建回调时会执行动态函数，因此只能接受提供当前页面的同一受信任 Host 所发送的 schema。secret 控件仍必须保持只写：初始为空，只展示是否已配置，空草稿不能清除已有密钥。</p></div>
 
         <h2 id="credentials-system">凭据引用与热轮换<a href="#credentials-system" class="anchor">#</a></h2>
         <p>配置文件只保存形如环境变量名的 <code>CredentialRef</code>，明文由 Credentials provider 管理。LLM Adapter 在每次请求前重新解析引用，不跨操作缓存，因此轮换后的密钥会在下一次请求生效，无需重启。</p>

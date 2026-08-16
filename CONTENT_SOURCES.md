@@ -124,7 +124,7 @@ Last upstream review:
 | Session telemetry, chunk sampling, handoff versus delivery, sharing disclosure, shutdown drain, and redaction | `docs/subsystems/session-telemetry.zh.md` |
 | Per-home anonymous user identity | `packages/identity/anonymous-user-id/README.zh.md` |
 | Package-owned runtime invariants, atomic registration, child-fiber cleanup, and selection regex semantics | `docs/subsystems/invariants.zh.md` |
-| Per-message feedback | `docs/subsystems/feedback.zh.md` |
+| Per-message local feedback, durable target ordering, Web exposure limits, process-local concurrency, and cross-tab visibility | `docs/subsystems/feedback.zh.md` |
 
 ## Refresh checklist
 

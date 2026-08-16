@@ -169,6 +169,7 @@
           <a href="#invariants">运行时 Invariants</a>
           <a href="#invariant-registration">Invariant 注册边界</a>
           <a href="#feedback">消息反馈</a>
+          <a href="#feedback-persistence">反馈持久化边界</a>
         </section>
         <section>
           <h2>持续执行</h2>
@@ -1185,6 +1186,15 @@ print(result.final_response)</code></pre>
           <div><strong>生命周期隔离</strong><p>Sidecar 绑定 Session 的 createdAt 与 cwd；Fork 不复制父会话反馈。</p></div>
         </div>
         <p>Web UI 首次 hover 或 focus 时才延迟读取整段会话的反馈，避免对每条消息单独请求。删除不存在的反馈是幂等成功；备注按 UTF-8 字节限制。</p>
+
+        <h3 id="feedback-persistence">消息反馈为什么不是上传动作<a href="#feedback-persistence" class="anchor">#</a></h3>
+        <p>点赞、点踩和备注只修改 message_feedback Storage Domain 中的本地伴随记录；它不会追加 Session 事件、进入模型上下文或触发遥测交接。不可变的 Session 级 feedback/record 是另一项约定，不能与这里的可编辑记录混为一谈。</p>
+        <div class="compare-grid">
+          <div><strong>先提交目标，再写伴随记录</strong><p>对 live Session 写入前先执行 flush checkpoint，随后从序列零物理复读日志并再次验证目标，确保被评价的消息先于 sidecar 耐久存在。</p></div>
+          <div><strong>Web 暴露范围更窄</strong><p>Host 可接受每条合格的 append-origin 助手消息；当前控件只出现在 Conversation 中已定稿 Turn 的收尾助手正文，Trajectory 与 waterfall 视图不显示它。</p></div>
+          <div><strong>并发保证止于单个 Host</strong><p>每个 Session 的操作在当前进程内串行，但 Storage Domain 没有跨进程条件写；多个 Host 共用同一存储根时不保证 compare-and-swap 或防止丢失更新。</p></div>
+        </div>
+        <div class="warning"><strong>其他标签页不会立即同步</strong><p>Sidecar 不发布实时帧。另一标签页要等到重连，或下一次写入收到 version-conflict 并用权威值对账后，才会看到新评分。</p></div>
 
         <div class="chapter-break"><span>08</span><div><small>持续执行</small><strong>委派、计划与长上下文</strong></div></div>
 

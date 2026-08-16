@@ -664,7 +664,7 @@ export const en = {
   '浏览范围不是沙箱': 'Browsing scope is not a sandbox',
   '当前 Browse 后端没有限定根目录，工作区创建也接受任意已有目录；目录选择器只负责交互体验，真正的写入边界仍由权限和沙箱策略决定。': 'The current Browse backend has no constrained root, and workspace creation accepts any existing directory. The picker only controls the interaction; permissions and sandbox policy still define the real write boundary.',
   'Web API 的传输与安全边界': 'Web API transport and security boundaries',
-  'Web API 使用 POST 请求和 SSE 推送承载同一套类型化 RPC。每个请求先校验信封，再按方法校验业务载荷；响应回显原 rpcId。业务错误留在 RPC 结果中，HTTP 状态只表达传输层结果。': 'The Web API carries one typed RPC protocol over POST requests and SSE pushes. Each request validates its envelope first and then its method-specific payload; responses echo the original rpcId. Domain errors stay in RPC results, while HTTP status represents transport outcomes only.',
+  'Web API 使用 HTTP POST 承载上行 unary/respond，并以两条只向浏览器发送消息的 WebSocket 承载 mux 与 host 事件。每个请求先校验信封，再按方法校验业务载荷；响应回显原 rpcId。业务错误留在 RPC 结果中，HTTP 状态只表达传输层结果。': 'The Web API carries upstream unary/respond calls over HTTP POST and mux and host events over two WebSockets that send only to the browser. Each request validates its envelope first and then its method-specific payload; responses echo the original rpcId. Domain errors stay in RPC results, while HTTP status represents transport outcomes only.',
   '所有 API POST 必须声明 application/json，否则在分发前返回 415；跨站简单请求因此不能直接触发有副作用的方法。': 'Every API POST must declare application/json or receive 415 before dispatch, so a cross-origin simple request cannot directly trigger methods with side effects.',
   '原生目录选择、设置、凭据和本地文档操作属于特权面，浏览器载体将它们限制在回环地址的同源请求；应用内目录浏览仍经过 Host 与 Origin 信任栅栏。': 'Native directory selection, settings, credentials, and local-document operations are privileged surfaces restricted to same-origin requests on loopback addresses; in-app directory browsing still passes the Host and Origin trust fence.',
   '路径由宿主根据预设 ID 或无路径操作解析；浏览器载荷不能指定任意文件去打开。': 'The host resolves paths from preset IDs or pathless operations; browser payloads cannot choose arbitrary files to open.',
@@ -715,7 +715,18 @@ export const en = {
   '插件页支持按模块短名和条目 ID 搜索，但没有修改能力、失败历史或实时订阅；重新打开 Settings 才会取得新快照。它回答“现在加载成什么样”，而 ': 'The Plugins page can search by module short name and entry ID, but offers no mutation, failure history, or live subscription; reopening Settings obtains a new snapshot. It answers “what is loaded now,” while ',
   ' 回答“配置由哪一层引入”，两者要结合使用。': ' answers “which layer introduced the configuration”; use both together.',
   '运行清单不提供来源归因': 'The runtime inventory does not attribute sources',
-  '清单不会告诉你条目来自 bundle、profile、DSH_HOME patch 还是命令行 override。需要追踪来源时，请检查带逐行来源标注的生效配置；需要失败堆栈时，请查看 Host 启动日志。': 'The inventory does not say whether an entry came from a bundle, profile, DSH_HOME patch, or command-line override. For provenance, inspect effective configuration with per-row source annotations; for failure stacks, inspect the host startup log.'
+  '清单不会告诉你条目来自 bundle、profile、DSH_HOME patch 还是命令行 override。需要追踪来源时，请检查带逐行来源标注的生效配置；需要失败堆栈时，请查看 Host 启动日志。': 'The inventory does not say whether an entry came from a bundle, profile, DSH_HOME patch, or command-line override. For provenance, inspect effective configuration with per-row source annotations; for failure stacks, inspect the host startup log.',
+  '连接恢复': 'Connection recovery',
+  'WebSocket 就绪与断线恢复': 'WebSocket readiness and reconnect',
+  '浏览器分别连接 ': 'The browser connects separately to ',
+  ' 和 ': ' and ',
+  '。两条连接都只接收文本帧，客户端不会在 socket 上发送业务请求；直接用普通 GET 访问会得到 426，也没有浏览器 SSE 回退。': '. Both connections receive text frames only; the client sends no business requests on the sockets. A normal GET returns 426, and there is no browser SSE fallback.',
+  '新 generation 同时打开两条下行流，并调用 host.describe 验证 HTTP 上行可达。': 'A new generation opens both downstream streams together and calls host.describe to verify HTTP upstream reachability.',
+  '就绪后才发布该 generation 的 Host 能力描述并触发业务层重新同步基线。': 'Only after readiness does it publish that generation’s Host capability description and trigger business-layer baseline resynchronization.',
+  '任一流结束都会使整代失效，两条流一起重建；旧代响应不能覆盖新状态。': 'Either stream ending invalidates the whole generation and rebuilds both streams; old-generation responses cannot overwrite new state.',
+  '连续失败采用带抖动的指数退避：首次上限 500ms，逐次翻倍，最高 10 秒；成功连接后尝试计数归零。断线时 Host 能力描述会清空，因此目录选择和本地打开等消费者不会沿用过期能力。': 'Consecutive failures use jittered exponential backoff: the first cap is 500ms, doubling each time to at most 10 seconds; a successful connection resets the attempt count. On disconnect, the Host capability description is cleared so consumers such as directory selection and local opening cannot retain stale capabilities.',
+  '反向代理必须支持 WebSocket Upgrade': 'The reverse proxy must support WebSocket Upgrade',
+  '代理若只转发普通 HTTP，页面资源和 POST 可能正常，但两条事件流无法就绪。应允许上述两个路径升级，并避免把 426 当成可缓存的应用响应。': 'If a proxy forwards only ordinary HTTP, page assets and POST calls may work while both event streams fail readiness. Allow upgrades on the two paths above and avoid treating 426 as a cacheable application response.'
 }
 
 export const normalizedEn = new Map(

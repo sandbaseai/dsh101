@@ -51,6 +51,7 @@ const changed = execFileSync('git', [
   'docs/subsystems/typert.zh.md', 'packages/typert', 'packages/api/gateway',
   'docs/subsystems/filesystem.zh.md', 'packages/fs',
   'docs/subsystems/subprocess.zh.md', 'packages/subprocess',
+  'packages/e2b', 'packages/fs/tool-fs-search', 'packages/identity/anonymous-user-id',
   'packages/llm/token-meter', 'packages/session/session-telemetry',
   'packages/runtime-diagnostics/invariants', 'packages/feedback',
   'docs/subsystems/token-meter.zh.md', 'docs/subsystems/session-telemetry.zh.md',

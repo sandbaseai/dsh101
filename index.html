@@ -76,6 +76,7 @@
           <a href="#permission-presets">权限预设</a>
           <a href="#approval-flow">审批链路</a>
           <a href="#sandbox">沙箱模式</a>
+          <a href="#e2b-runtime">E2B 远程执行</a>
         </section>
         <section>
           <h2>SDK</h2>
@@ -115,6 +116,7 @@
           <a href="#attachments">图片附件</a>
           <a href="#user-questions">向用户提问</a>
           <a href="#filesystem-seam">文件系统语义</a>
+          <a href="#file-search">Glob 与 Grep</a>
           <a href="#shell-terminal">Shell 与 Terminal</a>
           <a href="#subprocess-seam">子进程运行时</a>
           <a href="#lsp-navigation">LSP 代码导航</a>
@@ -130,6 +132,7 @@
           <h2>可观测性</h2>
           <a href="#token-meter">Token 计量</a>
           <a href="#telemetry">Session Telemetry</a>
+          <a href="#anonymous-id">匿名身份</a>
           <a href="#invariants">运行时 Invariants</a>
           <a href="#feedback">消息反馈</a>
         </section>
@@ -259,6 +262,17 @@
           <div><span>03</span><strong>Audit</strong><p>只有 asked 与 decided 都越过日志提交点，结果才会返回调用方。</p></div>
         </div>
         <div class="warning"><strong>只有 allowed-once 会放行</strong><p>取消信号会立即撤回问题，迟到的答案被丢弃。审批审计事件不会进入模型 transcript；模型只看到工具派生结果和最新的运行时上下文快照。</p></div>
+
+        <h2 id="e2b-runtime">E2B 远程执行运行时<a href="#e2b-runtime" class="anchor">#</a></h2>
+        <p>E2B provider 让文件系统、Bash、PTY 和 LSP 共享同一个短暂远程 Linux 沙箱，而 Cordis 服务、Agent、Session 日志、LLM 请求与 SDK 缓冲仍留在宿主进程。宿主 API Key 只用于创建 SDK 连接，绝不会注入沙箱环境。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Own</strong><p>共享 owner 创建远程 cwd 和权限为 0700 的私有适配器目录。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Adapt</strong><p>远程 fs 与 subprocess provider 复用同一个句柄和进程命名空间。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Dispose</strong><p>先停止新操作并清理进程，再删除沙箱；超时同样会删除全部状态。</p></div>
+        </div>
+        <div class="warning"><strong>远程 cwd 不是同步或包含边界</strong><p>本地工作区不会自动上传或同步回来；把宿主路径写进 cwd 只会远程创建同名目录。命令仍能访问沙箱中的其他路径，网络策略沿用 E2B 基础镜像。</p></div>
 
         <div class="chapter-break"><span>02</span><div><small>程序化使用</small><strong>从 Web UI 走向 SDK</strong></div></div>
 
@@ -569,6 +583,15 @@ print(result.final_response)</code></pre>
         <p>编辑不是“先读再写”的外部组合：版本检查、字面匹配、换行规范化和原子替换都在同一个后端临界区完成。窗口化读取即使只返回部分行，也会记录完整文件版本；过大的原始字节读取则明确失败，不会静默截断。</p>
         <div class="detail-card"><strong>符号链接需要单独看待</strong><p>resolve 会跟随链接以生成稳定身份；需要守住仓库信任边界的调用方应先使用不跟随最终链接的 lstat，并在解析前拒绝 symlink。</p></div>
 
+        <h2 id="file-search">Glob、Grep 与结果预算<a href="#file-search" class="anchor">#</a></h2>
+        <p>文件发现工具使用 npm 随包交付的 ripgrep 二进制，并通过 Subprocess seam 以固定 argv 启动；不依赖宿主预装 rg，也不经过 shell。启动时强制 no-config，避免继承的 RIPGREP_CONFIG_PATH 注入预处理器。</p>
+        <div class="compare-grid">
+          <div><strong>glob</strong><p>查找文件路径并包含 hidden/ignored 文件；不含斜杠的 pattern 会匹配任意深度 basename。</p></div>
+          <div><strong>grep</strong><p>按 rg JSON 解析正则匹配并按文件分组，避免依赖冒号拆分。</p></div>
+          <div><strong>spill</strong><p>内联页面达到路径、匹配或行字节上限时，尽力保存完整格式化结果。</p></div>
+        </div>
+        <p>原始 stdout 超过传输预算会以 SEARCH_RAW_OUTPUT_OVERFLOW 失败并要求缩小查询；退出码 1 只是成功的空结果。搜索进程的 cwd 必须与文件系统工作区共置，否则返回路径无法保证能被 read 继续读取。</p>
+
         <h2 id="shell-terminal">Shell 与持久 Terminal<a href="#shell-terminal" class="anchor">#</a></h2>
         <p>两者都能运行命令，但生命周期不同。默认使用 Shell 完成有边界的一次性操作；只有任务需要交互式 stdin、REPL、开发服务器或持续终端状态时，才打开 PTY Terminal。</p>
         <div class="compare-grid">
@@ -658,6 +681,15 @@ print(result.final_response)</code></pre>
           <div><span>03</span><strong>Emit</strong><p>后端非阻塞入队；批处理、重试、留存和丢失策略归 SDK。</p></div>
         </div>
         <div class="warning"><strong>尽力而为，不是审计真源</strong><p>记录可能丢失或重复，接收端应按 <code>(session.id, event.seq)</code> 去重 ledger。脱敏只修改导出副本，权威 Session 日志永不改写。</p></div>
+
+        <h2 id="anonymous-id">每个 Harness Home 的匿名身份<a href="#anonymous-id" class="anchor">#</a></h2>
+        <p>Harness 会为每个 DSH_HOME 生成随机 UUID v4，供 Session telemetry、直接反馈确认和 DeepSeek Provider 请求共同关联。它保存在 .anonymous-user-id，不从 hostname、网络地址、Git remote 或其他身份材料派生。</p>
+        <div class="compare-grid">
+          <div><strong>Per home</strong><p>不同 Harness Home 拥有不同身份，不提供跨 Home 关联。</p></div>
+          <div><strong>Best effort</strong><p>Home 不可写时仍返回仅进程内 UUID，不阻断模型请求或反馈。</p></div>
+          <div><strong>Resettable</strong><p>删除身份文件后，下次启动会生成新值，旧身份无法恢复。</p></div>
+        </div>
+        <div class="warning"><strong>关闭遥测不等于关闭该标头</strong><p>DSH_TELEMETRY_DISABLED 只停止遥测导出，不禁止反馈确认或 DeepSeek 请求中的 x-deepseek-harness-user-id。配置自定义 DeepSeek gateway 时，该 gateway 也会收到此值。</p></div>
 
         <h2 id="invariants">运行时 Invariants<a href="#invariants" class="anchor">#</a></h2>
         <p>Invariant Registry 让每个包注册自己拥有的运行时约束，例如事件必须成对、状态转换必须合法。检查断言权威事件流或可变数据关系，而不是简单确认某个服务或方法存在。</p>

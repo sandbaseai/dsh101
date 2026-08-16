@@ -43,8 +43,10 @@ Last upstream review:
 | Persistent image attachments | `docs/subsystems/attachment.zh.md` |
 | Structured user questions | `docs/subsystems/user-questions.zh.md` |
 | Filesystem targets and observation guards | `docs/subsystems/filesystem.zh.md` |
+| Bundled glob/grep search and result budgets | `packages/fs/tool-fs-search/README.zh.md` |
 | Shell execution and persistent terminals | `docs/subsystems/shell.zh.md`, `docs/subsystems/terminal.zh.md`, `packages/terminal/tool-terminal/README.zh.md` |
 | Subprocess streams and process-tree termination | `docs/subsystems/subprocess.zh.md` |
+| Shared E2B remote filesystem and subprocess runtime | `packages/e2b/e2b/README.zh.md`, `packages/e2b/fs-e2b/README.zh.md`, `packages/e2b/subprocess-e2b/README.zh.md` |
 | LSP semantic code navigation | `docs/subsystems/lsp.zh.md`, `packages/lsp/tool-lsp/README.zh.md` |
 | Subagent delegation and lifecycles | `packages/subagent/subagent/README.zh.md`, `packages/subagent/tool-subagent/README.zh.md` |
 | Todo snapshots | `packages/todo/tool-todo/README.zh.md` |
@@ -74,6 +76,7 @@ Last upstream review:
 | Persona and system prompt assembly | `packages/preset/persona/README.zh.md`, `docs/subsystems/system-prompt.zh.md` |
 | Token metering | `docs/subsystems/token-meter.zh.md` |
 | Session telemetry and redaction | `docs/subsystems/session-telemetry.zh.md` |
+| Per-home anonymous user identity | `packages/identity/anonymous-user-id/README.zh.md` |
 | Package-owned runtime invariants | `docs/subsystems/invariants.zh.md` |
 | Per-message feedback | `docs/subsystems/feedback.zh.md` |
 

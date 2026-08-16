@@ -67,6 +67,7 @@
           <a href="#inspect-config">检查生效配置</a>
           <a href="#model">配置模型</a>
           <a href="#onboarding">首次启动诊断</a>
+          <a href="#model-selection-state">模型选择收敛</a>
         </section>
         <section>
           <h2>核心概念</h2>
@@ -247,6 +248,15 @@
         </div>
         <p>模型目录只是建议列表，不是路由白名单：一个未列出的模型仍可能由适配器解析，而目录中可见的休眠提供方也可能暂时不可调用。真正发送 prompt 时，宿主会再次执行权威检查，并以 <code>model-unavailable</code> 拒绝不可路由的选择。</p>
         <div class="warning"><strong>引导跳过不代表配置成功</strong><p>适配器缺失、配置能力只读或联接失败时，凭据步骤会直接让位，Models 页面仍是诊断入口。保存密钥后无需重启；DeepSeek 路由会在下一次调用时重新解析凭据。</p></div>
+
+        <h3 id="model-selection-state">会话模型选择如何收敛<a href="#model-selection-state" class="anchor">#</a></h3>
+        <p><code>/model</code> 与输入框的模型入口共用同一份会话级目录，通过 Host 提交完整的 provider、model 与 reasoning effort。打开选择器会刷新目录；提供方元数据失败以内联不可选行呈现，其他可用分组仍能继续选择。</p>
+        <div class="compare-grid">
+          <div><strong>Host 选择才是真源</strong><p>目录只负责呈现。当已选 provider/model 不再出现在公布分组中，路由选择仍可保持有效，但触发器回退为 Select model，也不会显示陈旧 Effort。</p></div>
+          <div><strong>旧响应不能覆盖新选择</strong><p>目录加载与选择操作共用单调代次。选择失败会保留上一次选择和可用分组；较旧请求即使迟到也不能回写新状态。</p></div>
+          <div><strong>重连重新建立目录</strong><p>连接重置会丢弃常驻目录投影，再拉取 Host 恢复的选择；未变化的选择子结构保持稳定，避免无意义的 UI 抖动。</p></div>
+        </div>
+        <div class="warning"><strong>目录缺失不等于输入必须阻塞</strong><p>只有 Host 明确报告 <code>routable: false</code> 才禁用输入框；首次加载前或加载失败后的 <code>null</code> 不阻塞。已寻址的 subagent 不公开模型选择入口，也拒绝目录刷新和选择操作。</p></div>
 
         <h2 id="workspace">选择工作区<a href="#workspace" class="anchor">#</a></h2>
         <p>点击「选择工作区」，添加你启动 <code>dsh</code> 时所在的项目目录。工作区决定 Agent 能够读取和修改的文件范围。</p>

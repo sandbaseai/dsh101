@@ -49,6 +49,7 @@ Last upstream review:
 | Browser WebSocket readiness, generations, and reconnect backoff | `packages/client/connection/README.zh.md`, `packages/client/connection/src/client/connection.ts` |
 | Generated TypeRT remote-call boundary, Gateway invocation, cancellation, live resolution, contribution retraction, strict no-downgrade behavior, and protocol ownership | `docs/subsystems/typert.zh.md`, `docs/api-gateway.zh.md`, `packages/api/gateway/README.zh.md`, `packages/api/remotes/README.zh.md`, `packages/client/connection/README.zh.md` |
 | Selected Host event forwarding, shared allowlist and type surface, fiber-owned subscriptions, ordered error isolation, disclosure boundary, and no-replay semantics | `packages/api/remotes/README.zh.md`, `packages/api/remotes/src/remote-events.ts`, `packages/api/remotes/src/types.ts`, `packages/api/gateway/README.zh.md`, `packages/api/gateway/src/client/index.ts`, `packages/client/runtime/src/client/index.ts` |
+| ACP automation transport, capability negotiation, prompt and committed-message semantics, permissions, cancellation, multi-session ownership, and connection cleanup | `packages/acp/README.zh.md`, `packages/acp/acp/README.zh.md`, `packages/examples/acp-demo/README.zh.md` |
 | Services and dependency injection | `docs/user/develop/framework/service.zh.md` |
 | Event dispatch modes | `docs/user/develop/framework/events.zh.md` |
 | Capability role design | `docs/user/develop/practice/index.zh.md` |

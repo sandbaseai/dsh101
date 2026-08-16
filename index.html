@@ -121,6 +121,7 @@
           <a href="#typert-remote">TypeRT Remote</a>
           <a href="#api-gateway-lifecycle">Gateway 调用生命周期</a>
           <a href="#remote-event-forwarding">Host 事件转发</a>
+          <a href="#acp-automation">ACP 自动化协议</a>
           <a href="#capability-seam">能力三层拆分</a>
           <a href="#llm-adapter">LLM 适配器</a>
           <a href="#llm-streaming">流式协议与重试</a>
@@ -770,6 +771,25 @@ print(result.final_response)</code></pre>
           <div><strong>重连不会重放</strong><p>转发事件没有 payload 投影、脱敏、Scope 化订阅或重放保证。需要恢复一致性的 UI 必须在订阅前读取权威基线，并把事件仅当作失效或刷新信号。</p></div>
         </div>
         <div class="warning"><strong>Allowlist 是数据披露边界</strong><p>事件名与参数数组原样进入浏览器。新增转发项前应审查 owner 的全部参数是否适合暴露；需要裁剪、脱敏或耐久重放的数据，应建立独立协议，而不是直接加入名单。</p></div>
+
+        <h2 id="acp-automation">ACP：面向程序的 Agent 入口<a href="#acp-automation" class="anchor">#</a></h2>
+        <p>Harness 的 ACP Server 通过 stdin/stdout 上的 JSON-RPC 把 Agent 暴露给自动化客户端。它是传输适配器，不是 Web UI 或通用能力 seam：stdout 只能写协议帧，诊断必须走 stderr。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Initialize</strong><p>协商协议版本，只公布文本提示词基线；不声称支持图像、音频、编辑器、终端、文件系统、MCP 或会话恢复能力。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>New &amp; prompt</strong><p>绝对 cwd 创建独立 Agent；文本块拼成一条用户消息，资源链接只展平为带方括号的引用，每个会话同时最多处理一个提示词。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Settle</strong><p>桥接层等待 Agent 整体空闲，再以 end_turn 或 cancelled 结算；关联轮次的模型错误则拒绝当前提示词。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>只发送已提交文本</strong><p>每个非空 assistant/message 文本块成为一个 agent_message_chunk。原始 token 分片、未提交重试输出、推理、工具活动、计划、标题与用量都不进入 ACP wire。</p></div>
+          <div><strong>权限是一锤子买卖</strong><p>桥接层按工具调用 id 提供一次性允许或拒绝选项，自动化客户端可以应答；模型只通过所属工具的常规结果得知结局，不会看到权限协议元数据。</p></div>
+          <div><strong>多会话但不恢复</strong><p>一个连接可拥有多个隔离会话，各有 workspace、提示词槽位与取消路径；当前只支持新建，不支持列出、加载、fork、删除或单独关闭。</p></div>
+        </div>
+        <h3 id="acp-lifecycle">取消与连接级清理<a href="#acp-lifecycle" class="anchor">#</a></h3>
+        <p><code>session/cancel</code> 只取消指定 Agent，并把它尚未结算的提示词标记为 cancelled；未知 session id 是无操作。取消不是整个共享 Context 的全局开关。</p>
+        <p>客户端断开和插件释放共用一次记忆化清理：先拒绝新工作并结算待处理提示词，只 drain 本连接拥有的 Agent 及其可继续后代，再并行释放 handle 并等待全部清理完成。其他前端拥有的 Agent 森林不会被带走。</p>
+        <div class="warning"><strong>stopReason 不是提示词专属轮次摘要</strong><p>ACP 在整个自有活动期间转发已提交消息；提示词之后发生的 steering 或注入工作也可能参与，达到 token 上限的轮次仍可能在 Agent 最终空闲时以 end_turn 结算。需要完整推理、工具轨迹或持久日志时，应从 Session 系统读取，而不是从 ACP 响应反推。</p></div>
 
         <h2 id="capability-seam">能力的三种角色<a href="#capability-seam" class="anchor">#</a></h2>
         <p>当能力需要可替换提供方时，Harness 将它拆成三个角色。只有完整组合才构成一个 capability seam；单独一个角色并不完整。</p>

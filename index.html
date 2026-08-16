@@ -153,6 +153,7 @@
           <a href="#session-history">会话检索与导出</a>
           <a href="#session-reference">跨会话引用</a>
           <a href="#session-title">会话标题</a>
+          <a href="#session-management">分支、归档与删除边界</a>
           <a href="#persistence">会话持久化</a>
           <a href="#session-projection">会话投影</a>
           <a href="#storage-domains">领域存储</a>
@@ -859,6 +860,16 @@ print(result.final_response)</code></pre>
           <div><strong>User rename</strong><p>显式重命名会抢占正在生成的修订；主动 refresh 才会重新解锁生成。</p></div>
         </div>
         <p>服务接纳结果时会验证来源 seq、规范化非空文本并执行 UTF-8 字节上限。即使辅助 LLM 最终失败，请求记录仍能还原当时模型实际看见的输入与路由。</p>
+
+        <h2 id="session-management">会话分支、归档与删除边界<a href="#session-management" class="anchor">#</a></h2>
+        <p>Fork 不会在任意半成品事件处截断。消息下方的分支操作只在已完成轮次的最后一条 Assistant 文本上启用；宿主把事件锚点推进到该位置之后的首个 <code>turn/end</code>，确保子会话继承完整轮次。</p>
+        <div class="compare-grid">
+          <div><strong>Fork</strong><p>继承种子历史、cwd、最近模型选择和谱系，再加入源 Workspace。开放轮次不能分支，也不会悄悄退回更早轮次。</p></div>
+          <div><strong>Rename</strong><p>显式标题会写入日志并固定，之后的自动标题不能覆盖。Fork 后客户端会把标题尾部编号递增。</p></div>
+          <div><strong>Archive</strong><p>只把 Session ID 加入全局归档集合，从所有分组和搜索视图隐藏；日志与 Workspace 记账保持不变。</p></div>
+        </div>
+        <div class="warning"><strong>当前没有删除 Session 或取消归档控件</strong><p>删除 Workspace 只删除注册记录，目录与 Session 日志仍保留，相关会话会进入 Ungrouped。归档同样不是删除；当前 Web UI 没有查看或恢复已归档会话的入口。</p></div>
+        <p>若 Fork 已成功发布子会话、但加入 Workspace 或自动改名失败，错误仍会携带并保留已创建的子会话，客户端先完成对账再报告失败，避免重试时产生重复分支。</p>
 
         <h2 id="persistence">会话持久化与恢复<a href="#persistence" class="anchor">#</a></h2>
         <p>内存中的仅追加 <code>SessionEvent</code> 日志是真源，Persistence seam 负责把同一组事件耐久保存；它没有另造一套“持久化事件”。元数据 header 与日志分开保存，记录格式版本、cwd、父会话、seed 边界、委派深度和 Agent preset。</p>

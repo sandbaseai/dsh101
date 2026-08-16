@@ -690,7 +690,17 @@ export const en = {
   '模型目录只是建议列表，不是路由白名单：一个未列出的模型仍可能由适配器解析，而目录中可见的休眠提供方也可能暂时不可调用。真正发送 prompt 时，宿主会再次执行权威检查，并以 ': 'The model catalog is advisory, not a routing allowlist: an unlisted model may still be resolved by an adapter, while a visible dormant provider may not currently be callable. When a prompt is sent, the host performs the authoritative check again and rejects an unroutable selection with ',
   ' 拒绝不可路由的选择。': '.',
   '引导跳过不代表配置成功': 'Skipped onboarding does not prove successful configuration',
-  '适配器缺失、配置能力只读或联接失败时，凭据步骤会直接让位，Models 页面仍是诊断入口。保存密钥后无需重启；DeepSeek 路由会在下一次调用时重新解析凭据。': 'When the adapter is missing, configuration is read-only, or the joined snapshot fails, the credential step yields immediately and the Models page remains the diagnostic surface. No restart is needed after saving a key; the DeepSeek route resolves credentials again on the next call.'
+  '适配器缺失、配置能力只读或联接失败时，凭据步骤会直接让位，Models 页面仍是诊断入口。保存密钥后无需重启；DeepSeek 路由会在下一次调用时重新解析凭据。': 'When the adapter is missing, configuration is read-only, or the joined snapshot fails, the credential step yields immediately and the Models page remains the diagnostic surface. No restart is needed after saving a key; the DeepSeek route resolves credentials again on the next call.',
+  '分支、归档与删除边界': 'Fork, archive, and deletion boundaries',
+  '会话分支、归档与删除边界': 'Session fork, archive, and deletion boundaries',
+  'Fork 不会在任意半成品事件处截断。消息下方的分支操作只在已完成轮次的最后一条 Assistant 文本上启用；宿主把事件锚点推进到该位置之后的首个 ': 'Fork never truncates at an arbitrary partial event. The branch action beneath a message is enabled only on the final assistant text of a completed turn; the host advances the event anchor to the first ',
+  '，确保子会话继承完整轮次。': ' after that position so the child inherits a complete turn.',
+  '继承种子历史、cwd、最近模型选择和谱系，再加入源 Workspace。开放轮次不能分支，也不会悄悄退回更早轮次。': 'Inherits seed history, cwd, the latest model selection, and lineage, then joins the source Workspace. An open turn cannot be forked and never silently falls back to an earlier turn.',
+  '显式标题会写入日志并固定，之后的自动标题不能覆盖。Fork 后客户端会把标题尾部编号递增。': 'An explicit title is logged and pinned so later automatic titles cannot overwrite it. After a fork, the client increments a trailing title number.',
+  '只把 Session ID 加入全局归档集合，从所有分组和搜索视图隐藏；日志与 Workspace 记账保持不变。': 'Only adds the Session ID to the global archive set and hides it from every grouping and search view; logs and Workspace bookkeeping remain unchanged.',
+  '当前没有删除 Session 或取消归档控件': 'There is currently no Delete Session or Unarchive control',
+  '删除 Workspace 只删除注册记录，目录与 Session 日志仍保留，相关会话会进入 Ungrouped。归档同样不是删除；当前 Web UI 没有查看或恢复已归档会话的入口。': 'Deleting a Workspace removes only its registry record; the directory and Session logs remain, and related sessions move to Ungrouped. Archiving is not deletion either; the current Web UI has no entry point to view or restore archived sessions.',
+  '若 Fork 已成功发布子会话、但加入 Workspace 或自动改名失败，错误仍会携带并保留已创建的子会话，客户端先完成对账再报告失败，避免重试时产生重复分支。': 'If a fork publishes the child successfully but Workspace attachment or automatic renaming fails, the error still identifies and preserves the created child. The client reconciles that partial success before reporting failure, preventing a retry from creating duplicate forks.'
 }
 
 export const normalizedEn = new Map(

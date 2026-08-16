@@ -70,6 +70,7 @@ Last upstream review:
 | Session search and log export | `docs/subsystems/session-query.zh.md`, `packages/session-query/tool-session-query/README.zh.md`, `packages/session-query/session-log-export/README.zh.md` |
 | Structured cross-session references | `docs/subsystems/session-reference.zh.md` |
 | Durable session titles | `docs/subsystems/session-title.zh.md` |
+| Session fork, rename, archive, and workspace deletion boundaries | `packages/host/apiproxy/README.zh.md`, `packages/client/runtime/README.zh.md`, `packages/client/ui-conversation/README.zh.md`, `packages/client/ui-workspace/README.zh.md` |
 | Session persistence and crash recovery | `docs/subsystems/persistence.zh.md`, `packages/session/session-checkpoint-policy/README.zh.md` |
 | Session projections and cold-read cache | `docs/subsystems/session-projection.zh.md` |
 | Domain storage | `docs/subsystems/storage.zh.md` |

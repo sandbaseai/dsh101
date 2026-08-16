@@ -86,6 +86,7 @@ Last upstream review:
 | Structured cross-session references | `docs/subsystems/session-reference.zh.md` |
 | Durable session titles | `docs/subsystems/session-title.zh.md` |
 | Session fork, rename, archive, and workspace deletion boundaries | `packages/host/apiproxy/README.zh.md`, `packages/client/runtime/README.zh.md`, `packages/client/ui-conversation/README.zh.md`, `packages/client/ui-workspace/README.zh.md` |
+| Assistant footer action placement, completed-turn branching, read-only user messages, and selection behavior on failure | `packages/client/ui-conversation/README.zh.md` |
 | Full-snapshot archive set, cross-tab and reconnect convergence, selection clearing, and UI failure behavior | `packages/client/runtime/README.zh.md`, `packages/client/ui-workspace/README.zh.md` |
 | Session persistence and crash recovery | `docs/subsystems/persistence.zh.md`, `packages/session/session-checkpoint-policy/README.zh.md` |
 | Session projections and cold-read cache | `docs/subsystems/session-projection.zh.md` |

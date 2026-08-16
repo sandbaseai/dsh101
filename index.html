@@ -174,6 +174,7 @@
           <a href="#session-reference">跨会话引用</a>
           <a href="#session-title">会话标题</a>
           <a href="#session-management">分支、归档与删除边界</a>
+          <a href="#message-actions">消息操作边界</a>
           <a href="#archive-convergence">归档跨标签页收敛</a>
           <a href="#persistence">会话持久化</a>
           <a href="#session-projection">会话投影</a>
@@ -1203,6 +1204,15 @@ print(result.final_response)</code></pre>
         </div>
         <div class="warning"><strong>当前没有删除 Session 或取消归档控件</strong><p>删除 Workspace 只删除注册记录，目录与 Session 日志仍保留，相关会话会进入 Ungrouped。归档同样不是删除；当前 Web UI 没有查看或恢复已归档会话的入口。</p></div>
         <p>若 Fork 已成功发布子会话、但加入 Workspace 或自动改名失败，错误仍会携带并保留已创建的子会话，客户端先完成对账再报告失败，避免重试时产生重复分支。</p>
+
+        <h3 id="message-actions">消息底部操作何时出现<a href="#message-actions" class="anchor">#</a></h3>
+        <p>Chat 不会给每一个 Assistant 节点复制一套操作栏。复制、时钟与分支组成的 IconActions 只挂在已结束轮次中最后一条带文本内容的 Assistant 消息下，让一个完整轮次只有一个明确操作锚点。</p>
+        <div class="compare-grid">
+          <div><strong>中间内容没有 chrome</strong><p>轮次中间的叙述、纯 Think 节点，以及仍在生成步骤的轮次都不显示消息操作栏，避免把半成品误当成稳定分支点。</p></div>
+          <div><strong>分支要求完整尾部</strong><p>即使操作栏可见，只有同时位于已完成轮次最后一个 transcript 节点时才启用分支；成功后递增继承标题并打开子会话。</p></div>
+          <div><strong>用户气泡保持只读</strong><p>已发送的用户消息保留复制和时钟，但没有编辑或分支操作；当前 Host 对已消费输入也没有对应的重写语义。</p></div>
+        </div>
+        <div class="warning"><strong>失败不切走源会话</strong><p>如果 fork 或自动改名失败，源会话继续保持选中。界面不会打开一个尚未完成对账的目标，也不会静默退回更早轮次重试。</p></div>
 
         <h3 id="archive-convergence">归档集合如何跨标签页收敛<a href="#archive-convergence" class="anchor">#</a></h3>
         <p>归档状态是 Host 注册表级的完整 Session ID 集合。Workspace 基线、本地归档 RPC 回声和其他标签页触发的 changed 帧都会安装整份集合，而不是对旧数组追加或删除一项。</p>

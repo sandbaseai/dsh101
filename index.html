@@ -162,6 +162,7 @@
           <a href="#token-meter">Token 计量</a>
           <a href="#session-stats">会话统计条</a>
           <a href="#trajectory">Trajectory 调试视图</a>
+          <a href="#trajectory-viewport">Trajectory 视口稳定性</a>
           <a href="#telemetry">Session Telemetry</a>
           <a href="#anonymous-id">匿名身份</a>
           <a href="#invariants">运行时 Invariants</a>
@@ -1121,6 +1122,15 @@ print(result.final_response)</code></pre>
         </div>
         <div class="detail-card"><strong>Trajectory 与 Chat 各自投影</strong><p>Trajectory 从共享 Session 原始事件组装自己的记录，也保留因取消而冻结的助手与工具步骤；它不读取或修改 Chat 会话快照。搜索、折叠、选择与请求汇总只覆盖当前已经加载的窗口。</p></div>
         <div class="warning"><strong>进行中不虚构耗时</strong><p>部分响应和运行中的工具只显示开始标记与运行状态，完成前不会绘制假定时长。时间线与记录选择也只存在于当前页面，不提供可分享的锚点深链接。</p></div>
+
+        <h3 id="trajectory-viewport">长轨迹如何保持视口稳定<a href="#trajectory-viewport" class="anchor">#</a></h3>
+        <p>虚拟列表不仅减少 DOM 数量，还要在初始定位、向前补页和流式追加之间守住同一条记录的视觉身份。Trajectory 为这些阶段分别定义了可见的加载状态与稳定的测量边界。</p>
+        <div class="principles">
+          <div><span>01</span><strong>先定位，再展示</strong><p>初始尾部定位完成前以明确的加载行遮住真实记录，避免先闪现顶部再跳到底部。</p></div>
+          <div><span>02</span><strong>补页不重编号</strong><p>到达顶部时，首行控件原地进入禁用加载态；更早记录插入后，既有语义行键与 ARIA 索引保持不变。</p></div>
+          <div><span>03</span><strong>为浮层留出终点</strong><p>全高记录表按 composer 的实时高度预留底部空间，所以输入区尺寸变化后仍能滚到最后几行。</p></div>
+        </div>
+        <div class="detail-card"><strong>滚动条显隐不改变几何</strong><p>概述区默认隐藏滑块，只有悬停或内部获得键盘焦点时才显示；预留槽宽始终存在，因此内容不会在显隐时横向晃动。</p></div>
 
         <h2 id="telemetry">Session Telemetry<a href="#telemetry" class="anchor">#</a></h2>
         <p>Telemetry 把会话 ledger 事件和无日志归宿的 ops 信号投影成外发记录，再交给 OpenTelemetry 等 Provider。它完全位于模型请求之外，不会改变 Agent loop。</p>

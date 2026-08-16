@@ -77,6 +77,7 @@ Last upstream review:
 | Permission presets and approvals | `packages/interaction/permission-presets/README.zh.md`, `packages/interaction/user-approval/README.zh.md` |
 | Effective permission preset derivation | `docs/subsystems/permission-presets.zh.md` |
 | Approval request lifecycle and audit | `docs/subsystems/approval.zh.md` |
+| Browser approval composer takeover, sidebar pending projection, one-time-only decisions, restoration, and Full access confirmation | `packages/client/ui-conversation/README.zh.md`, `packages/client/ui-workspace/README.zh.md` |
 | Filesystem sandbox policy | `docs/subsystems/sandbox.zh.md`, `packages/fs/fs-sandbox/README.zh.md` |
 | Tool timeout enforcement, wrapper ordering, and per-agent repetition reminders | `packages/guard/timeout-policy/README.zh.md`, `packages/guard/repeat-tool-reminder/README.zh.md` |
 | Background job runtime | `docs/subsystems/jobs.zh.md` |

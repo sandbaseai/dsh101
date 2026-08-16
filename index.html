@@ -83,6 +83,7 @@
           <a href="#permissions">权限与审批</a>
           <a href="#permission-presets">权限预设</a>
           <a href="#approval-flow">审批链路</a>
+          <a href="#approval-composer">审批面板接管</a>
           <a href="#sandbox">沙箱模式</a>
           <a href="#e2b-runtime">E2B 远程执行</a>
         </section>
@@ -372,6 +373,18 @@
           <div><span>03</span><strong>Audit</strong><p>只有 asked 与 decided 都越过日志提交点，结果才会返回调用方。</p></div>
         </div>
         <div class="warning"><strong>只有 allowed-once 会放行</strong><p>取消信号会立即撤回问题，迟到的答案被丢弃。审批审计事件不会进入模型 transcript；模型只看到工具派生结果和最新的运行时上下文快照。</p></div>
+
+        <h3 id="approval-composer">审批如何接管输入区<a href="#approval-composer" class="anchor">#</a></h3>
+        <p>审批等待期间，ApprovalPanel 取代普通 InputBar 占据同一个 composer 位置，用琥珀色状态条展示理由、与运行中工具调用参数配对的命令行，以及一次性的拒绝或允许按钮。未决审批不会再在消息流中留下只读占位卡。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Project</strong><p>运行时把审批与问题统一投影为 pendingInteraction；Session 尚未实例化时，侧边栏也能显示待处理状态。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Answer</strong><p>用户在 composer 接管面板中作答，响应值携带审计关联，不从工具参数复制第二份可能漂移的数据。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Restore</strong><p>收到 approval/resolved 广播后等待落定，原输入栏恢复；迟到或重复响应不能重新打开已解决请求。</p></div>
+        </div>
+        <div class="warning"><strong>当前没有“始终允许此类”</strong><p>持久授权仍需要独立的授权存储设计；当前审批面板只能允许一次或拒绝。不要把一次允许解释为以后同类工具都会自动通过。</p></div>
+        <p>编辑器底部的 Access 选择器是另一条路径：普通安全预设会提交权限命令；选择 <strong>Full access</strong> 时必须先经过页面内风险确认，勾选确认项前启用按钮不可用。取消、Escape、关闭或点击遮罩都不会提交权限变更。</p>
 
         <h2 id="e2b-runtime">E2B 远程执行运行时<a href="#e2b-runtime" class="anchor">#</a></h2>
         <p>E2B provider 让文件系统、Bash、PTY 和 LSP 共享同一个短暂远程 Linux 沙箱，而 Cordis 服务、Agent、Session 日志、LLM 请求与 SDK 缓冲仍留在宿主进程。宿主 API Key 只用于创建 SDK 连接，绝不会注入沙箱环境。</p>

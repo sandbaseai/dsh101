@@ -116,6 +116,7 @@
           <a href="#prompt-assembly">Persona 与提示词</a>
           <a href="#workspace-instructions">工作区指令</a>
           <a href="#time-context">时间上下文</a>
+          <a href="#tmux-context">tmux 上下文</a>
         </section>
         <section>
           <h2>Agent 工作流</h2>
@@ -650,6 +651,15 @@ print(result.final_response)</code></pre>
         </div>
         <p><code>refreshIntervalMs: 0</code> 会为每次合格准备追加读数，正数间隔可减少历史增长。读数只追加在可复用前缀之后，不会使已有 KV cache 失效，但会持续占用 token，直到被压缩遮蔽。</p>
         <div class="warning"><strong>提示词时区不是工具默认值</strong><p>配置或进程时区可以在来源缺失时格式化时钟，却不代表用户权威。Schedule 等接受本地日历字段的工具仍必须收到显式偏移量或 <code>time_zone</code>，不会从模型上下文、Session 标头或连接状态中偷偷继承。</p></div>
+
+        <h2 id="tmux-context">可选的 tmux 位置上下文<a href="#tmux-context" class="anchor">#</a></h2>
+        <p><code>tmux-context</code> 在每轮第一个步骤前读取当前 Agent 进程所在的 session、window、pane 和 pane 树布局。Web 与无头默认组合不包含它，需要部署方主动挂载。</p>
+        <div class="compare-grid">
+          <div><strong>验证真实 pane</strong><p>不能只信任继承来的 <code>$TMUX_PANE</code>；插件比较该 pane 的 <code>pane_tty</code> 与进程控制终端，避免把 VS Code 等后代终端误判为原 pane。</p></div>
+          <div><strong>遵守执行策略</strong><p>只读探测经 <code>ctx.shell</code> 解析和运行，因此沿用部署的沙箱与策略。执行器缺失、拒绝、TTY 不匹配或格式非法都会安全降级为空操作。</p></div>
+          <div><strong>仅在变化时追加</strong><p>移动、改名或布局变化会产生带来源的持久 user message；状态不变时不增加历史，正数刷新间隔还会进一步抑制注入。</p></div>
+        </div>
+        <div class="detail-card"><strong>它看见位置，不看见屏幕</strong><p>模型只收到自身 session/window/pane 标识、活动状态与紧凑布局树；相邻 pane 文本和像素尺寸从不采集。读数仅追加，不破坏既有 KV cache，并在压缩前占用少量历史 token。</p></div>
 
         <div class="chapter-break"><span>05</span><div><small>Agent 工作流</small><strong>连接外部能力</strong></div></div>
 

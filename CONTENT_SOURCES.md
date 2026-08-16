@@ -27,6 +27,7 @@ Last upstream review:
 | First-run onboarding, provider readiness, and session model routing | `packages/client/ui-settings-models/README.zh.md`, `packages/client/ui-model-selection/README.zh.md`, `packages/host/apiproxy/README.zh.md`, `packages/llm/llm-deepseek/README.zh.md` |
 | Session model directory refresh, selection generations, failure retention, routability blocking, and reconnect convergence | `packages/client/ui-model-selection/README.zh.md`, `packages/client/runtime/README.zh.md` |
 | Python SDK and security boundary | `docs/user/guide/python-sdk.zh.md` |
+| Cross-process SDK protocol, TypeScript high- and low-level clients, activity-interval aggregation, notification scope, process ownership, and shutdown escalation | `packages/sdk/README.zh.md`, `packages/sdk/protocol/README.zh.md`, `packages/sdk/client/README.zh.md`, `packages/sdk/server/README.zh.md` |
 | CLI and profiles | `apps/cli/README.zh.md` |
 | User profile patch layering, hot reload, and last-good HMR fallback | `packages/boot/app-boot/README.zh.md` |
 | Headless execution and configuration dumps | `apps/cli/reference/README.zh.md` |

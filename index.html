@@ -136,6 +136,7 @@
         <section>
           <h2>自动化</h2>
           <a href="#commands">斜杠命令</a>
+          <a href="#input-triggers">输入触发器</a>
           <a href="#hooks">Hooks 桥接</a>
           <a href="#schedule">定时提醒</a>
           <a href="#workflows">Workflow 与 Ralph</a>
@@ -818,6 +819,15 @@ print(result.final_response)</code></pre>
           <div><strong>审计</strong><p>已接纳命令写入配对的 <code>command/run</code> 与 <code>command/done</code> 日志事件。</p></div>
         </div>
         <p>语法错误或未知命令不会写日志。Agent scope 中的同名定义会遮蔽全局命令；插件卸载时注册自动撤销。</p>
+
+        <h3 id="input-triggers">输入触发器与模糊发现<a href="#input-triggers" class="anchor">#</a></h3>
+        <p>浏览器的 <code>ui-input-trigger</code> 在光标处按词边界和 guard tier 检测 <code>/</code>、<code>@</code> 等触发器，再把分组候选与 pick 回调路由到注册 source。前置加号也复用同一控制器，只以合成 selection 打开 command source，不建立第二套菜单。</p>
+        <div class="compare-grid">
+          <div><strong>候选竞争</strong><p>source 按 order 和注册顺序分组；新查询会取消旧请求并以 generation 阻止迟到结果覆盖当前菜单，单个 source 失败只记录诊断。</p></div>
+          <div><strong>键盘裁决</strong><p>空格与 Enter 按注册顺序询问 source，第一个明确应答胜出。命令菜单支持不区分大小写的子序列模糊排序，但真正提交仍要求精确命令名。</p></div>
+          <div><strong>可访问焦点</strong><p>菜单采用 combobox 模式，焦点留在 textarea，高亮通过 <code>aria-activedescendant</code> 表达；指针选择在 mousedown 完成，避免失焦竞态。</p></div>
+        </div>
+        <div class="detail-card"><strong>只属于浏览器呈现层</strong><p>触发检测、菜单、launcher 和 notice 本身不进入会话日志，也不增加模型 token。只有 pick 之后执行的 Host 命令或插入到普通提示词中的引用文本，才产生各自领域的后续效果。</p></div>
 
         <h2 id="hooks">Codex 与 Claude Code Hooks<a href="#hooks" class="anchor">#</a></h2>
         <p>Hooks 桥接器把现有 Codex 或 Claude Code command hook 配置映射到 Harness 的类型化拦截点。它们是兼容层；需要完整类型、更多控制或稳定扩展时，应直接编写 Cordis 插件。</p>

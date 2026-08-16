@@ -46,6 +46,7 @@ requiredSections.push('defensive-patterns')
 requiredSections.push('config-catalog')
 requiredSections.push('tool-catalog')
 requiredSections.push('config-expression-postmortem')
+requiredSections.push('landlock-diagnostics')
 const missingSections = requiredSections.filter(id => !ids.has(id))
 if (missingSections.length > 0) {
   throw new Error(`Missing required sections: ${missingSections.join(', ')}`)

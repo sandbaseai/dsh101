@@ -89,6 +89,13 @@
           <a href="#profiles">Profile 与组合包</a>
         </section>
         <section>
+          <h2>Agent 配置</h2>
+          <a href="#settings-system">Settings 分层</a>
+          <a href="#credentials-system">凭据引用</a>
+          <a href="#agent-presets">Agent Presets</a>
+          <a href="#prompt-assembly">Persona 与提示词</a>
+        </section>
+        <section>
           <h2>Agent 工作流</h2>
           <a href="#mcp">连接 MCP</a>
           <a href="#skills">Skills</a>
@@ -312,7 +319,48 @@ print(result.final_response)</code></pre>
         </div>
         <p>后应用的层按行胜出。一个 patch 会替换目标行的整个 <code>config</code>，而不是递归合并其中的字段。</p>
 
-        <div class="chapter-break"><span>04</span><div><small>Agent 工作流</small><strong>连接外部能力</strong></div></div>
+        <div class="chapter-break"><span>04</span><div><small>Agent 配置</small><strong>设置、凭据与组装</strong></div></div>
+
+        <h2 id="settings-system">Settings 的三层解析<a href="#settings-system" class="anchor">#</a></h2>
+        <p>用户设置按 namespace 分节，每个生效值依次叠加 <strong>Schema 默认值 → 组合层 base → 用户分节</strong>。<code>cordis.yml</code> 仍保存部署组合；Settings 只承载允许用户编辑的子集。</p>
+        <div class="layer-stack">
+          <div><span>3</span><strong>用户覆盖 · update / replace / mutate</strong></div>
+          <div><span>2</span><strong>组合层 base · 部署方默认</strong></div>
+          <div><span>1</span><strong>Schema defaults · 类型与表单</strong></div>
+        </div>
+        <p><code>update</code> 合并稀疏 patch；<code>replace</code> 整体替换并让缺失字段重新继承；持有脱敏视图的 UI 必须使用路径级 <code>mutate</code>，避免覆盖自己从未看到的 secret 字段。每次写入都带 revision，可拒绝过期页面的并发覆盖。</p>
+        <div class="detail-card"><strong>生效时间是产品提示</strong><p><code>live</code> owner 观察变更并热应用；<code>restart</code> owner 只在构造时读取。外部编辑无效时，运行中的 namespace 保留最后一个已验证值。</p></div>
+
+        <h2 id="credentials-system">凭据引用与热轮换<a href="#credentials-system" class="anchor">#</a></h2>
+        <p>配置文件只保存形如环境变量名的 <code>CredentialRef</code>，明文由 Credentials provider 管理。LLM Adapter 在每次请求前重新解析引用，不跨操作缓存，因此轮换后的密钥会在下一次请求生效，无需重启。</p>
+        <div class="compare-grid">
+          <div><strong>resolve</strong><p>只向受信任消费方返回非空值及来源层；空字符串始终视为未配置。</p></div>
+          <div><strong>describe</strong><p>UI 只看到 configured、source 与 writable，永远拿不到凭据值。</p></div>
+          <div><strong>set / unset</strong><p>只修改 provider 管理的可写层；被只读环境变量遮蔽时明确拒绝。</p></div>
+        </div>
+        <div class="warning"><strong>不要把 Secret 放进 Settings</strong><p>Secret schema 字段在所有网络 descriptor 中都必须脱敏。模型配置引用凭据名，而不是复制 API Key。</p></div>
+
+        <h2 id="agent-presets">Agent Presets<a href="#agent-presets" class="anchor">#</a></h2>
+        <p>Preset 是包含 <code>agent.cordis.yml</code> 的目录，决定一个 Agent 可见的工具、提示词和投影插件。Roster 把每个版本的组装常驻挂载一次，各会话通过 scope 父链加入，实现 <code>agent → preset → global</code> 的近层遮蔽。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>发现</strong><p>每次 list/resolve 重新扫描根目录，并把损坏项连同原因一起列出。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>挂载</strong><p>会话发布前验证组装并加入常驻 scope，失败则回滚整个创建。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>固定</strong><p>运行中会话保留原代际；编辑文件只影响随后创建的会话。</p></div>
+        </div>
+        <p>只有空白会话可以切换 Preset，因为已有历史可能包含新工具集无法执行的调用。用户 Preset 的信任等级只是 UI 提示，不提供隔离；它引用的插件拥有什么权限，它就拥有什么权限。</p>
+
+        <h2 id="prompt-assembly">Persona 与系统提示词组装<a href="#prompt-assembly" class="anchor">#</a></h2>
+        <p>系统提示词由具名、带 order 的 section 组成，并在每次模型步骤前与工具 schema、变量和动态 runtime context 一起组装。Scoped section 会遮蔽同名全局 section；重复注册或未解析模板变量会立即失败。</p>
+        <div class="permission-table">
+          <div><code>-100</code><strong>Harness identity</strong><span>固定身份开场，位于最前。</span></div>
+          <div class="recommended"><code>0</code><strong>Deployment persona</strong><span>部署级人设，可由 Preset 内 persona 按 scope 替换。</span></div>
+          <div><code>100–199</code><strong>Tool guidance</strong><span>由工具插件携带的使用策略。</span></div>
+        </div>
+        <p>Persona 的 <code>complete: true</code> 会让该段成为唯一系统提示词，但工具与上下文仍先完成解析。<code>includeRuntimeContext: false</code> 只抑制模型看到的动态快照，不会关闭沙箱、审批等实际服务。</p>
+
+        <div class="chapter-break"><span>05</span><div><small>Agent 工作流</small><strong>连接外部能力</strong></div></div>
 
         <h2 id="mcp">连接 MCP Server<a href="#mcp" class="anchor">#</a></h2>
         <p>MCP Client 插件把外部服务器的工具注册到 <code>ctx.tools</code>。每个服务器使用一个插件实例，支持本地 <code>stdio</code> 与远程 <code>streamable-http</code> 两种传输。</p>
@@ -399,7 +447,7 @@ print(result.final_response)</code></pre>
         </div>
         <p>模型输入使用从 1 开始的 UTF-16 行列坐标；没有对准符号可能得到空结果。Provider 按文件扩展名确定性选择，没有匹配项时返回 <code>LSP_UNAVAILABLE</code>。LSP 是可选能力，不属于 Agent loop 主干。</p>
 
-        <div class="chapter-break"><span>05</span><div><small>自动化</small><strong>命令、钩子与编排</strong></div></div>
+        <div class="chapter-break"><span>06</span><div><small>自动化</small><strong>命令、钩子与编排</strong></div></div>
 
         <h2 id="commands">斜杠命令<a href="#commands" class="anchor">#</a></h2>
         <p>用户命令由插件注册，交互式客户端负责发现并针对确切 Agent 执行。输入形如 <code>/plan</code>、<code>/export</code>；处理器直接返回 UI 结果，不创建用户消息、不启动模型轮次，也不产生工具结果。</p>
@@ -438,7 +486,7 @@ print(result.final_response)</code></pre>
         </div>
         <div class="detail-card"><strong>完成声明仍需验证</strong><p>Ralph 的 <code>complete</code> 或 <code>blocked</code> 来自 worker 报告，没有独立评估器。普通 child 失败会终止运行而不会自动重试；取消后局部输出也不会伪装成成功。</p></div>
 
-        <div class="chapter-break"><span>06</span><div><small>持续执行</small><strong>委派、计划与长上下文</strong></div></div>
+        <div class="chapter-break"><span>07</span><div><small>持续执行</small><strong>委派、计划与长上下文</strong></div></div>
 
         <h2 id="subagents">Subagent 委派<a href="#subagents" class="anchor">#</a></h2>
         <p>Subagent seam 让父 Agent 通过具名 Provider 委派工作。Provider 可以在同一进程、独立进程、ACP、Codex 或 Claude Code 中运行，但父级看到的启动与结果约定保持一致。</p>

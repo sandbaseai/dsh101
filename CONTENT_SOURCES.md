@@ -52,6 +52,10 @@ Last upstream review:
 | Codex and Claude Code hook bridges | `packages/hooks/hooks-codex/README.zh.md`, `packages/hooks/hooks-claude-code/README.zh.md` |
 | Session-local schedules | `docs/subsystems/schedule.zh.md` |
 | Dynamic workflows and Ralph | `docs/subsystems/workflow.zh.md`, `packages/workflow/tool-workflow/README.zh.md`, `packages/workflow/tool-ralph/README.zh.md` |
+| Layered user settings | `docs/subsystems/settings.zh.md` |
+| Credential references and rotation | `docs/subsystems/credentials.zh.md` |
+| Agent preset composition | `packages/preset/agent-presets/README.zh.md` |
+| Persona and system prompt assembly | `packages/preset/persona/README.zh.md`, `docs/subsystems/system-prompt.zh.md` |
 
 ## Refresh checklist
 

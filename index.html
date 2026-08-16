@@ -167,6 +167,7 @@
           <a href="#telemetry-delivery">遥测交付边界</a>
           <a href="#anonymous-id">匿名身份</a>
           <a href="#invariants">运行时 Invariants</a>
+          <a href="#invariant-registration">Invariant 注册边界</a>
           <a href="#feedback">消息反馈</a>
         </section>
         <section>
@@ -1166,6 +1167,15 @@ print(result.final_response)</code></pre>
         <p>Invariant Registry 让每个包注册自己拥有的运行时约束，例如事件必须成对、状态转换必须合法。检查断言权威事件流或可变数据关系，而不是简单确认某个服务或方法存在。</p>
         <div class="detail-card"><strong>失败可归因到包</strong><p>违规会抛出稳定 code 为 <code>INVARIANT</code> 的错误，并携带完整 npm package name。每个 installer 在独立 child fiber 中运行，卸载后不会遗留监听器或 trace 状态。</p></div>
         <p>部署可以用 allowlist 和 blocklist 正则选择检查范围，blocklist 优先。模式在服务启动时严格校验并在生命周期内固定，确保后续插件加载与 HMR 行为确定。</p>
+
+        <h3 id="invariant-registration">Invariant 注册为什么是原子的<a href="#invariant-registration" class="anchor">#</a></h3>
+        <p>每个完整 npm 包名在同一注册表中只能有一个活跃贡献。注册表拥有 installer 的子 fiber，配套插件同时持有 effect disposer；任一侧卸载都会清理监听器、trace 状态与名称保留。</p>
+        <div class="compare-grid">
+          <div><strong>被过滤仍保留名称</strong><p>即使 enabled、allowlist 或 blocklist 让检查不运行，包名仍被占用，两个插件不能悄然认领同一归属。</p></div>
+          <div><strong>异步安装必须先结算</strong><p>installer 可声明所需服务并执行同步或异步检查；只有它成功完成后，注册才成立。</p></div>
+          <div><strong>失败释放全部状态</strong><p>安装阶段抛错会原子销毁子 fiber 并释放名称，因此修复后的插件可以重新加载，而不会撞上残留注册。</p></div>
+        </div>
+        <div class="warning"><strong>过滤项是正则源码，不是斜杠字面量</strong><p>模式区分大小写，默认不锚定；需要精确匹配时自行加入起止锚点。配置不会解析 /pattern/flags 写法，空白、重复、无效或首尾带空格的条目会让服务启动失败。</p></div>
 
         <h2 id="feedback">消息反馈<a href="#feedback" class="anchor">#</a></h2>
         <p>每条已完成 Assistant 消息可以保存好评或差评及可选备注。它是本地 Storage Domain 中的可编辑 sidecar，不是 Session 事件、模型上下文或自动遥测。</p>

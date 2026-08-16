@@ -123,7 +123,7 @@ Last upstream review:
 | Trajectory event inspection, timeline interaction, virtualized history, stable prefix pagination, composer clearance, and streaming follow | `packages/client/ui-trajectory/README.zh.md` |
 | Session telemetry, chunk sampling, handoff versus delivery, sharing disclosure, shutdown drain, and redaction | `docs/subsystems/session-telemetry.zh.md` |
 | Per-home anonymous user identity | `packages/identity/anonymous-user-id/README.zh.md` |
-| Package-owned runtime invariants | `docs/subsystems/invariants.zh.md` |
+| Package-owned runtime invariants, atomic registration, child-fiber cleanup, and selection regex semantics | `docs/subsystems/invariants.zh.md` |
 | Per-message feedback | `docs/subsystems/feedback.zh.md` |
 
 ## Refresh checklist

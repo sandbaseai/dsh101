@@ -179,6 +179,7 @@
           <a href="#session-projection">会话投影</a>
           <a href="#chat-assembly">Chat 增量组装</a>
           <a href="#chat-scroll-shell">Chat 滚动壳</a>
+          <a href="#context-disclosure">上下文来源展开项</a>
           <a href="#storage-domains">领域存储</a>
           <a href="#spill-output">大结果 Spill</a>
         </section>
@@ -1252,6 +1253,16 @@ print(result.final_response)</code></pre>
           <div><strong>草稿滚轮在边缘接力</strong><p>限高 textarea 有可滚内容时先在自身滚动；到达顶部或底部后，滚轮再交给会话宿主，避免长草稿把整页滚动永久截断。</p></div>
         </div>
         <div class="warning"><strong>不要把预留入口当成分页功能</strong><p>Assembler 已支持向前 prepend 历史并保留节点身份，但普通 Chat 的 assistant 逐消息分页目前仍只是设计 slot，尚未实现。现有 IconActions 只出现在已结束轮次最后一条有文本的 Assistant 消息下。</p></div>
+
+        <h3 id="context-disclosure">上下文消息的来源展开项<a href="#context-disclosure" class="anchor">#</a></h3>
+        <p>写入日志的非用户消息不会伪装成普通对话气泡。Chat 默认把它折叠成 DisclosureRow：标题先显示运行时投影的角色——注入显示“上下文注入”，召回显示“跨会话召回”——再附上持久来源记录中的生产者名称。</p>
+        <div class="compare-grid">
+          <div><strong>不展开也能辨认来源</strong><p>生产者标签可区分 skill 目录、Workspace 指令文件和被召回会话；来源没有名称时只显示角色，不猜测生产者。</p></div>
+          <div><strong>已知形态按语义展示</strong><p><code>instructions</code> 在正文上方列出已对账文件；<code>catalog</code> 展示来源记录的条目，而不是直接倾倒面向模型的正文。</p></div>
+          <div><strong>未知形态仍可检查</strong><p>未声明、当前版本不认识或字段不足时使用 opaque 内容区：保留真实换行展示模型所见文本，并列出剩余来源字段。</p></div>
+        </div>
+        <p>展开内容自适应高度，最高 141px，超出后在内部滚动；它不会合成工具状态或摘要。这个 opaque 路径是正式默认协议，而非错误兜底，因此恢复、fork 或外部写入的历史即使缺少当前生产插件，也仍能渲染。</p>
+        <div class="warning"><strong>Steering 不添加虚构标记</strong><p>持久或待处理的中途引导继续使用用户气泡样式；transcript 唯一的 steering 线索是它位于轮次中途。界面不会写入日志里不存在的来源或状态。</p></div>
 
         <h2 id="storage-domains">非会话数据的领域存储<a href="#storage-domains" class="anchor">#</a></h2>
         <p>设置、索引等不属于对话事件日志的数据进入 Storage subsystem。枢纽只负责注册后端和挂载数据形式，不执行 IO；领域层声明名称、格式版本、global slot、表和 zod schema，再按部署路由到 JSON 或 SQLite 后端。</p>

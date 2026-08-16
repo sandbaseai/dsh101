@@ -105,7 +105,7 @@ Last upstream review:
 | Persistent Chat scroll shell, reserved gutter, sticky composer geometry, textarea wheel chaining, and deferred per-message pagination | `packages/client/ui-conversation/README.zh.md` |
 | Non-user context disclosures, durable producer labels, source-shape rendering, opaque compatibility, and steering presentation | `packages/client/ui-conversation/README.zh.md` |
 | Streaming Think-row summaries, internal tail following, expanded reading control, and settled-state stabilization | `packages/client/ui-conversation/README.zh.md` |
-| Domain storage | `docs/subsystems/storage.zh.md` |
+| Domain storage, per-domain backend routing, JSON whole-unit durability, SQLite row layout, format rejection, in-process change visibility, and multiprocess limits | `docs/subsystems/storage.zh.md`, `packages/storage/storage/README.zh.md`, `packages/storage/storage-domain/README.zh.md`, `packages/storage/storage-json/README.zh.md`, `packages/storage/storage-sqlite/README.zh.md` |
 | Atomic Settings/Credentials replacement, cross-process locks, and durability limits | `packages/util/atomic-write/README.zh.md`, `packages/settings/settings-file/README.zh.md`, `packages/credentials/credentials-local/README.zh.md`, `packages/storage/storage-json/README.zh.md` |
 | Oversized tool result spill | `docs/subsystems/spill.zh.md` |
 | User slash commands | `docs/subsystems/commands.zh.md` |

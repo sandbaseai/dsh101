@@ -220,6 +220,7 @@
           <a href="#context-disclosure">上下文来源展开项</a>
           <a href="#thinking-tail">实时 Think 摘要</a>
           <a href="#storage-domains">领域存储</a>
+          <a href="#storage-provider-routing">存储后端路由</a>
           <a href="#spill-output">大结果 Spill</a>
         </section>
       </nav>
@@ -1732,6 +1733,23 @@ print(result.final_response)</code></pre>
           <div><strong>Domain API</strong><p>同步读取权威内存态；写入先持久化，再更新内存并发出变更事件。</p></div>
         </div>
         <p>同一领域的写入按顺序排队。后端写入失败时内存保持不变，因此读取不会领先于介质；格式版本不匹配或已存记录不符合 schema 会在打开领域时立即失败。</p>
+
+        <h3 id="storage-provider-routing">JSON 与 SQLite 后端如何路由<a href="#storage-provider-routing" class="anchor">#</a></h3>
+        <p>Storage hub 可以同时挂载多个具名后端；不存在全局“当前数据库”。Domain facility 先应用默认 backend，再按领域名称读取 routes 覆盖，因此低频、便于人工检查的数据和高频记录可以在同一进程中使用不同介质。</p>
+        <div class="compare-grid">
+          <div><strong>JSON：整 Unit 发布</strong><p>一个 unit 对应一份完整 JSON 文件。每次写入都在同目录写临时文件、fsync 后原子 rename；缺失文件按空状态打开，首次写入才物化。</p></div>
+          <div><strong>SQLite：每 Key 一行</strong><p>每个 unit/table 映射为经过验证名称的 STRICT 表，key 是主键，value 保存 JSON 文本；一次更新只执行一条预处理语句，默认 journal mode 为 WAL。</p></div>
+          <div><strong>Domain：内存是读取权威</strong><p>写入在每个领域自己的 Promise 链上串行，只有后端成功达到持久状态后才替换内存并发出 domain/changed。</p></div>
+        </div>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Open</strong><p>验证 unit 描述符、格式版本和全部已存记录；损坏介质、未知版本或 schema 不符都会拒绝打开。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Commit</strong><p>一次操作只修改一条领域记录；当前没有跨表事务、二级索引或多段 key 契约。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Publish</strong><p>提交后同步读取立即看到新内存态，并向同一进程发布变更；其他 Host 不会收到事件。</p></div>
+        </div>
+        <div class="detail-card"><strong>格式不匹配不会自动迁移</strong><p>JSON unit 版本、SQLite unit 描述符和数据库 user_version 只接受当前值。当前处于预发布阶段，旧版或新版介质都会明确失败，部署方必须自行迁移或选择新的存储位置。</p></div>
+        <div class="warning"><strong>两个后端都不是多进程协调器</strong><p>JSON 没有跨进程写锁，多个 Host 可能交错整文件替换并以后写覆盖；SQLite 没有 busy wait 或重试，其他连接持有写事务时立即失败。DatabaseSync 的同步语句还会短暂阻塞 Node 事件循环。</p></div>
 
         <h3 id="atomic-file-write">配置文件的原子替换与跨进程锁<a href="#atomic-file-write" class="anchor">#</a></h3>
         <p>Settings 文件和本地 Credentials 使用共享的 <code>atomic-write</code> 原语：在目标同目录以 <code>wx</code> 独占创建随机临时文件，带着显式 mode 写完后再用 <code>rename</code> 替换目标。读取方因此只会看到旧内容或完整新内容。</p>

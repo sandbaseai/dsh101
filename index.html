@@ -173,6 +173,7 @@
           <a href="#session-reference">跨会话引用</a>
           <a href="#session-title">会话标题</a>
           <a href="#session-management">分支、归档与删除边界</a>
+          <a href="#archive-convergence">归档跨标签页收敛</a>
           <a href="#persistence">会话持久化</a>
           <a href="#session-projection">会话投影</a>
           <a href="#storage-domains">领域存储</a>
@@ -1179,6 +1180,15 @@ print(result.final_response)</code></pre>
         </div>
         <div class="warning"><strong>当前没有删除 Session 或取消归档控件</strong><p>删除 Workspace 只删除注册记录，目录与 Session 日志仍保留，相关会话会进入 Ungrouped。归档同样不是删除；当前 Web UI 没有查看或恢复已归档会话的入口。</p></div>
         <p>若 Fork 已成功发布子会话、但加入 Workspace 或自动改名失败，错误仍会携带并保留已创建的子会话，客户端先完成对账再报告失败，避免重试时产生重复分支。</p>
+
+        <h3 id="archive-convergence">归档集合如何跨标签页收敛<a href="#archive-convergence" class="anchor">#</a></h3>
+        <p>归档状态是 Host 注册表级的完整 Session ID 集合。Workspace 基线、本地归档 RPC 回声和其他标签页触发的 changed 帧都会安装整份集合，而不是对旧数组追加或删除一项。</p>
+        <div class="compare-grid">
+          <div><strong>新快照覆盖过期基线</strong><p>若归档集合在 workspace.list 请求进行中更新，新集合会保留并压过随后返回的旧基线，避免短暂恢复已经归档的行。</p></div>
+          <div><strong>当前选择统一清空</strong><p>正在查看的 Session 一旦进入归档集合，投影就切回 New Session。此规则同时覆盖本地操作、其他标签页通知和离线期间变更后的重连。</p></div>
+          <div><strong>隐藏不等于移除</strong><p>归档行从 Workspace 分组、Ungrouped、平铺列表与内容搜索中全部消失，但 Session 摘要仍留在运行时 store，日志与记账席位也不改变。</p></div>
+        </div>
+        <div class="warning"><strong>Archive 不弹确认框</strong><p>当前 Web UI 直接提交这项非破坏性操作；失败只写入控制台诊断，列表保持原样。成功后目前没有查看或取消归档入口，因此仍应确认选中的是正确会话。</p></div>
 
         <h2 id="persistence">会话持久化与恢复<a href="#persistence" class="anchor">#</a></h2>
         <p>内存中的仅追加 <code>SessionEvent</code> 日志是真源，Persistence seam 负责把同一组事件耐久保存；它没有另造一套“持久化事件”。元数据 header 与日志分开保存，记录格式版本、cwd、父会话、seed 边界、委派深度和 Agent preset。</p>

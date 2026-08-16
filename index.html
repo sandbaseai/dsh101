@@ -66,6 +66,7 @@
           <a href="#headless">Headless 任务</a>
           <a href="#inspect-config">检查生效配置</a>
           <a href="#model">配置模型</a>
+          <a href="#model-provider-contract">Provider 与图片能力</a>
           <a href="#onboarding">首次启动诊断</a>
           <a href="#model-selection-state">模型选择收敛</a>
           <a href="#composer-blocks">输入阻塞与解除</a>
@@ -302,6 +303,23 @@
         </div>
         <h3>自定义提供方</h3>
         <p>公司网关或自建 OpenAI 兼容端点可通过「添加自定义提供方」配置。Provider ID 会被请求、会话、默认模型和凭据引用使用，因此保存后应视为永久标识；展示名称、URL、协议和模型仍可修改。</p>
+
+        <h3 id="model-provider-contract">Provider 认证、发现与图片能力<a href="#model-provider-contract" class="anchor">#</a></h3>
+        <p>模型配置包含三个彼此独立的契约：路由如何认证、目录如何发现模型，以及每个模型允许哪些输入。模型能出现在选择器中，不证明这三层都已经成立；真正请求会按所选 Provider 的适配器与不可变配置快照执行。</p>
+        <div class="capability-flow">
+          <div><span>01</span><strong>Authenticate</strong><p>普通 API 路由解析具名凭据；Bedrock、Vertex、Azure 与 Codex 等原生协议还分别依赖 AWS、ADC、api-version 或 OAuth，不能靠一个通用密钥字段补齐。</p></div>
+          <i>→</i>
+          <div><span>02</span><strong>Discover</strong><p>获取可用模型只查询表单当前的端点和凭据，候选项先进入草稿；目录提供方直接使用已安装 catalog，不发网络请求。</p></div>
+          <i>→</i>
+          <div><span>03</span><strong>Declare</strong><p>手动模型默认只接受文本；视觉模型必须在自己的 input 或路由 defaultInput 中显式声明 image，Harness 不会探测端点模态。</p></div>
+        </div>
+        <div class="compare-grid">
+          <div><strong>模型级 input 优先</strong><p>解析顺序是模型条目、已安装 catalog、路由 defaultInput；路由默认值只是最后回退，不会收窄 catalog 已知的图片能力。</p></div>
+          <div><strong>少声明会提前拒绝</strong><p>未声明 image 时，Harness 会在发送前点名模型并拒绝图片；为自定义视觉模型补充 input: [text, image] 后开启新会话再试。</p></div>
+          <div><strong>多声明会污染当前会话</strong><p>若端点实际不支持图片，Provider 会在用户消息已持久化后失败，同一会话会持续重发它；应切换到真实视觉模型、fork 到图片之前，或新建会话。</p></div>
+        </div>
+        <div class="detail-card"><strong>“获取可用模型”不是保存</strong><p>OpenAI 兼容发现只支持能以 GET /models 与 Bearer 凭据完整描述的协议。选择返回项只修改表单草稿，保存设置后才注册路由；不支持发现的端点应手动填写模型。</p></div>
+        <div class="warning"><strong>能力声明是部署方的断言</strong><p>input 与 defaultInput 不会验证远端真实能力。保守的纯文本默认会较早失败；错误授予 image 则会在轮次中途失败并留下持久消息，后果更难恢复。</p></div>
         <div class="error-table">
           <div><code>MISSING_CREDENTIAL</code><span>在模型页保存密钥，或提供配置引用的环境变量。</span></div>
           <div><code>UNKNOWN_MODEL</code><span>重新选择已配置模型，或在自定义提供方中添加模型。</span></div>

@@ -87,7 +87,7 @@ Last upstream review:
 | Dynamic workflows and Ralph | `docs/subsystems/workflow.zh.md`, `packages/workflow/tool-workflow/README.zh.md`, `packages/workflow/tool-ralph/README.zh.md` |
 | Layered user settings, file hot reload, safe mutation, revision conflicts, and secret redaction | `docs/subsystems/settings.zh.md`, `packages/settings/settings/README.zh.md`, `packages/settings/settings-file/README.zh.md`, `packages/client/ui-settings/README.zh.md`, `packages/host/apiproxy/README.zh.md` |
 | Browser schema rehydration, user-layer drafts, validation, and executable-envelope trust | `packages/client/schema-form/README.zh.md`, `packages/client/ui-settings-plugins/README.zh.md` |
-| Credential references and rotation | `docs/subsystems/credentials.zh.md` |
+| Credential references, rotation, local-document validation, permissions, and same-UID boundary | `docs/subsystems/credentials.zh.md`, `packages/credentials/credentials-local/README.zh.md` |
 | Frozen launch environment, `.env` provenance, and credential-source precedence | `packages/util/launch-environment/README.zh.md`, `packages/boot/app-boot/README.zh.md`, `packages/credentials/credentials-local/README.zh.md` |
 | Agent preset composition | `packages/preset/agent-presets/README.zh.md` |
 | Persona and system prompt assembly | `packages/preset/persona/README.zh.md`, `docs/subsystems/system-prompt.zh.md` |

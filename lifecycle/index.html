@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A source-verified bilingual guide to DeepSeek Harness plugin fibers, dependency-driven loading, effects, disposal, and HMR." />
+    <meta name="theme-color" content="#050907" />
+    <link rel="canonical" href="https://dsh101.com/lifecycle/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://dsh101.com/lifecycle/" />
+    <link rel="alternate" hreflang="en-US" href="https://dsh101.com/lifecycle/?lang=en" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>插件生命周期 · DSH 101</title>
+    <link rel="stylesheet" href="/subpage.css" />
+    <link rel="stylesheet" href="/plugin.css" />
+    <link rel="stylesheet" href="/tool.css" />
+    <link rel="stylesheet" href="/lifecycle.css" />
+  </head>
+  <body>
+    <header class="sub-header">
+      <a class="sub-brand" href="/"><img src="https://www.deepseek.com/harness/images/dsh-logo.svg" alt="DeepSeek Harness" /><span>101</span></a>
+      <a href="/publish/" data-zh="打包与安装" data-en="Package and install">打包与安装</a>
+      <a href="/" data-zh="返回首页" data-en="Back home">返回首页</a>
+      <a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/framework/" target="_blank" rel="noreferrer" data-zh="官方文档 ↗" data-en="Official docs ↗">官方文档 ↗</a>
+      <div class="locale-switch" role="group" aria-label="Language"><button type="button" data-locale="zh" class="active">中</button><button type="button" data-locale="en">EN</button></div>
+    </header>
+
+    <main class="sub-main plugin-main lifecycle-main">
+      <section class="plugin-hero lifecycle-hero">
+        <div class="plugin-intro">
+          <p class="sub-kicker" data-zh="Fiber、effect 与确定性清理" data-en="Fibers, effects, and deterministic cleanup">Fiber、effect 与确定性清理</p>
+          <h1 data-zh="让插件知道何时开始，也知道如何结束。" data-en="Know when a plugin starts and how it ends.">让插件知道何时开始，也知道如何结束。</h1>
+          <p class="sub-lead" data-zh="依赖驱动加载，作用域追踪注册，dispose 等待全部清理，HMR 不保留旧实例。" data-en="Dependencies drive loading, scopes track registrations, dispose awaits cleanup, and HMR retains no old instance.">依赖驱动加载，作用域追踪注册，dispose 等待全部清理，HMR 不保留旧实例。</p>
+          <div class="plugin-prerequisite"><strong data-zh="阅读位置" data-en="Where this fits">阅读位置</strong><span data-zh="完成打包教程后阅读。这里解释此前自动清理、依赖等待和热替换背后的运行时模型。" data-en="Read this after packaging. It explains the runtime model behind automatic cleanup, dependency waiting, and hot replacement.">完成打包教程后阅读。这里解释此前自动清理、依赖等待和热替换背后的运行时模型。</span></div>
+        </div>
+        <div class="code-stage lifecycle-code-stage" aria-label="Cordis effect and cleanup source code">
+          <div class="code-stage-head"><span>plugin.ts</span><button class="copy-code" type="button" data-copy-target="effect-example" data-zh="复制" data-en="Copy">复制</button></div>
+          <pre><code id="effect-example">export function apply(ctx: Context) {
+  ctx.on('some-event', handler)
+
+  ctx.effect(() => {
+    const connection = createConnection()
+
+    return () => connection.close()
+  })
+}</code></pre>
+        </div>
+      </section>
+
+      <aside class="source-note"><span data-zh="核对基线" data-en="Verified baseline">核对基线</span><p data-zh="官方提交 47f9438，2026-08-13。状态机、依赖驱动加载、effect、嵌套 Fiber、dispose 和 HMR 语义均来自官方框架文档。" data-en="Official commit 47f9438, 2026-08-13. State machine, dependency-driven loading, effects, nested fibers, dispose, and HMR semantics follow the official framework docs.">官方提交 47f9438，2026-08-13。状态机、依赖驱动加载、effect、嵌套 Fiber、dispose 和 HMR 语义均来自官方框架文档。</p></aside>
+
+      <nav class="chapter-nav" aria-label="Guide chapters">
+        <a href="#states" data-zh="Fiber 状态" data-en="Fiber states">Fiber 状态</a>
+        <a href="#dependencies" data-zh="依赖驱动" data-en="Dependency driven">依赖驱动</a>
+        <a href="#effects" data-zh="自动清理" data-en="Automatic cleanup">自动清理</a>
+        <a href="#nested" data-zh="嵌套作用域" data-en="Nested scopes">嵌套作用域</a>
+        <a href="#hmr" data-zh="热替换" data-en="Hot replacement">热替换</a>
+      </nav>
+
+      <section id="states" class="fiber-section">
+        <div class="tool-section-heading"><h2 data-zh="每个插件实例拥有一个 Fiber" data-en="Every plugin instance owns a Fiber">每个插件实例拥有一个 Fiber</h2><p data-zh="Fiber 是运行时作用域，也是生命周期句柄。状态反映依赖、apply 和清理当前进行到哪里。" data-en="A Fiber is both a runtime scope and lifecycle handle. Its state shows where dependency waiting, apply, or cleanup currently stands.">Fiber 是运行时作用域，也是生命周期句柄。状态反映依赖、apply 和清理当前进行到哪里。</p></div>
+        <div class="state-path"><span>PENDING</span><i>→</i><span>LOADING</span><i>→</i><span class="active-state">ACTIVE</span><i>→</i><span>UNLOADING</span><i>→</i><span>DISPOSED</span><b>FAILED</b></div>
+        <div class="state-meanings"><div><code>PENDING</code><p data-zh="已声明，所需服务尚未就绪。" data-en="Declared while required services are not ready.">已声明，所需服务尚未就绪。</p></div><div><code>LOADING / ACTIVE</code><p data-zh="apply 正在运行，或已经完成。" data-en="apply is running, or has completed.">apply 正在运行，或已经完成。</p></div><div><code>FAILED</code><p data-zh="apply 或配置校验抛出异常。" data-en="apply or config validation threw.">apply 或配置校验抛出异常。</p></div><div><code>UNLOADING / DISPOSED</code><p data-zh="disposer 正在运行，或清理已经完成。" data-en="Disposers are running, or cleanup is complete.">disposer 正在运行，或清理已经完成。</p></div></div>
+      </section>
+
+      <section id="dependencies" class="plugin-chapter">
+        <div class="chapter-copy"><h2 data-zh="inject 决定插件何时能进入 LOADING" data-en="inject decides when a plugin may enter LOADING">inject 决定插件何时能进入 LOADING</h2><p data-zh="插件会等待全部必需服务就绪。如果提供方被替换、服务暂时消失，消费者会自动卸载，并在服务恢复后重新加载。" data-en="A plugin waits for every required service. If a provider is replaced and a service disappears, the consumer unloads automatically and reloads when the service returns.">插件会等待全部必需服务就绪。如果提供方被替换、服务暂时消失，消费者会自动卸载，并在服务恢复后重新加载。</p></div>
+        <div class="chapter-work"><div class="code-block"><div><span>TypeScript</span><button class="copy-code" type="button" data-copy-target="inject-lifecycle" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="inject-lifecycle">export const inject = ['tools', 'llm']
+
+export function apply(ctx: Context) {
+  // ctx.tools and ctx.llm are ready here.
+}</code></pre></div><div class="dependency-cycle"><span data-zh="服务就绪" data-en="Services ready">服务就绪</span><i>→</i><span>ACTIVE</span><i>→</i><span data-zh="服务消失" data-en="Service disappears">服务消失</span><i>→</i><span>DISPOSED</span><i>→</i><span data-zh="恢复后重载" data-en="Reload on return">恢复后重载</span></div></div>
+      </section>
+
+      <section id="effects" class="effects-section">
+        <div class="tool-section-heading"><h2 data-zh="多数注册本身已经是 effect" data-en="Most registrations are effects already">多数注册本身已经是 effect</h2><p data-zh="通过 ctx 建立的注册会附着到当前 Fiber。只有 Cordis 不管理的资源才需要手写 ctx.effect()。" data-en="Registrations made through ctx attach to the current Fiber. Write ctx.effect() only for resources Cordis does not manage.">通过 ctx 建立的注册会附着到当前 Fiber。只有 Cordis 不管理的资源才需要手写 ctx.effect()。</p></div>
+        <div class="effect-map"><div><code>ctx.on(event, handler)</code><span data-zh="卸载时移除监听器" data-en="Removes the listener on unload">卸载时移除监听器</span></div><div><code>ctx.tools.register(tool)</code><span data-zh="撤销工具注册" data-en="Reverts the tool registration">撤销工具注册</span></div><div><code>ctx.llm.registerAdapter(...)</code><span data-zh="撤销模型适配器" data-en="Reverts the model adapter">撤销模型适配器</span></div><div><code>ctx.plugin(child)</code><span data-zh="随父 Fiber 递归卸载" data-en="Recursively unloads with its parent">随父 Fiber 递归卸载</span></div><div><code>ctx.effect(() =&gt; cleanup)</code><span data-zh="释放连接、watcher 等外部资源" data-en="Releases connections, watchers, and other external resources">释放连接、watcher 等外部资源</span></div></div>
+        <div class="async-warning"><strong data-zh="不要假设异步清理串行完成" data-en="Do not assume async cleanup completes serially">不要假设异步清理串行完成</strong><p data-zh="disposer 按注册顺序的逆序开始调用，但多个异步 disposer 会并发运行。存在顺序依赖时，把全部步骤放在同一个 disposer 中，并在内部依次 await。" data-en="Disposers start in reverse registration order, but multiple async disposers run concurrently. For order-dependent teardown, keep all steps in one disposer and await them serially inside it.">disposer 按注册顺序的逆序开始调用，但多个异步 disposer 会并发运行。存在顺序依赖时，把全部步骤放在同一个 disposer 中，并在内部依次 await。</p></div>
+      </section>
+
+      <section id="nested" class="nested-section">
+        <div class="tool-section-heading"><h2 data-zh="子插件继承上下文，但拥有独立生命周期" data-en="Child plugins inherit context but own their lifecycle">子插件继承上下文，但拥有独立生命周期</h2><p data-zh="ctx.plugin() 返回子 Fiber。它可以提前 dispose，也会在父插件卸载时递归清理。" data-en="ctx.plugin() returns a child Fiber. It may be disposed early and is recursively cleaned up when its parent unloads.">ctx.plugin() 返回子 Fiber。它可以提前 dispose，也会在父插件卸载时递归清理。</p></div>
+        <div class="nested-layout"><div class="fiber-parent"><span>parent Fiber</span><div><span>child Fiber</span><small data-zh="独立状态，同父级卸载" data-en="Independent state, unloads with parent">独立状态，同父级卸载</small></div></div><div class="code-block"><div><span>TypeScript</span><button class="copy-code" type="button" data-copy-target="manual-dispose" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="manual-dispose">const fiber = ctx.plugin(myPlugin)
+
+// Dispose it manually later.
+await fiber.dispose()</code></pre></div></div>
+        <div class="dispose-guarantees"><div><strong data-zh="移除拥有的注册" data-en="Remove owned registrations">移除拥有的注册</strong></div><div><strong data-zh="递归卸载子插件" data-en="Recursively unload children">递归卸载子插件</strong></div><div><strong data-zh="等待全部异步清理" data-en="Await all async cleanup">等待全部异步清理</strong></div></div>
+      </section>
+
+      <section id="hmr" class="hmr-section"><div class="tool-section-heading"><h2 data-zh="HMR 是完整卸载再加载" data-en="HMR is a full unload followed by load">HMR 是完整卸载再加载</h2><p data-zh="cordis-plugin-hmr 先清理旧实例的所有注册，再加载新代码并执行新的 apply。它不是在旧实例上打补丁。" data-en="cordis-plugin-hmr cleans every registration from the old instance, then loads new code and runs the new apply. It does not patch the old instance in place.">cordis-plugin-hmr 先清理旧实例的所有注册，再加载新代码并执行新的 apply。它不是在旧实例上打补丁。</p></div><div class="hmr-flow"><span data-zh="卸载旧实例" data-en="Unload old instance">卸载旧实例</span><i>→</i><span data-zh="清理全部注册" data-en="Clean all registrations">清理全部注册</span><i>→</i><span data-zh="加载新代码" data-en="Load new code">加载新代码</span><i>→</i><span data-zh="运行新 apply" data-en="Run new apply">运行新 apply</span></div></section>
+
+      <section class="plugin-next"><div><h2 data-zh="下一步，让插件向其他插件提供服务" data-en="Next, provide a service to other plugins">下一步，让插件向其他插件提供服务</h2></div><div class="next-links"><a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/framework/service" target="_blank" rel="noreferrer"><strong data-zh="服务与依赖" data-en="Services and dependencies">服务与依赖</strong><span data-zh="学习能力提供与消费 ↗" data-en="Learn capability provision and consumption ↗">学习能力提供与消费 ↗</span></a><a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/framework/events" target="_blank" rel="noreferrer"><strong data-zh="事件系统" data-en="Event system">事件系统</strong><span data-zh="学习插件间通信 ↗" data-en="Learn inter-plugin communication ↗">学习插件间通信 ↗</span></a></div></section>
+    </main>
+
+    <footer class="sub-footer"><span>DSH 101 / Plugins and lifecycle</span><span data-zh="非 DeepSeek 官方网站，生命周期语义以官方文档为准" data-en="Unofficial site. Official docs remain authoritative for lifecycle semantics.">非 DeepSeek 官方网站，生命周期语义以官方文档为准</span></footer>
+    <script type="module" src="/plugin.js"></script>
+  </body>
+</html>

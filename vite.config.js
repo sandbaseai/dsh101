@@ -13,6 +13,7 @@ export default defineConfig({
         tool: resolve(import.meta.dirname, 'tool/index.html'),
         config: resolve(import.meta.dirname, 'config/index.html'),
         publish: resolve(import.meta.dirname, 'publish/index.html'),
+        lifecycle: resolve(import.meta.dirname, 'lifecycle/index.html'),
       },
     },
   },

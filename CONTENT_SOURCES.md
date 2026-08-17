@@ -28,6 +28,7 @@ Last upstream review:
 | First model-callable tool | `docs/user/develop/basic/tool.md`, `docs/user/develop/basic/tool.zh.md` |
 | Typed plugin configuration | `docs/user/develop/basic/config.md`, `docs/user/develop/basic/config.zh.md` |
 | Package and install a plugin | `docs/user/develop/basic/publish.md`, `docs/user/develop/basic/publish.zh.md` |
+| Plugin lifecycle and effects | `docs/user/develop/framework/index.md`, `docs/user/develop/framework/index.zh.md`, `docs/cordis-tutorial/02-lifecycle-and-effects.md`, `docs/cordis-tutorial/02-lifecycle-and-effects.zh.md` |
 | Public architecture vocabulary | `docs/architecture.md`, `docs/architecture.zh.md` |
 
 ## Visual system provenance

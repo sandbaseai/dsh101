@@ -29,6 +29,7 @@ Last upstream review:
 | Typed plugin configuration | `docs/user/develop/basic/config.md`, `docs/user/develop/basic/config.zh.md` |
 | Package and install a plugin | `docs/user/develop/basic/publish.md`, `docs/user/develop/basic/publish.zh.md` |
 | Plugin lifecycle and effects | `docs/user/develop/framework/index.md`, `docs/user/develop/framework/index.zh.md`, `docs/cordis-tutorial/02-lifecycle-and-effects.md`, `docs/cordis-tutorial/02-lifecycle-and-effects.zh.md` |
+| Services and dependencies | `docs/user/develop/framework/service.md`, `docs/user/develop/framework/service.zh.md`, `docs/cordis-tutorial/03-services.md`, `docs/cordis-tutorial/03-services.zh.md` |
 | Public architecture vocabulary | `docs/architecture.md`, `docs/architecture.zh.md` |
 
 ## Visual system provenance

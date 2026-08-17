@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A source-verified bilingual guide to DeepSeek Harness services, inject, optional dependencies, provider replacement, and isolation." />
+    <meta name="theme-color" content="#050907" />
+    <link rel="canonical" href="https://dsh101.com/services/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://dsh101.com/services/" />
+    <link rel="alternate" hreflang="en-US" href="https://dsh101.com/services/?lang=en" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>服务与依赖 · DSH 101</title>
+    <link rel="stylesheet" href="/subpage.css" />
+    <link rel="stylesheet" href="/plugin.css" />
+    <link rel="stylesheet" href="/tool.css" />
+    <link rel="stylesheet" href="/services.css" />
+  </head>
+  <body>
+    <header class="sub-header">
+      <a class="sub-brand" href="/"><img src="https://www.deepseek.com/harness/images/dsh-logo.svg" alt="DeepSeek Harness" /><span>101</span></a>
+      <a href="/lifecycle/" data-zh="插件生命周期" data-en="Plugin lifecycle">插件生命周期</a>
+      <a href="/" data-zh="返回首页" data-en="Back home">返回首页</a>
+      <a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/framework/service" target="_blank" rel="noreferrer" data-zh="官方文档 ↗" data-en="Official docs ↗">官方文档 ↗</a>
+      <div class="locale-switch" role="group" aria-label="Language"><button type="button" data-locale="zh" class="active">中</button><button type="button" data-locale="en">EN</button></div>
+    </header>
+
+    <main class="sub-main plugin-main services-main">
+      <section class="plugin-hero services-hero">
+        <div class="plugin-intro">
+          <p class="sub-kicker" data-zh="具名能力与依赖驱动组合" data-en="Named capabilities and dependency-driven composition">具名能力与依赖驱动组合</p>
+          <h1 data-zh="依赖能力，不要绑定提供方。" data-en="Depend on a capability, not its provider.">依赖能力，不要绑定提供方。</h1>
+          <p class="sub-lead" data-zh="提供方公开具名能力，消费方声明需求，Cordis 负责启动、替换与清理。" data-en="Providers expose named capabilities. Consumers declare requirements. Cordis controls startup, replacement, and cleanup.">提供方公开具名能力，消费方声明需求，Cordis 负责启动、替换与清理。</p>
+        </div>
+        <div class="code-stage services-code-stage" aria-label="Cordis service provider source code">
+          <div class="code-stage-head"><span>greeter.ts</span><button class="copy-code" type="button" data-copy-target="service-provider" data-zh="复制" data-en="Copy">复制</button></div>
+          <pre><code id="service-provider">import { Service, type Context } from '@deepseek-ai/cordis'
+
+export class GreeterService extends Service {
+  constructor(ctx: Context) {
+    super(ctx, 'greeter')
+  }
+
+  greet(who: string) {
+    return `Hello, ${who}!`
+  }
+}</code></pre>
+        </div>
+      </section>
+
+      <aside class="source-note"><span data-zh="核对基线" data-en="Verified baseline">核对基线</span><p data-zh="官方提交 47f9438，2026-08-13。本页依据框架服务篇和 Cordis 服务教程，保留运行时与类型系统的边界。" data-en="Official commit 47f9438, 2026-08-13. This page follows the framework service guide and Cordis tutorial, preserving the runtime and type-system boundary.">官方提交 47f9438，2026-08-13。本页依据框架服务篇和 Cordis 服务教程，保留运行时与类型系统的边界。</p></aside>
+
+      <nav class="chapter-nav" aria-label="Guide chapters">
+        <a href="#model" data-zh="服务模型" data-en="Service model">服务模型</a>
+        <a href="#provide" data-zh="提供能力" data-en="Provide">提供能力</a>
+        <a href="#consume" data-zh="消费能力" data-en="Consume">消费能力</a>
+        <a href="#replace" data-zh="替换提供方" data-en="Replace providers">替换提供方</a>
+        <a href="#optional" data-zh="可选依赖" data-en="Optional dependencies">可选依赖</a>
+        <a href="#isolate" data-zh="服务隔离" data-en="Isolation">服务隔离</a>
+      </nav>
+
+      <section id="model" class="service-model">
+        <div class="tool-section-heading"><h2 data-zh="服务是挂载在 ctx 上的具名能力" data-en="A service is a named capability mounted on ctx">服务是挂载在 ctx 上的具名能力</h2><p data-zh="Harness 自身的工具运行时、模型运行时和 Agent 管理器都遵循同一模型。" data-en="Harness uses the same model for its tool runtime, model runtime, and agent manager.">Harness 自身的工具运行时、模型运行时和 Agent 管理器都遵循同一模型。</p></div>
+        <div class="service-surface"><code>ctx.tools</code><code>ctx.llm</code><code>ctx.agents</code><span data-zh="Harness 内置能力" data-en="Built-in Harness capabilities">Harness 内置能力</span></div>
+        <div class="service-rule"><strong data-zh="组合边界" data-en="Composition boundary">组合边界</strong><p data-zh="消费方只依赖 'tools' 或 'shell' 这样的能力名称，不导入具体实现。配置可以更换提供方，而消费代码保持不变。" data-en="A consumer depends on a capability name such as 'tools' or 'shell', not a concrete implementation. Configuration can change the provider without changing consumer code.">消费方只依赖 'tools' 或 'shell' 这样的能力名称，不导入具体实现。配置可以更换提供方，而消费代码保持不变。</p></div>
+      </section>
+
+      <section id="provide" class="plugin-chapter service-provide">
+        <div class="chapter-copy"><h2 data-zh="运行时注册与编译时类型是两件事" data-en="Runtime registration and compile-time typing are separate">运行时注册与编译时类型是两件事</h2><p data-zh="Service 基类负责注册实例；TypeScript 声明合并让 ctx.greeter 在消费端获得类型。后者不会生成运行时代码。" data-en="The Service base class registers the instance. TypeScript declaration merging types ctx.greeter for consumers and emits no runtime code.">Service 基类负责注册实例；TypeScript 声明合并让 ctx.greeter 在消费端获得类型。后者不会生成运行时代码。</p></div>
+        <div class="chapter-work">
+          <div class="provider-parts"><div><strong data-zh="运行时" data-en="Runtime">运行时</strong><code>super(ctx, 'greeter')</code><span data-zh="以名称注册实例，卸载时自动移除" data-en="Registers by name and removes it on unload">以名称注册实例，卸载时自动移除</span></div><div><strong data-zh="编译时" data-en="Compile time">编译时</strong><code>interface Context</code><span data-zh="声明合并提供类型安全，不改变运行时" data-en="Declaration merging adds type safety without changing runtime">声明合并提供类型安全，不改变运行时</span></div></div>
+          <div class="code-block"><div><span>greeter.ts</span><button class="copy-code" type="button" data-copy-target="service-types" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="service-types">declare module '@deepseek-ai/cordis' {
+  interface Context {
+    greeter: GreeterService
+  }
+}
+
+export function apply(ctx: Context) {
+  ctx.plugin(GreeterService)
+}</code></pre></div>
+        </div>
+      </section>
+
+      <section id="consume" class="consume-section">
+        <div class="tool-section-heading"><h2 data-zh="inject 是持续生效的硬性依赖" data-en="inject is a continuously enforced hard dependency">inject 是持续生效的硬性依赖</h2><p data-zh="Cordis 等待所有依赖出现后才运行 apply。决定启动时机的是依赖关系，不是 cordis.yml 中的文件顺序。" data-en="Cordis runs apply only after every dependency exists. Dependencies, not file order in cordis.yml, determine startup.">Cordis 等待所有依赖出现后才运行 apply。决定启动时机的是依赖关系，不是 cordis.yml 中的文件顺序。</p></div>
+        <div class="consume-layout">
+          <div class="code-block"><div><span>consumer.ts</span><button class="copy-code" type="button" data-copy-target="service-consumer" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="service-consumer">export const name = 'consumer'
+export const inject = ['greeter']
+
+export function apply(ctx: Context) {
+  console.log(ctx.greeter.greet('world'))
+}</code></pre></div>
+          <div class="dependency-decision"><div><span data-zh="greeter 不存在" data-en="greeter absent">greeter 不存在</span><strong>PENDING</strong><small data-zh="apply 不运行，不会部分启动" data-en="apply does not run, with no partial startup">apply 不运行，不会部分启动</small></div><i>→</i><div><span data-zh="greeter 就绪" data-en="greeter ready">greeter 就绪</span><strong>ACTIVE</strong><small data-zh="ctx.greeter 保证可用" data-en="ctx.greeter is guaranteed ready">ctx.greeter 保证可用</small></div></div>
+        </div>
+        <div class="pending-note"><strong data-zh="静默退出不一定是成功加载" data-en="A silent exit does not prove successful loading">静默退出不一定是成功加载</strong><p data-zh="PENDING Fiber 不会维持 Node 事件循环。如果组合里没有其他活动项，进程可能以状态码 0 静默退出。" data-en="A PENDING Fiber does not keep the Node event loop alive. With no other active item, the process may exit silently with status 0.">PENDING Fiber 不会维持 Node 事件循环。如果组合里没有其他活动项，进程可能以状态码 0 静默退出。</p></div>
+      </section>
+
+      <section id="replace" class="replace-section">
+        <div class="tool-section-heading"><h2 data-zh="替换提供方会干净地重启消费者" data-en="Replacing a provider cleanly restarts consumers">替换提供方会干净地重启消费者</h2><p data-zh="inject 不是启动时的一次检查。依赖消失时，消费插件及其 effect 会卸载；新提供方出现后再重新加载。" data-en="inject is not a one-time startup check. When a dependency disappears, the consumer and its effects unload, then reload for the new provider.">inject 不是启动时的一次检查。依赖消失时，消费插件及其 effect 会卸载；新提供方出现后再重新加载。</p></div>
+        <div class="replacement-flow"><div><strong data-zh="旧 shell" data-en="Old shell">旧 shell</strong><span>consumer ACTIVE</span></div><i>→</i><div><strong data-zh="提供方卸载" data-en="Provider unloads">提供方卸载</strong><span>consumer DISPOSED</span></div><i>→</i><div><strong data-zh="新 shell" data-en="New shell">新 shell</strong><span>consumer ACTIVE</span></div></div>
+        <p class="replacement-example" data-zh="例如卸载 dsh-bash-local，再挂载另一个 shell 实现。所有 inject: ['shell'] 的插件都会针对新实现完整重启。" data-en="For example, unload dsh-bash-local and mount another shell implementation. Every plugin with inject: ['shell'] restarts against the new implementation.">例如卸载 dsh-bash-local，再挂载另一个 shell 实现。所有 inject: ['shell'] 的插件都会针对新实现完整重启。</p>
+      </section>
+
+      <section id="optional" class="plugin-chapter optional-section">
+        <div class="chapter-copy"><h2 data-zh="能降级运行的能力不要放进 inject" data-en="Keep degradable capabilities out of inject">能降级运行的能力不要放进 inject</h2><p data-zh="可选依赖缺失时插件仍需运行，因此在真正使用的位置调用 ctx.get() 并处理 undefined。" data-en="A plugin with an optional dependency must still run, so call ctx.get() at the use site and handle undefined.">可选依赖缺失时插件仍需运行，因此在真正使用的位置调用 ctx.get() 并处理 undefined。</p></div>
+        <div class="chapter-work"><div class="dependency-compare"><div><strong data-zh="必需" data-en="Required">必需</strong><code>export const inject = ['tools']</code><span data-zh="缺失时保持 PENDING" data-en="Stays PENDING while absent">缺失时保持 PENDING</span></div><div><strong data-zh="可选" data-en="Optional">可选</strong><code>const metrics = ctx.get('metrics')</code><span data-zh="缺失时得到 undefined" data-en="Returns undefined while absent">缺失时得到 undefined</span></div></div><div class="code-block"><div><span>optional.ts</span><button class="copy-code" type="button" data-copy-target="optional-service" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="optional-service">export function apply(ctx: Context) {
+  const greeter = ctx.get('greeter')
+  const output = greeter?.greet('maybe')
+    ?? 'no greeter available'
+
+  console.log(output)
+}</code></pre></div></div>
+      </section>
+
+      <section id="isolate" class="isolation-section">
+        <div class="tool-section-heading"><h2 data-zh="隔离组可以拥有同名服务的不同实例" data-en="Isolated groups can own different instances of one service name">隔离组可以拥有同名服务的不同实例</h2><p data-zh="在 cordis.yml 的插件组上隔离 shell 后，每组内的插件只看到自己的 Bash 实例与配置。" data-en="Isolate shell on plugin groups in cordis.yml so plugins in each group see only their own Bash instance and configuration.">在 cordis.yml 的插件组上隔离 shell 后，每组内的插件只看到自己的 Bash 实例与配置。</p></div>
+        <div class="isolation-layout"><div class="isolated-group"><strong>group-a</strong><code>shell / timeoutMs: 5000</code><span>plugin-a</span></div><div class="isolation-divider" data-zh="互不可见" data-en="No cross-group visibility">互不可见</div><div class="isolated-group"><strong>group-b</strong><code>shell / timeoutMs: 60000</code><span>plugin-b</span></div></div>
+        <div class="namespace-note"><strong data-zh="命名约束" data-en="Naming constraint">命名约束</strong><p data-zh="每个应用的服务名称共用一个扁平命名空间。Harness 已使用 tools、llm 等普通名称，自定义服务应采用有辨识度的名称或前缀。" data-en="Service names share one flat namespace per application. Harness already claims plain names such as tools and llm, so custom services need distinctive names or prefixes.">每个应用的服务名称共用一个扁平命名空间。Harness 已使用 tools、llm 等普通名称，自定义服务应采用有辨识度的名称或前缀。</p></div>
+      </section>
+
+      <section class="plugin-next"><div><h2 data-zh="下一步，用事件实现无需共享服务的通信" data-en="Next, communicate without a shared service">下一步，用事件实现无需共享服务的通信</h2></div><div class="next-links"><a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/framework/events" target="_blank" rel="noreferrer"><strong data-zh="事件系统" data-en="Event system">事件系统</strong><span data-zh="理解广播、调用和卸载语义 ↗" data-en="Understand broadcast, call, and unload semantics ↗">理解广播、调用和卸载语义 ↗</span></a><a href="https://deepseek-harness.github.io/deepseek-harness/en/subsystems/core" target="_blank" rel="noreferrer"><strong data-zh="内置服务表面" data-en="Built-in service surface">内置服务表面</strong><span data-zh="查看生成的服务名与源码位置 ↗" data-en="See generated names and source locations ↗">查看生成的服务名与源码位置 ↗</span></a></div></section>
+    </main>
+
+    <footer class="sub-footer"><span>DSH 101 / Services and dependencies</span><span data-zh="非 DeepSeek 官方网站，服务接口以官方 TypeScript 定义为准" data-en="Unofficial site. Official TypeScript definitions remain authoritative for service interfaces.">非 DeepSeek 官方网站，服务接口以官方 TypeScript 定义为准</span></footer>
+    <script type="module" src="/plugin.js"></script>
+  </body>
+</html>

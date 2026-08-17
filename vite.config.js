@@ -16,6 +16,7 @@ export default defineConfig({
         lifecycle: resolve(import.meta.dirname, 'lifecycle/index.html'),
         services: resolve(import.meta.dirname, 'services/index.html'),
         events: resolve(import.meta.dirname, 'events/index.html'),
+        composition: resolve(import.meta.dirname, 'composition/index.html'),
       },
     },
   },

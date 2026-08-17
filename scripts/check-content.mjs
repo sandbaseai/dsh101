@@ -11,13 +11,14 @@ const publish = readFileSync(new URL('../publish/index.html', import.meta.url), 
 const lifecycle = readFileSync(new URL('../lifecycle/index.html', import.meta.url), 'utf8')
 const services = readFileSync(new URL('../services/index.html', import.meta.url), 'utf8')
 const events = readFileSync(new URL('../events/index.html', import.meta.url), 'utf8')
+const composition = readFileSync(new URL('../composition/index.html', import.meta.url), 'utf8')
 const script = readFileSync(new URL('../landing.js', import.meta.url), 'utf8')
 const styles = readFileSync(new URL('../landing.css', import.meta.url), 'utf8')
 const manifest = readFileSync(new URL('../public/site.webmanifest', import.meta.url), 'utf8')
 const socialCard = readFileSync(new URL('../public/social-card.svg', import.meta.url), 'utf8')
 const brandStyles = readFileSync(new URL('../brand.css', import.meta.url), 'utf8')
 
-for (const [label, source] of Object.entries({ landing: html, cordis, ecosystem, quickstart, plugin, tool, config, publish, lifecycle, services, events })) {
+for (const [label, source] of Object.entries({ landing: html, cordis, ecosystem, quickstart, plugin, tool, config, publish, lifecycle, services, events, composition })) {
   const pageIds = new Set([...source.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]))
   const missing = [...source.matchAll(/\bhref="#([^"]+)"/g)].map(match => match[1]).filter(id => !pageIds.has(id))
   if (missing.length) throw new Error(`${label} has broken local anchors: ${[...new Set(missing)].join(', ')}`)
@@ -35,7 +36,7 @@ for (const [label, url] of Object.entries({
   plugins: 'https://github.com/topics/dsh-plugin',
   paper: 'https://github.com/cordiverse/paper',
 })) {
-  if (![html, cordis, ecosystem, quickstart, plugin, tool, config, publish, lifecycle, services, events].some(source => source.includes(url))) throw new Error(`Missing ${label} reference: ${url}`)
+  if (![html, cordis, ecosystem, quickstart, plugin, tool, config, publish, lifecycle, services, events, composition].some(source => source.includes(url))) throw new Error(`Missing ${label} reference: ${url}`)
 }
 
 for (const required of [
@@ -71,7 +72,9 @@ const servicesLocalizedNodes = [...services.matchAll(/<[^>]+\bdata-zh="([^"]*)"[
 if (servicesLocalizedNodes.length < 50) throw new Error(`Services guide locale coverage is unexpectedly small: ${servicesLocalizedNodes.length}`)
 const eventsLocalizedNodes = [...events.matchAll(/<[^>]+\bdata-zh="([^"]*)"[^>]+\bdata-en="([^"]*)"[^>]*>/g)]
 if (eventsLocalizedNodes.length < 55) throw new Error(`Events guide locale coverage is unexpectedly small: ${eventsLocalizedNodes.length}`)
-for (const [, zh, en] of [...localizedNodes, ...cordisLocalizedNodes, ...ecosystemLocalizedNodes, ...quickstartLocalizedNodes, ...pluginLocalizedNodes, ...toolLocalizedNodes, ...configLocalizedNodes, ...publishLocalizedNodes, ...lifecycleLocalizedNodes, ...servicesLocalizedNodes, ...eventsLocalizedNodes]) {
+const compositionLocalizedNodes = [...composition.matchAll(/<[^>]+\bdata-zh="([^"]*)"[^>]+\bdata-en="([^"]*)"[^>]*>/g)]
+if (compositionLocalizedNodes.length < 55) throw new Error(`Composition guide locale coverage is unexpectedly small: ${compositionLocalizedNodes.length}`)
+for (const [, zh, en] of [...localizedNodes, ...cordisLocalizedNodes, ...ecosystemLocalizedNodes, ...quickstartLocalizedNodes, ...pluginLocalizedNodes, ...toolLocalizedNodes, ...configLocalizedNodes, ...publishLocalizedNodes, ...lifecycleLocalizedNodes, ...servicesLocalizedNodes, ...eventsLocalizedNodes, ...compositionLocalizedNodes]) {
   if (!zh.trim() || !en.trim()) throw new Error('Landing locale pair contains an empty value')
 }
 
@@ -80,7 +83,7 @@ for (const forbidden of ['TypeRT', 'DSH 101', '最后核对上游提交']) {
 }
 
 for (const forbidden of ['—', '–']) {
-  if ([html, cordis, ecosystem, quickstart, plugin, tool, config, publish, lifecycle, services, events].some(source => source.includes(forbidden))) throw new Error(`Taste preflight failed, forbidden dash remains: ${forbidden}`)
+  if ([html, cordis, ecosystem, quickstart, plugin, tool, config, publish, lifecycle, services, events, composition].some(source => source.includes(forbidden))) throw new Error(`Taste preflight failed, forbidden dash remains: ${forbidden}`)
 }
 if (!brandStyles.includes('--brand-green:#22bd7e')) throw new Error('Sandbase brand green token is missing')
 if (!html.includes('class="hero-product"') || !html.includes('feat-plugin.en.png')) throw new Error('Taste preflight failed, hero lacks a real product visual')
@@ -103,6 +106,7 @@ if (!html.includes('href="/publish/"')) throw new Error('Landing page does not r
 if (!html.includes('href="/lifecycle/"')) throw new Error('Landing page does not route to the lifecycle guide')
 if (!html.includes('href="/services/"')) throw new Error('Landing page does not route to the services guide')
 if (!html.includes('href="/events/"')) throw new Error('Landing page does not route to the events guide')
+if (!html.includes('href="/composition/"')) throw new Error('Landing page does not route to the composition guide')
 for (const navigation of ['id="primaryNav"', 'class="nav-group"', 'class="menu-toggle"', 'href="#approach"', 'href="#modes"']) {
   if (!html.includes(navigation)) throw new Error(`Landing navigation is missing: ${navigation}`)
 }
@@ -143,6 +147,13 @@ for (const required of ["'stats/report'(name: string, count: number): void", "ct
   if (!events.includes(required)) throw new Error(`Events guide is missing verified material: ${required}`)
 }
 
+for (const required of ['id: logger', "name: '@deepseek-ai/cordis-plugin-logger-console'", 'id: timer', "name: '@deepseek-ai/cordis-plugin-timer'", "name: '@deepseek-ai/cordis-plugin-hmr'", "root: ['.']", 'disabled: true', 'dsh --profile web --patch ./extra.yml --dump-config', 'dsh --profile web --dump-default-config', '!!js', 'node --import tsx ../../vendor/cordis/bin.js', "import { FiberState, type Context } from '@deepseek-ai/cordis'", 'ctx.registry.values()', 'FiberState.PENDING', "inject: ['timer']", 'Loader', 'Include', '47f9438']) {
+  if (!composition.includes(required)) throw new Error(`Composition guide is missing verified material: ${required}`)
+}
+for (const boundary of ['不显示 Fiber 状态', 'shows no Fiber state', '配置树正确不代表插件已经 ACTIVE', 'A correct tree does not prove the plugin is ACTIVE']) {
+  if (!composition.includes(boundary)) throw new Error(`Composition guide is missing diagnostic boundary: ${boundary}`)
+}
+
 for (const concept of ['官方项目', '社区索引', '第三方项目', '不是 DeepSeek 官方商店或安全认证', '安装审查', '卸载与回滚']) {
   if (!ecosystem.includes(concept)) throw new Error(`Ecosystem guide is missing: ${concept}`)
 }
@@ -150,7 +161,7 @@ for (const repository of ['deepseek-ai/deepseek-harness', 'awesome-dsh-plugin/aw
   if (!ecosystem.includes(`https://github.com/${repository}`)) throw new Error(`Ecosystem guide is missing repository source: ${repository}`)
 }
 
-for (const asset of ['public/favicon.svg', 'public/wordmark.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', 'docs/cloudflare-deploy.md', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml', 'landing.js', 'landing.css', 'navigation.css', 'brand.css', 'redesign.css', 'subpage.js', 'subpage.css', 'ecosystem.css', 'quickstart.css', 'quickstart.js', 'plugin.css', 'plugin.js', 'tool.css', 'config.css', 'publish.css', 'lifecycle.css', 'services.css', 'events.css', 'cordis/index.html', 'ecosystem/index.html', 'quickstart/index.html', 'plugin/index.html', 'tool/index.html', 'config/index.html', 'publish/index.html', 'lifecycle/index.html', 'services/index.html', 'events/index.html', 'vite.config.js']) {
+for (const asset of ['public/favicon.svg', 'public/wordmark.svg', 'public/social-card.svg', 'public/site.webmanifest', 'public/_headers', 'public/_redirects', 'docs/cloudflare-deploy.md', '.github/workflows/ci.yml', '.github/workflows/deploy-cloudflare-pages.yml', 'landing.js', 'landing.css', 'navigation.css', 'brand.css', 'redesign.css', 'subpage.js', 'subpage.css', 'ecosystem.css', 'quickstart.css', 'quickstart.js', 'plugin.css', 'plugin.js', 'tool.css', 'config.css', 'publish.css', 'lifecycle.css', 'services.css', 'events.css', 'composition.css', 'cordis/index.html', 'ecosystem/index.html', 'quickstart/index.html', 'plugin/index.html', 'tool/index.html', 'config/index.html', 'publish/index.html', 'lifecycle/index.html', 'services/index.html', 'events/index.html', 'composition/index.html', 'vite.config.js']) {
   if (!existsSync(new URL(`../${asset}`, import.meta.url))) throw new Error(`Required project asset is missing: ${asset}`)
 }
 for (const metadata of ['rel="manifest"', 'rel="canonical"', 'property="og:title"', 'property="og:url"', 'name="twitter:card"', 'hreflang="zh-CN"', 'hreflang="en-US"']) {
@@ -159,4 +170,4 @@ for (const metadata of ['rel="manifest"', 'rel="canonical"', 'property="og:title
 if (!script.includes('navigator.clipboard.writeText')) throw new Error('Quick-start copy interaction is missing')
 if (!styles.includes('@media(max-width:600px)')) throw new Error('Mobile landing breakpoint is missing')
 
-console.log(`content check passed (${ids.size} ids, ${localizedNodes.length} landing + ${cordisLocalizedNodes.length} Cordis + ${ecosystemLocalizedNodes.length} ecosystem + ${quickstartLocalizedNodes.length} quickstart + ${pluginLocalizedNodes.length} plugin + ${toolLocalizedNodes.length} tool + ${configLocalizedNodes.length} config + ${publishLocalizedNodes.length} publish + ${lifecycleLocalizedNodes.length} lifecycle + ${servicesLocalizedNodes.length} services + ${eventsLocalizedNodes.length} events bilingual nodes)`)
+console.log(`content check passed (${ids.size} ids, ${localizedNodes.length} landing + ${cordisLocalizedNodes.length} Cordis + ${ecosystemLocalizedNodes.length} ecosystem + ${quickstartLocalizedNodes.length} quickstart + ${pluginLocalizedNodes.length} plugin + ${toolLocalizedNodes.length} tool + ${configLocalizedNodes.length} config + ${publishLocalizedNodes.length} publish + ${lifecycleLocalizedNodes.length} lifecycle + ${servicesLocalizedNodes.length} services + ${eventsLocalizedNodes.length} events + ${compositionLocalizedNodes.length} composition bilingual nodes)`)

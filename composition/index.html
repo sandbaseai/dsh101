@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A source-verified bilingual guide to DeepSeek Harness configuration composition, stable entry identity, HMR prerequisites, and Fiber diagnosis." />
+    <meta name="theme-color" content="#050907" />
+    <link rel="canonical" href="https://dsh101.com/composition/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://dsh101.com/composition/" />
+    <link rel="alternate" hreflang="en-US" href="https://dsh101.com/composition/?lang=en" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>配置组合与 HMR 诊断 · DSH 101</title>
+    <link rel="stylesheet" href="/subpage.css" />
+    <link rel="stylesheet" href="/plugin.css" />
+    <link rel="stylesheet" href="/tool.css" />
+    <link rel="stylesheet" href="/composition.css" />
+  </head>
+  <body>
+    <header class="sub-header">
+      <a class="sub-brand" href="/"><img src="https://www.deepseek.com/harness/images/dsh-logo.svg" alt="DeepSeek Harness" /><span>101</span></a>
+      <a href="/events/" data-zh="事件与通信" data-en="Events">事件与通信</a>
+      <a href="/" data-zh="返回首页" data-en="Back home">返回首页</a>
+      <a href="https://deepseek-harness.github.io/deepseek-harness/en/cordis-tutorial/06-composition-and-hmr" target="_blank" rel="noreferrer" data-zh="官方教程 ↗" data-en="Official tutorial ↗">官方教程 ↗</a>
+      <div class="locale-switch" role="group" aria-label="Language"><button type="button" data-locale="zh" class="active">中</button><button type="button" data-locale="en">EN</button></div>
+    </header>
+
+    <main class="sub-main plugin-main composition-main">
+      <section class="plugin-hero composition-hero">
+        <div class="plugin-intro">
+          <p class="sub-kicker" data-zh="配置树、热替换与运行时状态" data-en="Configuration trees, hot replacement, and runtime state">配置树、热替换与运行时状态</p>
+          <h1 data-zh="先确认装载了什么，再判断为何没运行。" data-en="First prove what mounted. Then diagnose why it did not run.">先确认装载了什么，再判断为何没运行。</h1>
+          <p class="sub-lead" data-zh="配置转储解释组合结果，Fiber 注册表解释运行时，稳定 id 让热替换只触碰真正变化的条目。" data-en="Config dumps explain composition. The Fiber registry explains runtime. Stable ids keep hot replacement scoped to real changes.">配置转储解释组合结果，Fiber 注册表解释运行时，稳定 id 让热替换只触碰真正变化的条目。</p>
+        </div>
+        <div class="code-stage composition-code-stage" aria-label="Cordis HMR configuration source code">
+          <div class="code-stage-head"><span>cordis.yml</span><button class="copy-code" type="button" data-copy-target="hmr-config" data-zh="复制" data-en="Copy">复制</button></div>
+          <pre><code id="hmr-config">- id: logger
+  name: '@deepseek-ai/cordis-plugin-logger-console'
+- id: timer
+  name: '@deepseek-ai/cordis-plugin-timer'
+- id: hmr
+  name: '@deepseek-ai/cordis-plugin-hmr'
+  config:
+    root: ['.']
+- id: hello
+  name: './hello.ts'</code></pre>
+        </div>
+      </section>
+
+      <aside class="source-note"><span data-zh="核对基线" data-en="Verified baseline">核对基线</span><p data-zh="官方提交 47f9438，2026-08-13。本页结合 Cordis 第 6 章和 DSH CLI 行为参考，明确区分静态组合与运行时诊断。" data-en="Official commit 47f9438, 2026-08-13. This page combines Cordis chapter 6 with the DSH CLI reference and separates static composition from runtime diagnosis.">官方提交 47f9438，2026-08-13。本页结合 Cordis 第 6 章和 DSH CLI 行为参考，明确区分静态组合与运行时诊断。</p></aside>
+
+      <nav class="chapter-nav" aria-label="Guide chapters">
+        <a href="#entries" data-zh="稳定条目" data-en="Stable entries">稳定条目</a>
+        <a href="#layers" data-zh="组合结果" data-en="Composition">组合结果</a>
+        <a href="#hmr" data-zh="HMR" data-en="HMR">HMR</a>
+        <a href="#diagnose" data-zh="运行时诊断" data-en="Runtime diagnosis">运行时诊断</a>
+        <a href="#checklist" data-zh="排查路径" data-en="Troubleshooting path">排查路径</a>
+      </nav>
+
+      <section id="entries" class="entry-section">
+        <div class="tool-section-heading"><h2 data-zh="id 决定配置修改是更新，还是删除后重建" data-en="id decides whether a config edit is an update or a remove-and-add">id 决定配置修改是更新，还是删除后重建</h2><p data-zh="Loader 按稳定 id 比较配置项。没有显式 id 的条目在每次读取时获得新 id，因此无关编辑也可能导致它重新挂载。" data-en="The Loader diffs entries by stable id. Without an explicit id, a new generated id on every read can remount an unchanged entry after unrelated edits.">Loader 按稳定 id 比较配置项。没有显式 id 的条目在每次读取时获得新 id，因此无关编辑也可能导致它重新挂载。</p></div>
+        <div class="entry-compare"><div><strong data-zh="显式 id" data-en="Explicit id">显式 id</strong><code>- id: consumer</code><span data-zh="只重新配置真正变化的条目" data-en="Reconfigures only the entry that changed">只重新配置真正变化的条目</span></div><div><strong data-zh="生成 id" data-en="Generated id">生成 id</strong><code>- name: './consumer.ts'</code><span data-zh="配置文件变化后可能被视为先删除再添加" data-en="May count as removed and added after any config edit">配置文件变化后可能被视为先删除再添加</span></div></div>
+        <div class="disabled-control"><div><strong>disabled: true</strong><p data-zh="保留配置项但卸载插件。切回 false 后，插件以及所有等待其服务的 PENDING 消费方会重新加载。" data-en="Keeps the entry but unmounts its plugin. Switch back to false and the plugin plus consumers PENDING on its services load again.">保留配置项但卸载插件。切回 false 后，插件以及所有等待其服务的 PENDING 消费方会重新加载。</p></div><div><strong>group + isolate</strong><p data-zh="组把子树作为一个单元装卸，isolate 让不同组持有同名服务的独立实例。" data-en="A group mounts and unmounts a subtree as one unit. isolate gives separate groups distinct instances of the same service name.">组把子树作为一个单元装卸，isolate 让不同组持有同名服务的独立实例。</p></div></div>
+      </section>
+
+      <section id="layers" class="layers-diagnosis">
+        <div class="tool-section-heading"><h2 data-zh="配置转储回答最终树从哪里来" data-en="A config dump answers where the final tree came from">配置转储回答最终树从哪里来</h2><p data-zh="DSH 按 bundle、profile、home 和命令行 overlay 的顺序组合。后层按行胜出，并整体替换目标行的 config。" data-en="DSH composes bundle, profile, home, and command-line overlays in order. Later layers win per row and replace the target row's complete config.">DSH 按 bundle、profile、home 和命令行 overlay 的顺序组合。后层按行胜出，并整体替换目标行的 config。</p></div>
+        <div class="composition-stack"><div><span>bundles[]</span><small data-zh="基础与已安装 bundle" data-en="Base and installed bundles">基础与已安装 bundle</small></div><i>→</i><div><span>profile/cordis.patch.yml</span><small data-zh="当前 profile" data-en="Current profile">当前 profile</small></div><i>→</i><div><span>$DSH_HOME/cordis.patch.yml</span><small data-zh="机器共享偏好" data-en="Machine-wide preferences">机器共享偏好</small></div><i>→</i><div><span>--patch</span><small data-zh="按参数顺序" data-en="In argument order">按参数顺序</small></div></div>
+        <div class="dump-layout"><div class="code-block"><div><span>shell</span><button class="copy-code" type="button" data-copy-target="dump-config" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="dump-config">dsh --profile web --patch ./extra.yml --dump-config
+
+# Bundle layers only:
+dsh --profile web --dump-default-config</code></pre></div><div class="dump-facts"><strong data-zh="转储能证明" data-en="A dump proves">转储能证明</strong><span data-zh="每行来自哪个文件" data-en="Which file supplied each row">每行来自哪个文件</span><span data-zh="哪些 overlay 改写了它" data-en="Which overlays changed it">哪些 overlay 改写了它</span><span data-zh="是否存在未匹配的 patch 目标" data-en="Whether any patch target was unmatched">是否存在未匹配的 patch 目标</span></div></div>
+        <div class="dump-warning"><strong data-zh="转储不会启动应用" data-en="A dump does not boot the application">转储不会启动应用</strong><p data-zh="它保留未求值的 !!js 表达式，不运行应用命令行提供方，也不显示 Fiber 状态。配置树正确不代表插件已经 ACTIVE。" data-en="It keeps !!js expressions unevaluated, does not run app command-line providers, and shows no Fiber state. A correct tree does not prove the plugin is ACTIVE.">它保留未求值的 !!js 表达式，不运行应用命令行提供方，也不显示 Fiber 状态。配置树正确不代表插件已经 ACTIVE。</p></div>
+      </section>
+
+      <section id="hmr" class="hmr-diagnosis">
+        <div class="tool-section-heading"><h2 data-zh="HMR 是由三个支持能力组成的插件" data-en="HMR is a plugin backed by three supporting capabilities">HMR 是由三个支持能力组成的插件</h2><p data-zh="HMR 监听文件，通过 logger 输出消息，并注入 timer 完成去抖。缺少 timer 时它会合法地停在 PENDING，且可能没有任何日志。" data-en="HMR watches files, logs through logger, and injects timer for debouncing. Without timer it legitimately stays PENDING and may print nothing.">HMR 监听文件，通过 logger 输出消息，并注入 timer 完成去抖。缺少 timer 时它会合法地停在 PENDING，且可能没有任何日志。</p></div>
+        <div class="hmr-parts"><div><code>logger-console</code><span data-zh="导出 HMR 日志" data-en="Exports HMR logs">导出 HMR 日志</span></div><div><code>timer</code><span data-zh="满足去抖依赖" data-en="Satisfies the debounce dependency">满足去抖依赖</span></div><div><code>cordis-plugin-hmr</code><span data-zh="监视并替换插件" data-en="Watches and replaces plugins">监视并替换插件</span></div></div>
+        <div class="hmr-run"><div class="code-block"><div><span>shell</span><button class="copy-code" type="button" data-copy-target="run-cordis" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="run-cordis">node --import tsx ../../vendor/cordis/bin.js</code></pre></div><div class="hmr-log"><span>hmr watching [ '.' ]</span><span>hmr reload plugin at hello.ts</span><strong>hello from my EDITED plugin</strong></div></div>
+        <div class="replacement-cycle"><span data-zh="保存源文件" data-en="Save source">保存源文件</span><i>→</i><span data-zh="卸载旧实例与 effect" data-en="Unload old instance and effects">卸载旧实例与 effect</span><i>→</i><span data-zh="加载新代码" data-en="Load new code">加载新代码</span><i>→</i><span data-zh="重新运行 apply" data-en="Run apply again">重新运行 apply</span></div>
+      </section>
+
+      <section id="diagnose" class="runtime-diagnosis">
+        <div class="tool-section-heading"><h2 data-zh="插件无输出时，直接读取 Fiber 状态" data-en="When a plugin prints nothing, inspect its Fiber state directly">插件无输出时，直接读取 Fiber 状态</h2><p data-zh="PENDING 是合法等待，不会抛错。FAILED 表示 apply 或配置校验失败。ACTIVE 只说明加载完成，不说明业务输出一定发生。" data-en="PENDING is legitimate waiting and throws no error. FAILED means apply or config validation failed. ACTIVE proves loading, not business output.">PENDING 是合法等待，不会抛错。FAILED 表示 apply 或配置校验失败。ACTIVE 只说明加载完成，不说明业务输出一定发生。</p></div>
+        <div class="runtime-layout"><div class="code-block"><div><span>diagnose.ts</span><button class="copy-code" type="button" data-copy-target="fiber-diagnose" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="fiber-diagnose">import { FiberState, type Context } from '@deepseek-ai/cordis'
+
+export function apply(ctx: Context) {
+  setTimeout(() => {
+    for (const runtime of ctx.registry.values()) {
+      for (const fiber of runtime.fibers) {
+        if (fiber.state === FiberState.PENDING) {
+          console.log(`${fiber.name} is PENDING: required service missing`)
+        }
+      }
+    }
+  }, 500)
+}</code></pre></div><div class="fiber-results"><div><strong>PENDING</strong><span data-zh="检查 inject 中谁没有提供方" data-en="Find the inject name with no provider">检查 inject 中谁没有提供方</span></div><div><strong>FAILED</strong><span data-zh="检查 apply、schema 与错误日志" data-en="Inspect apply, schema, and error logs">检查 apply、schema 与错误日志</span></div><div><strong>ACTIVE</strong><span data-zh="继续检查事件、调用路径和日志级别" data-en="Then inspect events, call paths, and log level">继续检查事件、调用路径和日志级别</span></div></div></div>
+        <div class="loader-note"><strong data-zh="看到 Loader 和 Include 是正常的" data-en="Seeing Loader and Include is expected">看到 Loader 和 Include 是正常的</strong><p data-zh="不加 PENDING 过滤时，注册表也会显示 loader 自身的 ACTIVE 插件，因为配置文件本身也是通过插件挂载。" data-en="Without the PENDING filter, the registry also shows the Loader's own ACTIVE plugins because the config file itself is mounted through plugins.">不加 PENDING 过滤时，注册表也会显示 loader 自身的 ACTIVE 插件，因为配置文件本身也是通过插件挂载。</p></div>
+      </section>
+
+      <section id="checklist" class="diagnosis-path">
+        <div class="tool-section-heading"><h2 data-zh="从静态事实走向运行时事实" data-en="Move from static facts to runtime facts">从静态事实走向运行时事实</h2><p data-zh="按这个顺序排查，可以避免把配置覆盖、模块解析和依赖等待混成同一个问题。" data-en="Use this order to avoid mixing configuration overrides, module resolution, and dependency waiting into one problem.">按这个顺序排查，可以避免把配置覆盖、模块解析和依赖等待混成同一个问题。</p></div>
+        <div class="diagnosis-grid"><article><strong data-zh="检查最终树" data-en="Inspect the final tree">检查最终树</strong><code>--dump-config</code><p data-zh="确认条目存在、来源正确、覆盖符合预期。" data-en="Confirm the row exists, its source is correct, and overrides match intent.">确认条目存在、来源正确、覆盖符合预期。</p></article><article><strong data-zh="正常启动" data-en="Boot normally">正常启动</strong><code>dsh --profile web</code><p data-zh="解析、schema 或启动失败会非零退出。" data-en="Resolution, schema, or boot failures exit nonzero.">解析、schema 或启动失败会非零退出。</p></article><article><strong data-zh="枚举 Fiber" data-en="Enumerate Fibers">枚举 Fiber</strong><code>ctx.registry.values()</code><p data-zh="区分依赖等待、加载失败与正常活动。" data-en="Separate dependency waiting, load failure, and active state.">区分依赖等待、加载失败与正常活动。</p></article><article><strong data-zh="补齐依赖" data-en="Satisfy dependencies">补齐依赖</strong><code>inject: ['timer']</code><p data-zh="为 PENDING 插件添加缺失提供方，再观察自动加载。" data-en="Add the missing provider for a PENDING plugin and observe automatic loading.">为 PENDING 插件添加缺失提供方，再观察自动加载。</p></article></div>
+      </section>
+
+      <section class="plugin-next"><div><h2 data-zh="下一步，把相同模式用于真实 Harness 服务" data-en="Next, apply the same patterns to real Harness services">下一步，把相同模式用于真实 Harness 服务</h2></div><div class="next-links"><a href="https://deepseek-harness.github.io/deepseek-harness/en/cordis-tutorial/07-into-the-harness" target="_blank" rel="noreferrer"><strong data-zh="进入 Harness" data-en="Into the Harness">进入 Harness</strong><span data-zh="连接工具、模型与 Agent 服务 ↗" data-en="Connect tools, models, and agent services ↗">连接工具、模型与 Agent 服务 ↗</span></a><a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/apps/cli/reference/README.md" target="_blank" rel="noreferrer"><strong data-zh="CLI 行为参考" data-en="CLI behavior reference">CLI 行为参考</strong><span data-zh="核对精确层级与退出语义 ↗" data-en="Verify exact layers and exit semantics ↗">核对精确层级与退出语义 ↗</span></a></div></section>
+    </main>
+
+    <footer class="sub-footer"><span>DSH 101 / Composition and HMR diagnosis</span><span data-zh="非 DeepSeek 官方网站，运行时行为以官方 CLI 与 Cordis 文档为准" data-en="Unofficial site. Official CLI and Cordis docs remain authoritative for runtime behavior.">非 DeepSeek 官方网站，运行时行为以官方 CLI 与 Cordis 文档为准</span></footer>
+    <script type="module" src="/plugin.js"></script>
+  </body>
+</html>

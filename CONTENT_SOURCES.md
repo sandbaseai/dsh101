@@ -31,6 +31,7 @@ Last upstream review:
 | Plugin lifecycle and effects | `docs/user/develop/framework/index.md`, `docs/user/develop/framework/index.zh.md`, `docs/cordis-tutorial/02-lifecycle-and-effects.md`, `docs/cordis-tutorial/02-lifecycle-and-effects.zh.md` |
 | Services and dependencies | `docs/user/develop/framework/service.md`, `docs/user/develop/framework/service.zh.md`, `docs/cordis-tutorial/03-services.md`, `docs/cordis-tutorial/03-services.zh.md` |
 | Events and plugin communication | `docs/user/develop/framework/events.md`, `docs/user/develop/framework/events.zh.md`, `docs/cordis-tutorial/04-events.md`, `docs/cordis-tutorial/04-events.zh.md` |
+| Composition, HMR, and Fiber diagnosis | `docs/cordis-tutorial/06-composition-and-hmr.md`, `docs/cordis-tutorial/06-composition-and-hmr.zh.md`, `apps/cli/reference/README.md` |
 | Public architecture vocabulary | `docs/architecture.md`, `docs/architecture.zh.md` |
 
 ## Visual system provenance

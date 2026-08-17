@@ -17,6 +17,7 @@ export default defineConfig({
         services: resolve(import.meta.dirname, 'services/index.html'),
         events: resolve(import.meta.dirname, 'events/index.html'),
         composition: resolve(import.meta.dirname, 'composition/index.html'),
+        intoHarness: resolve(import.meta.dirname, 'into-harness/index.html'),
       },
     },
   },

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A source-verified bilingual end-to-end DeepSeek Harness plugin tutorial covering tool registration, execution, result events, and agent composition." />
+    <meta name="theme-color" content="#050907" />
+    <link rel="canonical" href="https://dsh101.com/into-harness/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://dsh101.com/into-harness/" />
+    <link rel="alternate" hreflang="en-US" href="https://dsh101.com/into-harness/?lang=en" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>进入 DeepSeek Harness · DSH 101</title>
+    <link rel="stylesheet" href="/subpage.css" />
+    <link rel="stylesheet" href="/plugin.css" />
+    <link rel="stylesheet" href="/tool.css" />
+    <link rel="stylesheet" href="/into-harness.css" />
+  </head>
+  <body>
+    <header class="sub-header">
+      <a class="sub-brand" href="/"><img src="https://www.deepseek.com/harness/images/dsh-logo.svg" alt="DeepSeek Harness" /><span>101</span></a>
+      <a href="/composition/" data-zh="组合与诊断" data-en="Composition">组合与诊断</a>
+      <a href="/" data-zh="返回首页" data-en="Back home">返回首页</a>
+      <a href="https://deepseek-harness.github.io/deepseek-harness/en/cordis-tutorial/07-into-the-harness" target="_blank" rel="noreferrer" data-zh="官方教程 ↗" data-en="Official tutorial ↗">官方教程 ↗</a>
+      <div class="locale-switch" role="group" aria-label="Language"><button type="button" data-locale="zh" class="active">中</button><button type="button" data-locale="en">EN</button></div>
+    </header>
+
+    <main class="sub-main plugin-main harness-main">
+      <section class="plugin-hero harness-hero">
+        <div class="plugin-intro">
+          <p class="sub-kicker" data-zh="从 Cordis 模式到真实工具流水线" data-en="From Cordis patterns to the real tool pipeline">从 Cordis 模式到真实工具流水线</p>
+          <h1 data-zh="注册、执行、观察，一个无需密钥的完整回路。" data-en="Register, execute, observe. One complete keyless loop.">注册、执行、观察，一个无需密钥的完整回路。</h1>
+          <p class="sub-lead" data-zh="工具服务负责注册与执行，结果事件连接独立观察者，依赖图保证每个插件在正确时机启动。" data-en="The tools service registers and executes. A result event connects observers. Dependencies start every plugin at the right time.">工具服务负责注册与执行，结果事件连接独立观察者，依赖图保证每个插件在正确时机启动。</p>
+        </div>
+        <div class="code-stage harness-code-stage" aria-label="DeepSeek Harness tool execution source code">
+          <div class="code-stage-head"><span>greet-tool.ts</span><button class="copy-code" type="button" data-copy-target="harness-execute" data-zh="复制" data-en="Copy">复制</button></div>
+          <pre><code id="harness-execute">const result = await ctx.tools.execute({
+  callId: CallId('demo-1'),
+  name: 'greet',
+  arguments: { name: 'Cordis' },
+  signal: new AbortController().signal,
+})
+
+console.log(
+  'tool replied:',
+  JSON.stringify(result.content),
+)</code></pre>
+        </div>
+      </section>
+
+      <aside class="source-note"><span data-zh="核对基线" data-en="Verified baseline">核对基线</span><p data-zh="官方提交 47f9438，2026-08-13。本页复现 Cordis 第 7 章的真实 Harness 工具链，示例不读取密钥，也不调用模型。" data-en="Official commit 47f9438, 2026-08-13. This page reproduces the real Harness tool path from Cordis chapter 7. It reads no key and calls no model.">官方提交 47f9438，2026-08-13。本页复现 Cordis 第 7 章的真实 Harness 工具链，示例不读取密钥，也不调用模型。</p></aside>
+
+      <nav class="chapter-nav" aria-label="Guide chapters">
+        <a href="#loop" data-zh="完整回路" data-en="Complete loop">完整回路</a>
+        <a href="#tool" data-zh="工具插件" data-en="Tool plugin">工具插件</a>
+        <a href="#execute" data-zh="真实执行" data-en="Real execution">真实执行</a>
+        <a href="#observe" data-zh="独立观察" data-en="Independent observer">独立观察</a>
+        <a href="#compose" data-zh="组合运行" data-en="Compose and run">组合运行</a>
+        <a href="#agent" data-zh="走向 Agent" data-en="Toward an agent">走向 Agent</a>
+      </nav>
+
+      <section id="loop" class="loop-section">
+        <div class="tool-section-heading"><h2 data-zh="同一条链路复用了前面所有框架机制" data-en="One path reuses every framework mechanism from earlier chapters">同一条链路复用了前面所有框架机制</h2><p data-zh="服务等待、effect 清理、类型声明和事件解耦在真实 Harness 接口上同时工作。" data-en="Service waiting, effect cleanup, type declarations, and event decoupling work together on real Harness interfaces.">服务等待、effect 清理、类型声明和事件解耦在真实 Harness 接口上同时工作。</p></div>
+        <div class="loop-path"><div><strong data-zh="等待注册表" data-en="Wait for registry">等待注册表</strong><code>inject: ['tools']</code></div><i>→</i><div><strong data-zh="注册工具" data-en="Register tool">注册工具</strong><code>ctx.tools.register()</code></div><i>→</i><div><strong data-zh="执行调用" data-en="Execute call">执行调用</strong><code>ctx.tools.execute()</code></div><i>→</i><div><strong data-zh="发出结果" data-en="Emit result">发出结果</strong><code>tools/result</code></div></div>
+        <div class="keyless-note"><strong data-zh="为什么无需密钥" data-en="Why this is keyless">为什么无需密钥</strong><p data-zh="示例代码直接调用工具执行管线，相当于模型已经决定调用 greet。CallId 只为调用提供关联 id，没有模型请求。" data-en="The example calls the tool execution pipeline directly, standing in for a model choosing greet. CallId supplies only a correlation id. No model request occurs.">示例代码直接调用工具执行管线，相当于模型已经决定调用 greet。CallId 只为调用提供关联 id，没有模型请求。</p></div>
+      </section>
+
+      <section id="tool" class="plugin-chapter harness-tool-section">
+        <div class="chapter-copy"><h2 data-zh="defineTool 同时定义模型契约与结果契约" data-en="defineTool defines both the model contract and the result contract">defineTool 同时定义模型契约与结果契约</h2><p data-zh="parameters 会转成展示给模型的 JSON Schema，并在 execute 前校验参数；output.schema 声明规范值，render 另行生成原生且可持久化的内容。" data-en="parameters becomes model-facing JSON Schema and validates before execute. output.schema defines the canonical value, while render produces native durable content.">parameters 会转成展示给模型的 JSON Schema，并在 execute 前校验参数；output.schema 声明规范值，render 另行生成原生且可持久化的内容。</p></div>
+        <div class="chapter-work"><div class="code-block"><div><span>greet-tool.ts</span><button class="copy-code" type="button" data-copy-target="greet-definition" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="greet-definition">import { defineTool } from '@deepseek-ai/dsh-tools'
+import { CallId } from '@deepseek-ai/dsh-llm'
+
+ctx.tools.register(defineTool({
+  name: 'greet',
+  description: 'Greet the named person.',
+  parameters: {
+    name: {
+      type: 'string',
+      required: true,
+      description: 'Who to greet',
+    },
+  },
+  output: {
+    schema: { type: 'string' },
+    render: (_args, value) => [
+      { type: 'text', text: value },
+    ],
+  },
+  async execute(args) {
+    return `Hello, ${args.name}!`
+  },
+}))</code></pre></div><div class="tool-contract"><div><strong>parameters</strong><span data-zh="模型可见 schema、类型推导、运行时校验" data-en="Model-facing schema, type inference, runtime validation">模型可见 schema、类型推导、运行时校验</span></div><div><strong>execute</strong><span data-zh="返回 output.schema 声明的规范值" data-en="Returns the canonical value declared by output.schema">返回 output.schema 声明的规范值</span></div><div><strong>output.render</strong><span data-zh="生成 Native 与持久化结果内容" data-en="Produces Native and durable result content">生成 Native 与持久化结果内容</span></div><div><strong>registration effect</strong><span data-zh="插件卸载时自动注销工具" data-en="Automatically unregisters the tool on plugin unload">插件卸载时自动注销工具</span></div></div></div>
+      </section>
+
+      <section id="execute" class="execution-section">
+        <div class="tool-section-heading"><h2 data-zh="ctx.tools.execute() 走的是实际 Harness 工具管线" data-en="ctx.tools.execute() uses the real Harness tool pipeline">ctx.tools.execute() 走的是实际 Harness 工具管线</h2><p data-zh="调用需要关联 id、工具名、已结构化参数和取消信号。返回值包含渲染后的 content，而不只是 execute 的原始字符串。" data-en="A call needs a correlation id, tool name, structured arguments, and cancellation signal. The result includes rendered content, not only the raw execute value.">调用需要关联 id、工具名、已结构化参数和取消信号。返回值包含渲染后的 content，而不只是 execute 的原始字符串。</p></div>
+        <div class="execution-map"><div><code>CallId('demo-1')</code><span data-zh="关联调用与结果" data-en="Correlates call and result">关联调用与结果</span></div><div><code>arguments: { name: 'Cordis' }</code><span data-zh="由工具 schema 校验" data-en="Validated by the tool schema">由工具 schema 校验</span></div><div><code>AbortController().signal</code><span data-zh="传递取消能力" data-en="Carries cancellation">传递取消能力</span></div><div class="execution-result"><code>result.content</code><span>[{ "type": "text", "text": "Hello, Cordis!" }]</span></div></div>
+      </section>
+
+      <section id="observe" class="observer-section">
+        <div class="tool-section-heading"><h2 data-zh="观察者只依赖事件，不依赖工具插件" data-en="The observer depends on the event, not the tool plugin">观察者只依赖事件，不依赖工具插件</h2><p data-zh="包级 type-only import 引入 dsh-tools 的声明合并，让 tools/result 及 payload 获得类型，不产生运行时导入。" data-en="A package-level type-only import exposes dsh-tools declaration merges, typing tools/result and its payload without a runtime import.">包级 type-only import 引入 dsh-tools 的声明合并，让 tools/result 及 payload 获得类型，不产生运行时导入。</p></div>
+        <div class="observer-layout"><div class="code-block"><div><span>tool-logger.ts</span><button class="copy-code" type="button" data-copy-target="harness-observer" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="harness-observer">import type {} from '@deepseek-ai/dsh-tools'
+
+export const inject = ['tools']
+
+export function apply(ctx: Context) {
+  ctx.on('tools/result', (exec, result) => {
+    const text = result.content
+      .map(block => block.type === 'text' ? block.text : '')
+      .join('')
+    console.log(`[tool-logger] ${exec.name} -> ${text}`)
+  })
+}</code></pre></div><div class="timing-path"><div><strong data-zh="工具执行完成" data-en="Tool execution completes">工具执行完成</strong></div><i>→</i><div><strong data-zh="物化结果 content" data-en="Materialize result content">物化结果 content</strong></div><i>→</i><div class="event-first"><strong data-zh="发出 tools/result" data-en="Emit tools/result">发出 tools/result</strong><small data-zh="logger 在这里输出" data-en="Logger prints here">logger 在这里输出</small></div><i>→</i><div><strong data-zh="execute Promise 兑现" data-en="execute promise resolves">execute Promise 兑现</strong><small data-zh="调用方随后输出" data-en="Caller prints afterward">调用方随后输出</small></div></div></div>
+        <div class="decoupling-note"><strong data-zh="两个插件互不认识" data-en="Neither plugin knows the other">两个插件互不认识</strong><p data-zh="greet-tool 只使用工具注册表，tool-logger 只监听结果事件。tools 服务与事件系统把它们连接起来。" data-en="greet-tool uses only the tool registry. tool-logger listens only to the result event. The tools service and event system connect them.">greet-tool 只使用工具注册表，tool-logger 只监听结果事件。tools 服务与事件系统把它们连接起来。</p></div>
+      </section>
+
+      <section id="compose" class="compose-section">
+        <div class="tool-section-heading"><h2 data-zh="工具服务自己也有依赖" data-en="The tools service has a dependency of its own">工具服务自己也有依赖</h2><p data-zh="dsh-tools 会向系统提示词贡献工具 schema，因此它注入 systemPrompt。缺少提供方时，工具服务保持 PENDING，后面的两个插件也会等待。" data-en="dsh-tools contributes tool schemas to the system prompt, so it injects systemPrompt. Without its provider, tools stays PENDING and both plugins wait.">dsh-tools 会向系统提示词贡献工具 schema，因此它注入 systemPrompt。缺少提供方时，工具服务保持 PENDING，后面的两个插件也会等待。</p></div>
+        <div class="compose-layout"><div class="code-block"><div><span>cordis.yml</span><button class="copy-code" type="button" data-copy-target="harness-composition" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="harness-composition">- name: '@deepseek-ai/dsh-system-prompt'
+- name: '@deepseek-ai/dsh-tools'
+- name: './tool-logger.ts'
+- name: './greet-tool.ts'</code></pre></div><div class="dependency-tree"><div><strong>systemPrompt</strong><span>dsh-system-prompt</span></div><i>→</i><div><strong>tools</strong><span>dsh-tools</span></div><i>→</i><div class="tree-consumers"><span>greet-tool</span><span>tool-logger</span></div></div></div>
+        <div class="run-result"><div><code>node --import tsx ../../vendor/cordis/bin.js</code></div><pre>[tool-logger] greet -> Hello, Cordis!
+tool replied: [{"type":"text","text":"Hello, Cordis!"}]</pre></div>
+      </section>
+
+      <section id="agent" class="agent-section">
+        <div class="tool-section-heading"><h2 data-zh="完整 Agent 只是继续扩展这棵插件树" data-en="A full agent continues extending this plugin tree">完整 Agent 只是继续扩展这棵插件树</h2><p data-zh="在当前工具回路上加入模型适配器、Agent loop、持久化和运行入口，就得到完整 Agent。每一层仍然是可替换插件。" data-en="Add an LLM adapter, agent loop, persistence, and an entry point to this tool loop. Every layer remains a replaceable plugin.">在当前工具回路上加入模型适配器、Agent loop、持久化和运行入口，就得到完整 Agent。每一层仍然是可替换插件。</p></div>
+        <div class="agent-stack"><div><strong data-zh="运行入口" data-en="Entry point">运行入口</strong><span data-zh="CLI、Web 或 SDK" data-en="CLI, Web, or SDK">CLI、Web 或 SDK</span></div><div><strong data-zh="Agent loop" data-en="Agent loop">Agent loop</strong><span data-zh="回合、步骤与工具调用" data-en="Turns, steps, and tool calls">回合、步骤与工具调用</span></div><div><strong data-zh="LLM 适配器" data-en="LLM adapter">LLM 适配器</strong><span data-zh="可替换模型提供方" data-en="Replaceable model provider">可替换模型提供方</span></div><div><strong data-zh="工具与持久化" data-en="Tools and persistence">工具与持久化</strong><span data-zh="能力、事件与会话记录" data-en="Capabilities, events, and session records">能力、事件与会话记录</span></div><div><strong>Cordis</strong><span data-zh="生命周期、依赖与组合" data-en="Lifecycle, dependencies, and composition">生命周期、依赖与组合</span></div></div>
+        <div class="headless-link"><strong>examples/headless-agent/cordis.yml</strong><p data-zh="官方示例展示了一棵可运行的完整配置树。复制它并加入 greet-tool.ts，即可从无模型的工具回路过渡到真实 Agent。" data-en="The official example shows a runnable full configuration tree. Copy it and add greet-tool.ts to move from a model-free tool loop to a real agent.">官方示例展示了一棵可运行的完整配置树。复制它并加入 greet-tool.ts，即可从无模型的工具回路过渡到真实 Agent。</p></div>
+      </section>
+
+      <section class="plugin-next"><div><h2 data-zh="下一步，学习 Harness 的三层能力设计" data-en="Next, learn Harness three-layer capability design">下一步，学习 Harness 的三层能力设计</h2></div><div class="next-links"><a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/practice/" target="_blank" rel="noreferrer"><strong data-zh="能力分层" data-en="Capability layering">能力分层</strong><span data-zh="定义、提供方与消费方 ↗" data-en="Definitions, providers, and consumers ↗">定义、提供方与消费方 ↗</span></a><a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/examples/headless-agent/cordis.yml" target="_blank" rel="noreferrer"><strong data-zh="Headless Agent 配置" data-en="Headless agent config">Headless Agent 配置</strong><span data-zh="阅读完整插件树 ↗" data-en="Read the complete plugin tree ↗">阅读完整插件树 ↗</span></a></div></section>
+    </main>
+
+    <footer class="sub-footer"><span>DSH 101 / Into DeepSeek Harness</span><span data-zh="非 DeepSeek 官方网站，接口以官方包类型和生成的子系统文档为准" data-en="Unofficial site. Official package types and generated subsystem docs remain authoritative.">非 DeepSeek 官方网站，接口以官方包类型和生成的子系统文档为准</span></footer>
+    <script type="module" src="/plugin.js"></script>
+  </body>
+</html>

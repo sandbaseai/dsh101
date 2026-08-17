@@ -32,6 +32,7 @@ Last upstream review:
 | Services and dependencies | `docs/user/develop/framework/service.md`, `docs/user/develop/framework/service.zh.md`, `docs/cordis-tutorial/03-services.md`, `docs/cordis-tutorial/03-services.zh.md` |
 | Events and plugin communication | `docs/user/develop/framework/events.md`, `docs/user/develop/framework/events.zh.md`, `docs/cordis-tutorial/04-events.md`, `docs/cordis-tutorial/04-events.zh.md` |
 | Composition, HMR, and Fiber diagnosis | `docs/cordis-tutorial/06-composition-and-hmr.md`, `docs/cordis-tutorial/06-composition-and-hmr.zh.md`, `apps/cli/reference/README.md` |
+| End-to-end Harness tool pipeline | `docs/cordis-tutorial/07-into-the-harness.md`, `docs/cordis-tutorial/07-into-the-harness.zh.md`, `examples/headless-agent/cordis.yml` |
 | Public architecture vocabulary | `docs/architecture.md`, `docs/architecture.zh.md` |
 
 ## Visual system provenance

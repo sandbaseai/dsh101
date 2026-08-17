@@ -15,6 +15,7 @@ export default defineConfig({
         publish: resolve(import.meta.dirname, 'publish/index.html'),
         lifecycle: resolve(import.meta.dirname, 'lifecycle/index.html'),
         services: resolve(import.meta.dirname, 'services/index.html'),
+        events: resolve(import.meta.dirname, 'events/index.html'),
       },
     },
   },

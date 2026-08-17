@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A source-verified bilingual guide to DeepSeek Harness and Cordis events, dispatch modes, typed listeners, waterfall interception, and session records." />
+    <meta name="theme-color" content="#050907" />
+    <link rel="canonical" href="https://dsh101.com/events/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://dsh101.com/events/" />
+    <link rel="alternate" hreflang="en-US" href="https://dsh101.com/events/?lang=en" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>事件与插件通信 · DSH 101</title>
+    <link rel="stylesheet" href="/subpage.css" />
+    <link rel="stylesheet" href="/plugin.css" />
+    <link rel="stylesheet" href="/tool.css" />
+    <link rel="stylesheet" href="/events.css" />
+  </head>
+  <body>
+    <header class="sub-header">
+      <a class="sub-brand" href="/"><img src="https://www.deepseek.com/harness/images/dsh-logo.svg" alt="DeepSeek Harness" /><span>101</span></a>
+      <a href="/services/" data-zh="服务与依赖" data-en="Services">服务与依赖</a>
+      <a href="/" data-zh="返回首页" data-en="Back home">返回首页</a>
+      <a href="https://deepseek-harness.github.io/deepseek-harness/en/develop/framework/events" target="_blank" rel="noreferrer" data-zh="官方文档 ↗" data-en="Official docs ↗">官方文档 ↗</a>
+      <div class="locale-switch" role="group" aria-label="Language"><button type="button" data-locale="zh" class="active">中</button><button type="button" data-locale="en">EN</button></div>
+    </header>
+
+    <main class="sub-main plugin-main events-main">
+      <section class="plugin-hero events-hero">
+        <div class="plugin-intro">
+          <p class="sub-kicker" data-zh="松耦合通知与协作决策" data-en="Loosely coupled signals and cooperative decisions">松耦合通知与协作决策</p>
+          <h1 data-zh="发出事实，不必认识监听者。" data-en="Announce a fact without knowing its listeners.">发出事实，不必认识监听者。</h1>
+          <p class="sub-lead" data-zh="事件把插件解耦，同时用明确的分发模式约束广播、顺序、并发和拦截。" data-en="Events decouple plugins while explicit dispatch modes govern broadcast, ordering, concurrency, and interception.">事件把插件解耦，同时用明确的分发模式约束广播、顺序、并发和拦截。</p>
+        </div>
+        <div class="code-stage events-code-stage" aria-label="Cordis typed event source code">
+          <div class="code-stage-head"><span>stats.ts</span><button class="copy-code" type="button" data-copy-target="event-basic" data-zh="复制" data-en="Copy">复制</button></div>
+          <pre><code id="event-basic">declare module '@deepseek-ai/cordis' {
+  interface Events {
+    'stats/report'(name: string, count: number): void
+  }
+}
+
+ctx.on('stats/report', (name, count) => {
+  console.log(`[stats] ${name} -> ${count}`)
+})
+
+ctx.emit('stats/report', 'tool_call', 1)</code></pre>
+        </div>
+      </section>
+
+      <aside class="source-note"><span data-zh="核对基线" data-en="Verified baseline">核对基线</span><p data-zh="官方提交 47f9438，2026-08-13。本页依据框架事件篇与 Cordis 事件教程，覆盖五种分发模式和会话记录边界。" data-en="Official commit 47f9438, 2026-08-13. This page follows the framework event guide and Cordis tutorial, including all five dispatch modes and the session-record boundary.">官方提交 47f9438，2026-08-13。本页依据框架事件篇与 Cordis 事件教程，覆盖五种分发模式和会话记录边界。</p></aside>
+
+      <nav class="chapter-nav" aria-label="Guide chapters">
+        <a href="#contract" data-zh="事件契约" data-en="Event contract">事件契约</a>
+        <a href="#modes" data-zh="分发模式" data-en="Dispatch modes">分发模式</a>
+        <a href="#waterfall" data-zh="Waterfall" data-en="Waterfall">Waterfall</a>
+        <a href="#records" data-zh="会话记录" data-en="Session records">会话记录</a>
+        <a href="#effects" data-zh="自动清理" data-en="Automatic cleanup">自动清理</a>
+      </nav>
+
+      <section id="contract" class="event-contract">
+        <div class="tool-section-heading"><h2 data-zh="事件名和监听器签名共同组成契约" data-en="An event name and listener signature form one contract">事件名和监听器签名共同组成契约</h2><p data-zh="interface Events 声明合并让 ctx.emit 与 ctx.on 同时获得参数和返回值类型。它不会产生运行时代码。" data-en="The interface Events merge types arguments and return values for both ctx.emit and ctx.on. It emits no runtime code.">interface Events 声明合并让 ctx.emit 与 ctx.on 同时获得参数和返回值类型。它不会产生运行时代码。</p></div>
+        <div class="contract-layout">
+          <div class="contract-piece"><strong data-zh="命名" data-en="Naming">命名</strong><code>stats/report</code><span data-zh="namespace/action 让扁平命名空间保持可读" data-en="namespace/action keeps the flat namespace readable">namespace/action 让扁平命名空间保持可读</span></div>
+          <div class="contract-piece"><strong data-zh="类型可见性" data-en="Type visibility">类型可见性</strong><code>import type {} from './stats.ts'</code><span data-zh="只让 TypeScript 看到声明合并，不产生运行时导入" data-en="Makes declaration merging visible to TypeScript with no runtime import">只让 TypeScript 看到声明合并，不产生运行时导入</span></div>
+          <div class="contract-piece contract-effect"><strong data-zh="作用域" data-en="Scope">作用域</strong><code>ctx.on(name, listener)</code><span data-zh="监听器属于当前 Fiber，卸载时自动移除" data-en="The listener belongs to the current Fiber and is removed on unload">监听器属于当前 Fiber，卸载时自动移除</span></div>
+        </div>
+      </section>
+
+      <section id="modes" class="dispatch-section">
+        <div class="tool-section-heading"><h2 data-zh="分发模式决定谁运行、是否等待、何时停止" data-en="The dispatch mode decides who runs, what waits, and when execution stops">分发模式决定谁运行、是否等待、何时停止</h2><p data-zh="模式是事件公开契约的一部分。开发时应以所属子系统页面生成的 cordis-surface 区块为准。" data-en="The mode is part of the public event contract. Use the generated cordis-surface region on the owning subsystem page while developing.">模式是事件公开契约的一部分。开发时应以所属子系统页面生成的 cordis-surface 区块为准。</p></div>
+        <div class="dispatch-grid">
+          <article class="emit-mode"><strong>emit</strong><code>ctx.emit(name, ...args)</code><p data-zh="同步广播给全部监听器。返回值和 Promise 都不会被等待或收集。" data-en="Synchronous broadcast to every listener. Returned values and promises are neither awaited nor collected.">同步广播给全部监听器。返回值和 Promise 都不会被等待或收集。</p></article>
+          <article class="parallel-mode"><strong>parallel</strong><code>await ctx.parallel(name, ...args)</code><p data-zh="所有监听器并发运行，调用方等待它们全部完成。" data-en="All listeners run concurrently, and the caller awaits all of them.">所有监听器并发运行，调用方等待它们全部完成。</p></article>
+          <article><strong>serial</strong><code>await ctx.serial(name, ...args)</code><p data-zh="按注册顺序等待。第一个有效返回值胜出并停止后续监听器。" data-en="Awaits listeners in registration order. The first effective result wins and stops later listeners.">按注册顺序等待。第一个有效返回值胜出并停止后续监听器。</p></article>
+          <article><strong>bail</strong><code>ctx.bail(name, ...args)</code><p data-zh="serial 的同步版本。null、false 和 undefined 表示继续。" data-en="The synchronous form of serial. null, false, and undefined mean continue.">serial 的同步版本。null、false 和 undefined 表示继续。</p></article>
+          <article class="waterfall-mode"><strong>waterfall</strong><code>ctx.waterfall(name, ...args, next)</code><p data-zh="每层可以包装下游结果，也可以不调用 next() 来主动短路。" data-en="Each layer may wrap the downstream result or intentionally short-circuit by omitting next().">每层可以包装下游结果，也可以不调用 next() 来主动短路。</p></article>
+        </div>
+        <div class="return-rule"><strong data-zh="serial 与 bail 的停止条件" data-en="Stopping rule for serial and bail">serial 与 bail 的停止条件</strong><p data-zh="第一个不是 null、false 或 undefined 的结果成为最终值。零、空字符串和 true 都会停止后续监听器。" data-en="The first result other than null, false, or undefined becomes final. Zero, an empty string, and true all stop later listeners.">第一个不是 null、false 或 undefined 的结果成为最终值。零、空字符串和 true 都会停止后续监听器。</p></div>
+      </section>
+
+      <section id="waterfall" class="waterfall-section">
+        <div class="tool-section-heading"><h2 data-zh="Waterfall 是环绕中间件，不是普通广播" data-en="Waterfall is around-middleware, not a broadcast">Waterfall 是环绕中间件，不是普通广播</h2><p data-zh="监听器调用 next() 进入下游，再在返回路径上转换结果。不调用 next() 就代表当前监听器接管决定。" data-en="A listener calls next() to enter downstream, then transforms the result on return. Omitting next() means the listener owns the decision.">监听器调用 next() 进入下游，再在返回路径上转换结果。不调用 next() 就代表当前监听器接管决定。</p></div>
+        <div class="waterfall-layout">
+          <div class="waterfall-path"><div><span data-zh="监听器 1" data-en="Listener 1">监听器 1</span><strong>await next()</strong><small data-zh="返回时转为大写" data-en="Uppercase on return">返回时转为大写</small></div><i>→</i><div><span data-zh="监听器 2" data-en="Listener 2">监听器 2</span><strong data-zh="命中 blocked" data-en="Matches blocked">命中 blocked</strong><small data-zh="直接返回替代值" data-en="Returns a replacement">直接返回替代值</small></div><i>×</i><div class="skipped-default"><span data-zh="默认逻辑" data-en="Default">默认逻辑</span><strong data-zh="未运行" data-en="Skipped">未运行</strong></div></div>
+          <div class="code-block"><div><span>waterfall-demo.ts</span><button class="copy-code" type="button" data-copy-target="waterfall-example" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="waterfall-example">ctx.on('demo/transform', async (input, next) => {
+  const downstream = await next()
+  return downstream.toUpperCase()
+})
+
+ctx.on('demo/transform', async (input, next) => {
+  if (input.includes('blocked')) return '** blocked **'
+  return next()
+})</code></pre></div>
+        </div>
+        <div class="waterfall-warning"><strong data-zh="观察型监听器也必须调用 next()" data-en="Observing listeners must still call next()">观察型监听器也必须调用 next()</strong><p data-zh="日志监听器忘记 next() 会静默吞掉所有下游默认行为。不调用只能用于有意的拦截、网关或否决。" data-en="A logging listener that forgets next() silently swallows all downstream defaults. Omit it only for intentional interception, gateway behavior, or veto.">日志监听器忘记 next() 会静默吞掉所有下游默认行为。不调用只能用于有意的拦截、网关或否决。</p></div>
+        <div class="harness-waterfalls"><div><code>agent/request</code><span data-zh="插件可以替换模型调用配置" data-en="A plugin may replace model-call configuration">插件可以替换模型调用配置</span></div><div><code>approval/request</code><span data-zh="策略可以代替用户回答审批" data-en="A policy may answer approval instead of the user">策略可以代替用户回答审批</span></div></div>
+      </section>
+
+      <section id="records" class="records-section">
+        <div class="tool-section-heading"><h2 data-zh="Cordis 事件与持久化会话记录不是同一层" data-en="Cordis events and durable session records are different layers">Cordis 事件与持久化会话记录不是同一层</h2><p data-zh="名字相似不代表可以直接 ctx.on。先判断目标属于运行时通信还是会话历史。" data-en="Similar names do not imply direct ctx.on support. First decide whether the target is runtime communication or session history.">名字相似不代表可以直接 ctx.on。先判断目标属于运行时通信还是会话历史。</p></div>
+        <div class="record-compare"><div><strong data-zh="Cordis 事件" data-en="Cordis events">Cordis 事件</strong><code>agent/step</code><code>agent/request</code><code>tools/result</code><code>session/event</code><span data-zh="直接按官方签名监听" data-en="Listen directly using the official signature">直接按官方签名监听</span></div><div><strong data-zh="会话记录类型" data-en="Session record types">会话记录类型</strong><code>turn/*</code><code>step/*</code><code>tool/call</code><code>tool/result</code><code>compaction/*</code><span data-zh="监听 session/event，再检查 event.type" data-en="Listen to session/event, then inspect event.type">监听 session/event，再检查 event.type</span></div></div>
+      </section>
+
+      <section id="effects" class="effects-section event-effects">
+        <div class="tool-section-heading"><h2 data-zh="ctx.on() 注册的监听器随插件自动消失" data-en="Listeners registered with ctx.on() disappear with the plugin">ctx.on() 注册的监听器随插件自动消失</h2><p data-zh="监听器属于当前 Fiber 的 effect。卸载、热替换或依赖消失时，无需手工 removeListener。" data-en="A listener is an effect of the current Fiber. Unload, hot replacement, and dependency loss require no manual removeListener.">监听器属于当前 Fiber 的 effect。卸载、热替换或依赖消失时，无需手工 removeListener。</p></div>
+        <div class="effect-lifecycle"><span>ctx.on('tools/result', handler)</span><i>→</i><span data-zh="插件运行" data-en="Plugin active">插件运行</span><i>→</i><span>Fiber DISPOSED</span><i>→</i><span data-zh="监听器已移除" data-en="Listener removed">监听器已移除</span></div>
+        <div class="code-block logger-code"><div><span>tool-logger.ts</span><button class="copy-code" type="button" data-copy-target="tool-logger" data-zh="复制" data-en="Copy">复制</button></div><pre><code id="tool-logger">export function apply(ctx: Context) {
+  ctx.on('tools/result', (exec, result) => {
+    console.log(`[tool] ${exec.name}`)
+    const text = result.content
+      .map(block => block.type === 'text' ? block.text : '')
+      .join('')
+    console.log(`[tool result] ${text.slice(0, 100)}`)
+  })
+}</code></pre></div>
+      </section>
+
+      <section class="plugin-next"><div><h2 data-zh="下一步，诊断配置组合与热替换" data-en="Next, diagnose composition and hot replacement">下一步，诊断配置组合与热替换</h2></div><div class="next-links"><a href="https://deepseek-harness.github.io/deepseek-harness/en/cordis-tutorial/06-composition-and-hmr" target="_blank" rel="noreferrer"><strong data-zh="组合与 HMR" data-en="Composition and HMR">组合与 HMR</strong><span data-zh="理解配置树、PENDING 与诊断 ↗" data-en="Understand config trees, PENDING, and diagnosis ↗">理解配置树、PENDING 与诊断 ↗</span></a><a href="https://deepseek-harness.github.io/deepseek-harness/en/subsystems/core" target="_blank" rel="noreferrer"><strong data-zh="生成的事件参考" data-en="Generated event reference">生成的事件参考</strong><span data-zh="查看真实签名和分发模式 ↗" data-en="See real signatures and dispatch modes ↗">查看真实签名和分发模式 ↗</span></a></div></section>
+    </main>
+
+    <footer class="sub-footer"><span>DSH 101 / Events and plugin communication</span><span data-zh="非 DeepSeek 官方网站，事件签名以生成的官方子系统文档为准" data-en="Unofficial site. Generated official subsystem docs remain authoritative for event signatures.">非 DeepSeek 官方网站，事件签名以生成的官方子系统文档为准</span></footer>
+    <script type="module" src="/plugin.js"></script>
+  </body>
+</html>
